@@ -1,0 +1,13 @@
+# Robots.txt for beacon.omni.dev
+
+# Twitter card crawler
+User-agent: Twitterbot
+Allow: /
+
+# All other crawlers
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://beacon.omni.dev/sitemap.xml

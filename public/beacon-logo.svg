@@ -1,0 +1,8 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer: front → left → apex → right → front (closed, wide angles at all vertices) -->
+  <path d="M50 74 L20 62 L50 20 L80 62 Z" stroke="#f97316" stroke-width="5" stroke-linejoin="miter" />
+  <!-- Inner: left → back → right -->
+  <path d="M20 62 L50 50 L80 62" stroke="#f97316" stroke-width="5" stroke-linejoin="miter" />
+  <!-- Vertical: apex → front -->
+  <path d="M50 20 L50 74" stroke="#f97316" stroke-width="5" />
+</svg>
