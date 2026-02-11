@@ -168,6 +168,8 @@ export function useChat({
           onError?.(error);
           streamingContentRef.current = "";
         },
+        // personaId — ensure gateway uses the correct persona
+        personaId,
       );
 
       // Navigate to new conversation after WebSocket is established

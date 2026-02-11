@@ -229,6 +229,7 @@ export interface ApiClient {
     onToken?: (token: string) => void,
     onComplete?: (message: Message) => void,
     onError?: (error: string) => void,
+    personaId?: string,
   ): Promise<void>;
 
   // Persona

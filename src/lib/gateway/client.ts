@@ -38,6 +38,7 @@ import { type DeviceIdentity, loadOrCreateIdentity } from "./identity";
 interface WsIncoming {
   type: "chat" | "ping";
   content?: string;
+  persona_id?: string;
 }
 
 interface WsOutgoing {
@@ -367,6 +368,7 @@ export function createGatewayClient(
       onToken?: (token: string) => void,
       onComplete?: (message: Message) => void,
       onError?: (error: string) => void,
+      personaId?: string,
     ): Promise<void> {
       // Ensure WebSocket is connected to the right session
       if (sessionId !== conversationId || ws?.readyState !== WebSocket.OPEN) {
@@ -411,8 +413,8 @@ export function createGatewayClient(
       const callbackId = `${conversationId}-${Date.now()}`;
       messageCallbacks.set(callbackId, { onToken, onComplete, onError });
 
-      // Send message
-      sendWsMessage({ type: "chat", content });
+      // Send message with explicit persona to prevent server-side drift
+      sendWsMessage({ type: "chat", content, persona_id: personaId });
     },
 
     // Persona

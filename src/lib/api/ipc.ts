@@ -287,11 +287,12 @@ export function createIpcClient(): ApiClient {
       onToken?: (token: string) => void,
       onComplete?: (message: Message) => void,
       onError?: (error: string) => void,
+      personaId?: string,
     ): Promise<void> {
       await setupEventListeners(conversationId, onToken, onComplete, onError);
 
       try {
-        await invoke("send_message", { conversationId, content });
+        await invoke("send_message", { conversationId, content, personaId });
       } catch (err) {
         onError?.(err instanceof Error ? err.message : String(err));
       }

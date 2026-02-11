@@ -421,6 +421,7 @@ export function createHttpClient(): ApiClient {
       onToken?: (token: string) => void,
       onComplete?: (message: Message) => void,
       onError?: (error: string) => void,
+      personaId?: string,
     ): Promise<void> {
       // Ensure WebSocket is connected
       connect(conversationId);
@@ -462,8 +463,8 @@ export function createHttpClient(): ApiClient {
       errorCallback = onError ?? null;
       streamingContent = "";
 
-      // Send message
-      ws.send(JSON.stringify({ type: "chat", content }));
+      // Send message with explicit persona to prevent server-side drift
+      ws.send(JSON.stringify({ type: "chat", content, persona_id: personaId }));
     },
 
     // Persona
