@@ -48,7 +48,6 @@ function LoginPage() {
     const result = await authClient.signIn.oauth2({
       providerId: "omni",
       callbackURL: BASE_URL || "/",
-      errorCallbackURL: `${BASE_URL}/login`,
     });
 
     // better-auth returns { error } instead of throwing
