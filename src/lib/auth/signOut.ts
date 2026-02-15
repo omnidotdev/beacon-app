@@ -9,8 +9,9 @@ import { signOutLocal } from "@/server/functions/auth";
 const signOut = async () => {
   const { idpLogoutUrl } = await signOutLocal();
 
-  // Redirect to IDP for federated logout, or fallback to login
-  window.location.href = idpLogoutUrl ?? "/login";
+  // Redirect to IDP for federated logout, or fallback to root
+  // (auth guard redirects unauthenticated users to login)
+  window.location.href = idpLogoutUrl ?? "/";
 };
 
 export default signOut;
