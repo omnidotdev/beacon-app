@@ -25,3 +25,12 @@ export {
   signPayload,
   verifySignature,
 } from "./identity";
+
+export {
+  type NodeRegistrationConfig,
+  NodeRegistrationService,
+  getDeviceCapabilities,
+  getDeviceFamily,
+} from "./node";
+
+export { executeCommand, getSupportedCommands } from "./commands";

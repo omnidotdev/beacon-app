@@ -1,4 +1,11 @@
 export { ApiProvider, useApi } from "./useApi";
+export {
+  useBillingPortal,
+  useCancelSubscription,
+  useCheckout,
+  useRenewSubscription,
+  useSubscription,
+} from "./useBilling";
 export { useChat } from "./useChat";
 export {
   useConversations,

@@ -37,6 +37,15 @@
     "shell": {
       "open": true,
       "scope": []
+    },
+    "geolocation": {
+      "permissions": ["geolocation:allow-get-current-position", "geolocation:allow-watch-position"]
+    },
+    "barcode-scanner": {
+      "permissions": ["barcode-scanner:allow-scan", "barcode-scanner:allow-cancel"]
+    },
+    "notification": {
+      "permissions": ["notification:default"]
     }
   }
 }

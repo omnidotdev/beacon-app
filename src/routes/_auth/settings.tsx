@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import SubscriptionSettings from "@/components/SubscriptionSettings";
 import {
   useConfigureProvider,
   usePersona,
@@ -148,6 +149,8 @@ function SettingsPage() {
               </div>
             </SettingsSection>
           )}
+
+          <SubscriptionSettings />
 
           <SettingsSection title="Persona">
             <div className="flex items-center gap-4">

@@ -4,6 +4,8 @@
 // that connects to the beacon-gateway over HTTP/WebSocket
 
 import { getCloudGatewayUrl, isCloudDeployment } from "../api";
+import { isNative } from "../platform";
+import { NodeRegistrationService } from "./node";
 import type {
   ApiClient,
   ConfigureProviderParams,
@@ -77,6 +79,7 @@ export function createGatewayClient(
   let accessToken: string | null = null;
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
+  let nodeService: NodeRegistrationService | null = null;
   const messageCallbacks: Map<
     string,
     {
@@ -86,14 +89,38 @@ export function createGatewayClient(
     }
   > = new Map();
 
+  // Node registration for native platforms only
+  function startNodeRegistration(gatewayUrl: string): void {
+    if (!isNative()) return;
+
+    stopNodeRegistration();
+
+    nodeService = new NodeRegistrationService({
+      gatewayUrl,
+      defaultDeviceName,
+    });
+    nodeService.start();
+    console.log("[gateway] Node registration started");
+  }
+
+  function stopNodeRegistration(): void {
+    if (nodeService) {
+      nodeService.stop();
+      nodeService = null;
+      console.log("[gateway] Node registration stopped");
+    }
+  }
+
   // Discovery integration
   const discovery = getGatewayDiscovery();
   discovery.subscribe((state) => {
     if (state.status === "connected") {
       gateway = state.gateway;
+      startNodeRegistration(state.gateway.url);
     } else if (state.status === "disconnected") {
       gateway = null;
       disconnectWebSocket();
+      stopNodeRegistration();
     }
   });
 
@@ -559,6 +586,7 @@ export function createGatewayClient(
     disconnectFromGateway(): void {
       discovery.disconnect();
       disconnectWebSocket();
+      stopNodeRegistration();
     },
 
     getDiscoveredGateways(): DiscoveredGateway[] {

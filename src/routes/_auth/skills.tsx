@@ -1,13 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Zap } from "lucide-react";
-import { useInstalledSkills, useToggleSkill, useUninstallSkill } from "@/hooks";
-import type { Skill } from "@/lib/api";
+import { Search, Zap } from "lucide-react";
+import { useState } from "react";
+import {
+  useInstalledSkills,
+  useInstallSkill,
+  useSearchSkills,
+  useToggleSkill,
+  useUninstallSkill,
+} from "@/hooks";
+import type { Skill, SkillSource } from "@/lib/api";
 
 export const Route = createFileRoute("/_auth/skills")({
   component: SkillsPage,
 });
 
+type Tab = "installed" | "browse";
+
 function SkillsPage() {
+  const [activeTab, setActiveTab] = useState<Tab>("installed");
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <header className="glass-surface border-b border-border/50 px-6 py-4">
@@ -16,10 +28,71 @@ function SkillsPage() {
         </h1>
       </header>
 
+      <div className="border-b border-border/50 px-6">
+        <div className="flex gap-6">
+          <TabButton
+            active={activeTab === "installed"}
+            onClick={() => setActiveTab("installed")}
+          >
+            Installed
+          </TabButton>
+          <TabButton
+            active={activeTab === "browse"}
+            onClick={() => setActiveTab("browse")}
+          >
+            Marketplace
+          </TabButton>
+        </div>
+      </div>
+
+      {activeTab === "browse" && (
+        <div className="border-b border-border/50 px-6 py-4">
+          <div className="relative max-w-md">
+            <Search
+              size={18}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted/50"
+            />
+            <input
+              type="text"
+              placeholder="Search skills..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="glass-input w-full rounded-xl py-2.5 pl-10 pr-4 text-sm"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-6">
-        <InstalledSkillsTab />
+        {activeTab === "installed" ? (
+          <InstalledSkillsTab />
+        ) : (
+          <BrowseSkillsTab searchQuery={searchQuery} />
+        )}
       </div>
     </div>
+  );
+}
+
+interface TabButtonProps {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+function TabButton({ active, onClick, children }: TabButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`border-b-2 py-3 text-sm font-medium transition-all ${
+        active
+          ? "border-primary text-primary"
+          : "border-transparent text-muted hover:text-text"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -40,7 +113,7 @@ function InstalledSkillsTab() {
     return (
       <EmptyState
         title="No skills installed"
-        description="Skills extend your assistant's capabilities"
+        description="Browse the marketplace to discover and install skills"
       />
     );
   }
@@ -51,6 +124,7 @@ function InstalledSkillsTab() {
         <SkillCard
           key={skill.id}
           skill={skill}
+          installed
           onToggle={() =>
             toggleSkill.mutate({ skillId: skill.id, enabled: !skill.enabled })
           }
@@ -64,17 +138,83 @@ function InstalledSkillsTab() {
   );
 }
 
+function BrowseSkillsTab({ searchQuery }: { searchQuery: string }) {
+  const { data, isLoading, error } = useSearchSkills(
+    searchQuery ? { q: searchQuery } : {},
+  );
+  const { data: installed } = useInstalledSkills();
+  const installSkill = useInstallSkill();
+
+  const installedIds = new Set(installed?.skills.map((s) => s.id) ?? []);
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (error) {
+    return <ErrorState message={error.message} />;
+  }
+
+  if (!data?.skills.length) {
+    return (
+      <EmptyState
+        title="No skills found"
+        description={
+          searchQuery
+            ? "Try a different search term"
+            : "No skills available in the marketplace"
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {data.skills.map((skill) => {
+        const isInstalled = installedIds.has(skill.id);
+        return (
+          <SkillCard
+            key={skill.id}
+            skill={skill}
+            installed={isInstalled}
+            onInstall={() => {
+              const source = skill.source as Extract<
+                SkillSource,
+                { type: "manifold" }
+              >;
+              if (source.type === "manifold") {
+                installSkill.mutate({
+                  namespace: source.namespace,
+                  skill_id: skill.id,
+                });
+              }
+            }}
+            isLoading={
+              installSkill.isPending &&
+              installSkill.variables?.skill_id === skill.id
+            }
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 interface SkillCardProps {
   skill: Skill;
+  installed: boolean;
   onToggle?: () => void;
   onUninstall?: () => void;
+  onInstall?: () => void;
   isLoading?: boolean;
 }
 
 function SkillCard({
   skill,
+  installed,
   onToggle,
   onUninstall,
+  onInstall,
   isLoading,
 }: SkillCardProps) {
   return (
@@ -91,7 +231,7 @@ function SkillCard({
             )}
           </div>
         </div>
-        {skill.enabled !== undefined && (
+        {installed && skill.enabled !== undefined && (
           <button
             type="button"
             onClick={onToggle}
@@ -127,14 +267,25 @@ function SkillCard({
       )}
 
       <div className="mt-4 flex gap-2">
-        <button
-          type="button"
-          onClick={onUninstall}
-          disabled={isLoading}
-          className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted hover:border-red-500/50 hover:text-red-400"
-        >
-          Uninstall
-        </button>
+        {installed ? (
+          <button
+            type="button"
+            onClick={onUninstall}
+            disabled={isLoading}
+            className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted hover:border-red-500/50 hover:text-red-400"
+          >
+            Uninstall
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onInstall}
+            disabled={isLoading}
+            className="btn-primary flex-1 rounded-xl py-2 text-sm disabled:opacity-50"
+          >
+            {isLoading ? "Installing..." : "Install"}
+          </button>
+        )}
       </div>
     </div>
   );

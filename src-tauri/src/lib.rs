@@ -98,10 +98,21 @@ pub fn run() {
         data_dir,
     });
 
-    tauri::Builder::default()
+    #[allow(unused_mut)]
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_geolocation::init())
+        .plugin(tauri_plugin_notification::init());
+
+    // Barcode scanner is mobile-only (crate is gated behind #[cfg(mobile)])
+    #[cfg(mobile)]
+    {
+        builder = builder.plugin(tauri_plugin_barcode_scanner::init());
+    }
+
+    builder
         .manage(state.clone())
         .setup(move |app| {
             // Show window
