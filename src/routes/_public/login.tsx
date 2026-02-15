@@ -44,14 +44,17 @@ function LoginPage() {
   const handleOmniSignIn = async () => {
     setError(null);
     setIsRedirecting(true);
-    try {
-      await authClient.signIn.oauth2({
-        providerId: "omni",
-        callbackURL: BASE_URL || "/",
-        errorCallbackURL: `${BASE_URL}/login`,
-      });
-    } catch {
-      setError("Sign in failed. Please try again.");
+
+    const result = await authClient.signIn.oauth2({
+      providerId: "omni",
+      callbackURL: BASE_URL || "/",
+      errorCallbackURL: `${BASE_URL}/login`,
+    });
+
+    // better-auth returns { error } instead of throwing
+    if (result?.error) {
+      console.error("[login] OAuth sign-in error:", result.error);
+      setError(result.error.message || "Sign in failed. Please try again.");
       setIsRedirecting(false);
     }
   };
