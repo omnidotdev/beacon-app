@@ -33,5 +33,6 @@ export {
   useToggleSkill,
   useUninstallSkill,
 } from "./useSkills";
+export { useDeleteMemory, useMemories, useUpdateMemory } from "./useMemories";
 export { useTheme } from "./useTheme";
 export { useVoice } from "./useVoice";

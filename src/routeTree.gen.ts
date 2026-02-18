@@ -18,6 +18,7 @@ import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as AuthSkillsRouteImport } from './routes/_auth/skills'
 import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
 import { Route as AuthPersonasRouteImport } from './routes/_auth/personas'
+import { Route as AuthMemoriesRouteImport } from './routes/_auth/memories'
 import { Route as AuthChatRouteImport } from './routes/_auth/chat'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -64,6 +65,11 @@ const AuthPersonasRoute = AuthPersonasRouteImport.update({
   path: '/personas',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthMemoriesRoute = AuthMemoriesRouteImport.update({
+  id: '/memories',
+  path: '/memories',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthChatRoute = AuthChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -77,6 +83,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/chat': typeof AuthChatRoute
+  '/memories': typeof AuthMemoriesRoute
   '/personas': typeof AuthPersonasRoute
   '/settings': typeof AuthSettingsRoute
   '/skills': typeof AuthSkillsRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/chat': typeof AuthChatRoute
+  '/memories': typeof AuthMemoriesRoute
   '/personas': typeof AuthPersonasRoute
   '/settings': typeof AuthSettingsRoute
   '/skills': typeof AuthSkillsRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_auth/chat': typeof AuthChatRoute
+  '/_auth/memories': typeof AuthMemoriesRoute
   '/_auth/personas': typeof AuthPersonasRoute
   '/_auth/settings': typeof AuthSettingsRoute
   '/_auth/skills': typeof AuthSkillsRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/chat'
+    | '/memories'
     | '/personas'
     | '/settings'
     | '/skills'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/chat'
+    | '/memories'
     | '/personas'
     | '/settings'
     | '/skills'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_public'
     | '/_auth/chat'
+    | '/_auth/memories'
     | '/_auth/personas'
     | '/_auth/settings'
     | '/_auth/skills'
@@ -220,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPersonasRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/memories': {
+      id: '/_auth/memories'
+      path: '/memories'
+      fullPath: '/memories'
+      preLoaderRoute: typeof AuthMemoriesRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/chat': {
       id: '/_auth/chat'
       path: '/chat'
@@ -239,6 +258,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthRouteChildren {
   AuthChatRoute: typeof AuthChatRoute
+  AuthMemoriesRoute: typeof AuthMemoriesRoute
   AuthPersonasRoute: typeof AuthPersonasRoute
   AuthSettingsRoute: typeof AuthSettingsRoute
   AuthSkillsRoute: typeof AuthSkillsRoute
@@ -247,6 +267,7 @@ interface AuthRouteChildren {
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthChatRoute: AuthChatRoute,
+  AuthMemoriesRoute: AuthMemoriesRoute,
   AuthPersonasRoute: AuthPersonasRoute,
   AuthSettingsRoute: AuthSettingsRoute,
   AuthSkillsRoute: AuthSkillsRoute,
