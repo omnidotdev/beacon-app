@@ -98,7 +98,9 @@ function SettingsPage() {
     }
   };
 
-  const providers = providersData?.providers ?? [];
+  const providers = [...(providersData?.providers ?? [])].sort((a, b) =>
+    a.id === "omni_credits" ? -1 : b.id === "omni_credits" ? 1 : 0,
+  );
   const activeProvider = providersData?.active_provider;
 
   return (
@@ -366,6 +368,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
 
   const isConfigured = provider.status === "configured";
   const isComingSoon = provider.coming_soon;
+  const isOmniCredits = provider.id === "omni_credits";
 
   const handleRemove = async () => {
     try {
@@ -442,7 +445,13 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
           )}
         </div>
 
-        {!disabled && (
+        {!disabled && isOmniCredits && isConfigured && (
+          <span className="text-xs font-medium text-emerald-400">
+            Included with your account
+          </span>
+        )}
+
+        {!disabled && !isOmniCredits && (
           <div className="flex shrink-0 items-center gap-2">
             {provider.api_key_url && (
               <a
@@ -518,7 +527,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
       )}
 
       {/* API key input form */}
-      {showForm && !disabled && (
+      {showForm && !disabled && !isOmniCredits && (
         <form onSubmit={handleSubmit} className="mt-3 space-y-2">
           <div className="flex gap-2">
             <div className="relative flex-1">

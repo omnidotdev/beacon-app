@@ -10,6 +10,16 @@ import { useApi } from "./useApi";
 const DEFAULT_PROVIDERS: ProvidersResponse = {
   providers: [
     {
+      id: "omni_credits",
+      name: "Omni Credits",
+      description: "Omni's AI router with smart model selection",
+      status: "not_configured",
+      active: false,
+      api_key_url: null,
+      coming_soon: false,
+      features: ["smart routing", "cost optimization", "tool discovery"],
+    },
+    {
       id: "anthropic",
       name: "Anthropic",
       description: "Claude models with advanced reasoning",
