@@ -417,12 +417,12 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
         <div className="flex items-center gap-2">
           <span className="font-medium text-text">{provider.name}</span>
           {isActive && (
-            <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
+            <span className="flex items-center gap-1 rounded-full bg-purple-500/15 px-2 py-0.5 text-xs text-purple-400">
               <Check size={10} />
               Active
             </span>
           )}
-          {isConfigured && !isActive && (
+          {isConfigured && (
             <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-400">
               <Check size={10} />
               Configured

@@ -16,12 +16,15 @@ export function useSubscription() {
 
   return useQuery({
     queryKey: ["subscription", session?.user?.id],
-    queryFn: () =>
-      billingProvider!.getSubscription(
+    queryFn: () => {
+      if (!billingProvider) throw new Error("Billing is not configured");
+
+      return billingProvider.getSubscription(
         ENTITY_TYPE,
         session!.user.id,
         session!.accessToken,
-      ),
+      );
+    },
     enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
     staleTime: STALE_TIME_MS,
   });
@@ -37,14 +40,17 @@ export function useBillingPortal() {
     mutationFn: ({
       productId,
       returnUrl,
-    }: { productId: string; returnUrl: string }) =>
-      billingProvider!.getBillingPortalUrl(
+    }: { productId: string; returnUrl: string }) => {
+      if (!billingProvider) throw new Error("Billing is not configured");
+
+      return billingProvider.getBillingPortalUrl(
         ENTITY_TYPE,
         session!.user.id,
         productId,
         returnUrl,
         session!.accessToken,
-      ),
+      );
+    },
     onSuccess: (url) => {
       window.open(url, "_blank");
     },
@@ -70,8 +76,10 @@ export function useCheckout() {
       cancelUrl: string;
       workspaceId?: string;
       createWorkspace?: { name: string; slug?: string };
-    }) =>
-      billingProvider!.createCheckoutWithWorkspace({
+    }) => {
+      if (!billingProvider) throw new Error("Billing is not configured");
+
+      return billingProvider.createCheckoutWithWorkspace({
         appId: import.meta.env.VITE_AETHER_APP_ID,
         priceId,
         successUrl,
@@ -79,7 +87,8 @@ export function useCheckout() {
         accessToken: session!.accessToken,
         workspaceId,
         createWorkspace,
-      }),
+      });
+    },
     onSuccess: (data) => {
       window.location.href = data.checkoutUrl;
     },
@@ -94,12 +103,15 @@ export function useCancelSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () =>
-      billingProvider!.cancelSubscription(
+    mutationFn: () => {
+      if (!billingProvider) throw new Error("Billing is not configured");
+
+      return billingProvider.cancelSubscription(
         ENTITY_TYPE,
         session!.user.id,
         session!.accessToken,
-      ),
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
     },
@@ -114,12 +126,15 @@ export function useRenewSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () =>
-      billingProvider!.renewSubscription(
+    mutationFn: () => {
+      if (!billingProvider) throw new Error("Billing is not configured");
+
+      return billingProvider.renewSubscription(
         ENTITY_TYPE,
         session!.user.id,
         session!.accessToken,
-      ),
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
     },
