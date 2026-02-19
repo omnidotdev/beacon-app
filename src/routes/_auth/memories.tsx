@@ -101,7 +101,7 @@ function MemoriesContent() {
       </header>
 
       {/* Category filter tabs */}
-      <div className="border-b border-border/50 px-6">
+      <div className="px-6">
         <div className="flex gap-6">
           {CATEGORIES.map((cat) => (
             <CategoryTab
@@ -116,7 +116,7 @@ function MemoriesContent() {
       </div>
 
       {/* Search bar */}
-      <div className="border-b border-border/50 px-6 py-4">
+      <div className="px-6 py-4">
         <div className="relative max-w-md">
           <Search
             size={18}
