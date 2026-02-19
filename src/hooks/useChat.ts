@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessage, Message } from "@/lib/api";
 import * as localDb from "@/lib/db/conversations";
 import { isNative } from "@/lib/platform";
+import { NO_PERSONA_ID } from "@/lib/persona";
 import { useApi } from "./useApi";
 
 // Track the last persona ID we successfully synced with the gateway
@@ -105,7 +106,8 @@ export function useChat({
       // This guards against the UI showing one persona while the
       // gateway has a different one active (e.g. after a failed
       // initial sync during page load)
-      if (personaId && syncedPersonaId !== personaId) {
+      // Skip sync in no-persona mode — the gateway has no endpoint for NO_PERSONA_ID
+      if (personaId && personaId !== NO_PERSONA_ID && syncedPersonaId !== personaId) {
         try {
           await api.switchPersona(personaId);
           syncedPersonaId = personaId;
@@ -168,8 +170,8 @@ export function useChat({
           onError?.(error);
           streamingContentRef.current = "";
         },
-        // personaId — ensure gateway uses the correct persona
-        personaId,
+        // personaId — omit when no persona selected so gateway uses its default
+        personaId !== NO_PERSONA_ID ? personaId : undefined,
       );
 
       // Navigate to new conversation after WebSocket is established

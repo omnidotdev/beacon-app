@@ -40,6 +40,7 @@ import {
 import { isCloudDeployment } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
 import { CONSOLE_URL } from "@/lib/config/env.config";
+import { NO_PERSONA, NO_PERSONA_ID } from "@/lib/persona";
 import ConversationList from "./ConversationList";
 
 interface NavItem {
@@ -302,6 +303,26 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 </div>
               ) : (
                 <>
+                  <button
+                    type="button"
+                    onClick={() => handlePersonaSwitch(NO_PERSONA_ID)}
+                    className={`flex w-full items-center gap-3 rounded-lg p-2 transition-colors ${
+                      persona?.id === NO_PERSONA_ID
+                        ? "bg-primary/10"
+                        : "hover:bg-surface-elevated"
+                    }`}
+                  >
+                    <PersonaAvatar
+                      name={NO_PERSONA.name}
+                      avatar={NO_PERSONA.avatar ?? undefined}
+                      size="sm"
+                    />
+                    <div className="min-w-0 flex-1 text-left">
+                      <span className="block text-sm text-text">{NO_PERSONA.name}</span>
+                      <span className="block text-xs text-muted">{NO_PERSONA.tagline}</span>
+                    </div>
+                  </button>
+                  <div className="my-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                   {(personas && personas.length > 0
                     ? personas
                     : [persona!]
@@ -321,7 +342,12 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                         avatar={p.avatar ?? undefined}
                         size="sm"
                       />
-                      <span className="text-sm text-text">{p.name}</span>
+                      <div className="min-w-0 flex-1 text-left">
+                        <span className="block text-sm text-text">{p.name}</span>
+                        {p.tagline && (
+                          <span className="block text-xs text-muted">{p.tagline}</span>
+                        )}
+                      </div>
                     </button>
                   ))}
                   <div className="mt-1 px-2 pt-1">

@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import type { Conversation, PersonaInfo } from "@/lib/api";
 import * as localDb from "@/lib/db/conversations";
+import { NO_PERSONA, NO_PERSONA_ID } from "@/lib/persona";
 import { useApi } from "./useApi";
 import { markPersonaSynced } from "./useChat";
 
@@ -104,6 +105,11 @@ export function usePersona() {
   const query = useQuery({
     queryKey: ["persona"],
     queryFn: async () => {
+      // Skip gateway sync for no-persona mode
+      if (storedId === NO_PERSONA_ID) {
+        return NO_PERSONA;
+      }
+
       const persona = await api.getPersona();
 
       // Sync gateway to match stored preference
@@ -126,7 +132,9 @@ export function usePersona() {
 
   // Fall back to stored persona when gateway is unreachable
   const fallback =
-    DEFAULT_PERSONAS.find((p) => p.id === storedId) ?? DEFAULT_PERSONAS[0];
+    storedId === NO_PERSONA_ID
+      ? NO_PERSONA
+      : DEFAULT_PERSONAS.find((p) => p.id === storedId) ?? DEFAULT_PERSONAS[0];
 
   return {
     ...query,
@@ -148,6 +156,13 @@ export function usePersonas() {
 
   const switchPersona = async (personaId: string) => {
     storePersonaId(personaId);
+
+    if (personaId === NO_PERSONA_ID) {
+      markPersonaSynced(NO_PERSONA_ID);
+      queryClient.setQueryData(["persona"], NO_PERSONA);
+      queryClient.invalidateQueries({ queryKey: ["personas"] });
+      return;
+    }
 
     try {
       const newPersona = await api.switchPersona(personaId);
