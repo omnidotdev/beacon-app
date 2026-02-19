@@ -190,6 +190,7 @@ export function createGatewayClient(
 
     // Different session — close the old connection first
     if (ws) {
+      failPendingCallbacks("Session changed");
       // Remove handlers so the old onclose doesn't null our new ws
       ws.onopen = null;
       ws.onmessage = null;
@@ -242,6 +243,9 @@ export function createGatewayClient(
       console.log("[gateway] WebSocket disconnected");
       ws = null;
 
+      // Notify any in-flight message that the connection was lost
+      failPendingCallbacks("Connection lost");
+
       // Attempt reconnection
       if (reconnectAttempts < maxReconnectAttempts && sessionId) {
         const currentSessionId = sessionId;
@@ -254,13 +258,20 @@ export function createGatewayClient(
     };
   }
 
+  function failPendingCallbacks(reason: string): void {
+    for (const cb of messageCallbacks.values()) {
+      cb.onError?.(reason);
+    }
+    messageCallbacks.clear();
+  }
+
   function disconnectWebSocket(): void {
+    failPendingCallbacks("Disconnected from gateway");
     if (ws) {
       ws.close();
       ws = null;
     }
     sessionId = null;
-    messageCallbacks.clear();
   }
 
   function handleWsMessage(msg: WsOutgoing): void {
