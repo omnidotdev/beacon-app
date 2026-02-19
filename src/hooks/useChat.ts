@@ -170,8 +170,8 @@ export function useChat({
           onError?.(error);
           streamingContentRef.current = "";
         },
-        // personaId — omit when no persona selected so gateway uses its default
-        personaId !== NO_PERSONA_ID ? personaId : undefined,
+        // Pass NO_PERSONA_ID through so the gateway skips the system prompt
+        personaId,
       );
 
       // Navigate to new conversation after WebSocket is established
