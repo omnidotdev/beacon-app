@@ -5,7 +5,7 @@ const NO_PERSONA_ID = "__none__";
 
 const NO_PERSONA = {
   id: NO_PERSONA_ID,
-  name: "No Persona",
+  name: "Beacon",
   tagline: "Direct model access",
   avatar: null,
 } satisfies PersonaInfo;

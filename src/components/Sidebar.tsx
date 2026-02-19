@@ -249,11 +249,17 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             }
             className="persona-card flex w-full items-center gap-3 rounded-xl p-3"
           >
-            <PersonaAvatar
-              name={persona?.name ?? "Assistant"}
-              avatar={persona?.avatar ?? undefined}
-              size="md"
-            />
+            {persona?.id === NO_PERSONA_ID ? (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary">
+                <BeaconLogo className="h-5 w-5" />
+              </div>
+            ) : (
+              <PersonaAvatar
+                name={persona?.name ?? "Assistant"}
+                avatar={persona?.avatar ?? undefined}
+                size="md"
+              />
+            )}
             <div className="min-w-0 flex-1 text-left">
               <p className="truncate text-sm font-medium text-text">
                 {persona?.name ?? "Assistant"}
@@ -312,11 +318,9 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                         : "hover:bg-surface-elevated"
                     }`}
                   >
-                    <PersonaAvatar
-                      name={NO_PERSONA.name}
-                      avatar={NO_PERSONA.avatar ?? undefined}
-                      size="sm"
-                    />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary">
+                      <BeaconLogo className="h-4 w-4" />
+                    </div>
                     <div className="min-w-0 flex-1 text-left">
                       <span className="block text-sm text-text">{NO_PERSONA.name}</span>
                       <span className="block text-xs text-muted">{NO_PERSONA.tagline}</span>
