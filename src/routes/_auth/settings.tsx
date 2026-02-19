@@ -28,7 +28,9 @@ import { isCloudDeployment } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
 import { db } from "@/lib/db";
 import * as localDb from "@/lib/db/conversations";
+import { NO_PERSONA_ID } from "@/lib/persona";
 import createMetaTags from "@/lib/util/createMetaTags";
+import { BeaconLogo } from "@/components/Sidebar";
 
 export const Route = createFileRoute("/_auth/settings")({
   head: () => createMetaTags({ title: "Settings" }),
@@ -162,6 +164,10 @@ function SettingsPage() {
                   alt={persona.name}
                   className="h-14 w-14 rounded-full object-cover ring-2 ring-primary/20"
                 />
+              ) : persona?.id === NO_PERSONA_ID ? (
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary ring-2 ring-primary/20">
+                  <BeaconLogo className="h-7 w-7" />
+                </div>
               ) : (
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/30 to-primary/10 ring-2 ring-primary/20">
                   <span className="text-xl font-semibold text-primary">
