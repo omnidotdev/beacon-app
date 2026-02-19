@@ -25,7 +25,12 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { RiDiscordLine, RiFeedbackLine, RiTwitterXLine } from "react-icons/ri";
+import {
+  RiDiscordLine,
+  RiFeedbackLine,
+  RiGithubLine,
+  RiTwitterXLine,
+} from "react-icons/ri";
 import {
   useCreateConversation,
   usePersona,
@@ -561,6 +566,15 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           title="X"
         >
           <RiTwitterXLine size={18} />
+        </a>
+        <a
+          href="https://github.com/omnidotdev/beacon-gateway"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"
+          title="GitHub"
+        >
+          <RiGithubLine size={18} />
         </a>
         <a
           href="https://docs.omni.dev/armory/beacon"
