@@ -12,6 +12,7 @@ import {
   useSubscription,
 } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
+import billingProvider from "@/lib/billing";
 
 /** Format a Unix timestamp to a readable date */
 function formatDate(timestamp: number): string {
@@ -318,9 +319,9 @@ function SubscriptionSettingsInner() {
   );
 }
 
-// Guard component that skips rendering on non-cloud deployments
+// Guard component that skips rendering on non-cloud deployments or without billing
 function SubscriptionSettings() {
-  if (!isCloudDeployment()) return null;
+  if (!isCloudDeployment() || !billingProvider) return null;
   return <SubscriptionSettingsInner />;
 }
 
