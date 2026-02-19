@@ -1,4 +1,4 @@
-import { CreditCard, Loader2, RefreshCw, Shield, X } from "lucide-react";
+import { Coins, CreditCard, Loader2, RefreshCw, Shield, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -6,6 +6,8 @@ import {
   useBillingPortal,
   useCancelSubscription,
   useCheckout,
+  useCreditBalance,
+  useCreditCheckout,
   useRenewSubscription,
   useSubscription,
 } from "@/hooks";
@@ -73,9 +75,12 @@ function SubscriptionSkeleton() {
 // Inner component that always calls hooks (avoids Rules of Hooks violation)
 function SubscriptionSettingsInner() {
   const { data: subscription, isLoading } = useSubscription();
+  const { data: creditData, isLoading: isCreditLoading } = useCreditBalance();
   const { mutateAsync: openPortal, isPending: isPortalLoading } =
     useBillingPortal();
   const { mutateAsync: checkout, isPending: isCheckoutLoading } = useCheckout();
+  const { mutateAsync: creditCheckout, isPending: isCreditCheckoutLoading } =
+    useCreditCheckout();
   const { mutateAsync: cancel, isPending: isCancelling } =
     useCancelSubscription();
   const { mutateAsync: renew, isPending: isRenewing } =
@@ -185,6 +190,38 @@ function SubscriptionSettingsInner() {
             <p className="text-sm text-muted">
               Upgrade to unlock additional features and higher usage limits
             </p>
+          )}
+
+          {/* Credit balance */}
+          {creditData && !isCreditLoading && (
+            <div className="flex items-center gap-3 rounded-xl bg-surface-elevated/50 px-4 py-3">
+              <Coins size={16} className="text-amber-400" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-text">
+                  {creditData.balance.toLocaleString()} credits
+                </p>
+                <p className="text-xs text-muted">Available balance</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  creditCheckout({
+                    amount: 10,
+                    successUrl: `${window.location.origin}/settings?credits=purchased`,
+                    cancelUrl: window.location.href,
+                  })
+                }
+                disabled={isCreditCheckoutLoading}
+                className="flex items-center gap-1.5 rounded-lg bg-amber-500/15 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25 disabled:opacity-50"
+              >
+                {isCreditCheckoutLoading ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Coins size={12} />
+                )}
+                Buy Credits
+              </button>
+            </div>
           )}
 
           {/* Actions */}

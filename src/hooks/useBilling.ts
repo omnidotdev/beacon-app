@@ -5,7 +5,11 @@ import { isCloudDeployment } from "@/lib/api";
 import billingProvider from "@/lib/billing";
 
 const STALE_TIME_MS = 300_000; // 5 minutes
+const CREDIT_STALE_TIME_MS = 60_000; // 1 minute
 const ENTITY_TYPE = "user";
+const SYNAPSE_API_URL = import.meta.env.VITE_SYNAPSE_API_URL as
+  | string
+  | undefined;
 
 /**
  * Fetch subscription details for the current user.
@@ -27,6 +31,65 @@ export function useSubscription() {
     },
     enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
     staleTime: STALE_TIME_MS,
+  });
+}
+
+/**
+ * Fetch credit balance for the current user.
+ * Proxied through synapse-api which handles Aether service auth
+ */
+export function useCreditBalance() {
+  const { session } = useRouteContext({ from: "__root__" });
+
+  return useQuery({
+    queryKey: ["creditBalance", session?.user?.id],
+    queryFn: async () => {
+      const res = await fetch(`${SYNAPSE_API_URL}/credits/me/balance`, {
+        headers: {
+          Authorization: `Bearer ${session!.accessToken}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch credit balance");
+
+      return res.json() as Promise<{ balance: number }>;
+    },
+    enabled:
+      isCloudDeployment() && !!SYNAPSE_API_URL && !!session?.user?.id,
+    staleTime: CREDIT_STALE_TIME_MS,
+  });
+}
+
+/**
+ * Create a credit purchase checkout session via synapse-api
+ */
+export function useCreditCheckout() {
+  const { session } = useRouteContext({ from: "__root__" });
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      amount,
+      successUrl,
+      cancelUrl,
+    }: { amount: number; successUrl: string; cancelUrl: string }) => {
+      const res = await fetch(`${SYNAPSE_API_URL}/credits/me/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session!.accessToken}`,
+        },
+        body: JSON.stringify({ amount, successUrl, cancelUrl }),
+      });
+
+      if (!res.ok) throw new Error("Failed to create credit checkout");
+
+      return res.json() as Promise<{ checkoutUrl: string }>;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["creditBalance"] });
+      window.location.href = data.checkoutUrl;
+    },
   });
 }
 

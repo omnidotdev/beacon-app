@@ -3,6 +3,8 @@ export {
   useBillingPortal,
   useCancelSubscription,
   useCheckout,
+  useCreditBalance,
+  useCreditCheckout,
   useRenewSubscription,
   useSubscription,
 } from "./useBilling";
