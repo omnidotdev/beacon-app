@@ -197,7 +197,7 @@ function ModelDropdown({
     <div className="absolute bottom-full right-0 z-50 mb-1 min-w-[180px] overflow-hidden rounded-xl border border-border bg-[var(--background)] p-1 shadow-lg">
       {groups.map(([providerId, models], i) => (
         <div key={providerId}>
-          {i > 0 && <div className="mx-2 my-1 border-t border-border/30" />}
+          {i > 0 && <div className="mx-2 my-1 border-t border-subtle" />}
           <div className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted/50">
             {getProviderDisplayName(providerId)}
           </div>
