@@ -2,8 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Mic, Settings, User } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
+import { NO_PERSONA_ID } from "@/lib/persona";
 import Markdown from "./Markdown";
 import ModelSelector from "./ModelSelector";
+import { BeaconLogo } from "./Sidebar";
 
 interface UserInfo {
   name?: string | null;
@@ -267,7 +269,7 @@ function EmptyState({
         {personaLoading ? (
           <div className="h-20 w-20 animate-pulse rounded-full bg-surface-elevated" />
         ) : (
-          <Avatar name={name} avatar={persona?.avatar} size="xl" />
+          <Avatar name={name} avatar={persona?.avatar} size="xl" personaId={persona?.id} />
         )}
         <div className="relative z-10 rounded-full ring-2 ring-primary/20">
           {user?.image ? (
@@ -341,6 +343,7 @@ function MessageBubble({
             name={persona?.name ?? "Assistant"}
             avatar={persona?.avatar}
             size="sm"
+            personaId={persona?.id}
           />
         )}
       </div>
@@ -380,6 +383,7 @@ function ThinkingIndicator({ persona }: { persona?: PersonaInfo }) {
           name={persona?.name ?? "Assistant"}
           avatar={persona?.avatar}
           size="sm"
+          personaId={persona?.id}
         />
       </div>
       <div className="bubble-assistant flex items-center rounded-2xl rounded-bl-md px-4 py-3">
@@ -422,9 +426,17 @@ interface AvatarProps {
   name: string;
   avatar?: string | null;
   size?: "sm" | "md" | "lg" | "xl";
+  personaId?: string;
 }
 
-function Avatar({ name, avatar, size = "md" }: AvatarProps) {
+const avatarIconSizes = {
+  sm: "h-4 w-4",
+  md: "h-5 w-5",
+  lg: "h-6 w-6",
+  xl: "h-10 w-10",
+};
+
+function Avatar({ name, avatar, size = "md", personaId }: AvatarProps) {
   const sizeClasses = {
     sm: "h-8 w-8 text-xs",
     md: "h-10 w-10 text-sm",
@@ -439,6 +451,16 @@ function Avatar({ name, avatar, size = "md" }: AvatarProps) {
         alt={name}
         className={`${sizeClasses[size]} rounded-full object-cover ring-2 ring-accent/20`}
       />
+    );
+  }
+
+  if (personaId === NO_PERSONA_ID) {
+    return (
+      <div
+        className={`${sizeClasses[size]} flex items-center justify-center rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary`}
+      >
+        <BeaconLogo className={avatarIconSizes[size]} />
+      </div>
     );
   }
 
