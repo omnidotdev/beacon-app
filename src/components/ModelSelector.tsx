@@ -59,6 +59,8 @@ function ModelSelector() {
       return;
     }
 
+    const previousModelId = selectedModelId;
+
     // Optimistic update
     setSelectedModelId(model.id);
     localStorage.setItem(STORAGE_KEY, model.id);
@@ -67,6 +69,13 @@ function ModelSelector() {
     try {
       await configure({ provider: model.provider, model: model.id });
     } catch {
+      // Rollback
+      setSelectedModelId(previousModelId);
+      if (previousModelId) {
+        localStorage.setItem(STORAGE_KEY, previousModelId);
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
       toast.error("Failed to switch model");
     }
   };
