@@ -62,7 +62,7 @@ function MemoriesContent() {
 
   // Pass undefined for "all" so the API returns everything
   const categoryFilter = activeCategory === "all" ? undefined : activeCategory;
-  const { data: memories, isLoading, error } = useMemories(categoryFilter);
+  const { data: memories, isLoading, error, refetch } = useMemories(categoryFilter);
 
   // Filter by search query client-side
   const filteredMemories = useMemo(() => {
@@ -137,7 +137,7 @@ function MemoriesContent() {
         {isLoading ? (
           <LoadingState />
         ) : error ? (
-          <ErrorState message={error.message} />
+          <ErrorState message={error.message} onRetry={refetch} />
         ) : sortedMemories.length === 0 ? (
           <EmptyState
             hasSearch={!!searchQuery.trim()}
@@ -320,10 +320,10 @@ function MemoryCard({ memory }: { memory: Memory }) {
 }
 
 const CATEGORY_STYLES: Record<string, string> = {
-  preference: "bg-purple-500/15 text-purple-400",
-  fact: "bg-blue-500/15 text-blue-400",
-  correction: "bg-amber-500/15 text-amber-400",
-  general: "bg-emerald-500/15 text-emerald-400",
+  preference: "bg-primary/15 text-primary",
+  fact: "bg-accent/15 text-accent",
+  correction: "bg-primary/10 text-primary/60",
+  general: "bg-surface-elevated text-muted",
 };
 
 function CategoryBadge({ category }: { category: MemoryCategory }) {
@@ -351,13 +351,17 @@ function LoadingState() {
   );
 }
 
-function ErrorState({ message }: { message: string }) {
+function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="glass-panel rounded-2xl border-red-500/20 bg-red-500/5 p-6 text-center">
-      <p className="break-words text-red-400">Error: {message}</p>
-      <p className="mt-2 text-sm text-muted">
-        Make sure you are signed in and the API is available
-      </p>
+    <div className="glass-panel mx-auto max-w-sm rounded-2xl p-6 text-center">
+      <p className="break-words text-sm text-muted">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-3 rounded-lg bg-surface-elevated px-4 py-2 text-sm text-muted transition-colors hover:text-text"
+      >
+        Try again
+      </button>
     </div>
   );
 }

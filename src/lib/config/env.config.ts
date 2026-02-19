@@ -20,7 +20,8 @@ export const FLAGS_API_HOST = env.FLAGS_API_HOST || env.VITE_FLAGS_API_HOST;
 export const FLAGS_CLIENT_KEY =
   env.FLAGS_CLIENT_KEY || env.VITE_FLAGS_CLIENT_KEY;
 
-export const API_GRAPHQL_URL = `${API_BASE_URL}/graphql`;
+const API_BASE = API_BASE_URL ?? "/api";
+export const API_GRAPHQL_URL = `${API_BASE}/graphql`;
 
 // Environment helpers
 export const isDevEnv = import.meta.env.DEV;

@@ -30,6 +30,7 @@ export default defineConfig(({ command }) => ({
           "/gateway/**": {
             proxy: { to: "https://gateway.beacon.omni.dev/**" },
           },
+          "/api/graphql": { proxy: { to: "https://api.beacon.omni.dev/graphql" } },
         },
       }),
     viteTsConfigPaths({
@@ -67,6 +68,11 @@ export default defineConfig(({ command }) => ({
         target: "http://localhost:18790",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/gateway/, ""),
+      },
+      "/api/graphql": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
       "/ws": {
         target: "ws://localhost:18790",

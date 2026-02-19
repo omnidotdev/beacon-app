@@ -36,7 +36,13 @@ async function graphqlFetch<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`GraphQL request failed: ${response.status}`);
+    const messages: Record<number, string> = {
+      401: "Authentication required",
+      403: "Access denied",
+      404: "API endpoint not found",
+      500: "Server error",
+    };
+    throw new Error(messages[response.status] ?? `Request failed (${response.status})`);
   }
 
   const result: GraphQLResponse<T> = await response.json();
