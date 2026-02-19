@@ -185,7 +185,7 @@ export function useProviders() {
 
   return {
     ...query,
-    data: query.data ?? (query.isError ? DEFAULT_PROVIDERS : undefined),
+    data: query.data ?? DEFAULT_PROVIDERS,
   };
 }
 
