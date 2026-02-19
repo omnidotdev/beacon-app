@@ -104,6 +104,7 @@ function SettingsPage() {
     a.id === "omni_credits" ? -1 : b.id === "omni_credits" ? 1 : 0,
   );
   const activeProvider = providersData?.active_provider;
+  const activeProviderInfo = providers.find((p) => p.id === activeProvider);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -205,6 +206,7 @@ function SettingsPage() {
                       key={provider.id}
                       provider={provider}
                       isActive={activeProvider === provider.id}
+                      activeProviderName={activeProviderInfo?.name}
                     />
                   ))
               )}
@@ -359,10 +361,11 @@ function ProviderSkeleton() {
 interface ProviderCardProps {
   provider: ProviderInfo;
   isActive: boolean;
+  activeProviderName?: string;
   disabled?: boolean;
 }
 
-function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
+function ProviderCard({ provider, isActive, activeProviderName, disabled }: ProviderCardProps) {
   const { mutateAsync: configure, isPending } = useConfigureProvider();
   const { mutateAsync: remove, isPending: isRemoving } = useRemoveProvider();
   const [showForm, setShowForm] = useState(false);
@@ -428,13 +431,13 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
           {isActive && (
             <span className="flex items-center gap-1 rounded-full bg-purple-500/15 px-2 py-0.5 text-xs text-purple-400">
               <Check size={10} />
-              Active
+              In use
             </span>
           )}
-          {isConfigured && (
+          {isConfigured && !isActive && !isOmniCredits && (
             <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-400">
               <Check size={10} />
-              Configured
+              Connected
             </span>
           )}
           {success && (
@@ -530,6 +533,13 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
             </span>
           ))}
         </div>
+      )}
+
+      {isOmniCredits && isConfigured && !isActive && activeProviderName && (
+        <p className="mt-2 text-xs text-amber-400/80">
+          Not currently in use — your {activeProviderName} key takes priority.
+          Remove it to route through Omni Credits.
+        </p>
       )}
 
       {/* API key input form */}

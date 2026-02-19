@@ -25,8 +25,8 @@ export function useSubscription() {
 
       return billingProvider.getSubscription(
         ENTITY_TYPE,
-        session!.user.id,
-        session!.accessToken,
+        session!.user.id!,
+        session!.accessToken!,
       );
     },
     enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
@@ -108,10 +108,10 @@ export function useBillingPortal() {
 
       return billingProvider.getBillingPortalUrl(
         ENTITY_TYPE,
-        session!.user.id,
+        session!.user.id!,
         productId,
         returnUrl,
-        session!.accessToken,
+        session!.accessToken!,
       );
     },
     onSuccess: (url) => {
@@ -143,11 +143,11 @@ export function useCheckout() {
       if (!billingProvider) throw new Error("Billing is not configured");
 
       return billingProvider.createCheckoutWithWorkspace({
-        appId: import.meta.env.VITE_AETHER_APP_ID,
+        appId: import.meta.env.VITE_AETHER_APP_ID as string,
         priceId,
         successUrl,
         cancelUrl,
-        accessToken: session!.accessToken,
+        accessToken: session!.accessToken!,
         workspaceId,
         createWorkspace,
       });
@@ -171,8 +171,8 @@ export function useCancelSubscription() {
 
       return billingProvider.cancelSubscription(
         ENTITY_TYPE,
-        session!.user.id,
-        session!.accessToken,
+        session!.user.id!,
+        session!.accessToken!,
       );
     },
     onSuccess: () => {
@@ -194,8 +194,8 @@ export function useRenewSubscription() {
 
       return billingProvider.renewSubscription(
         ENTITY_TYPE,
-        session!.user.id,
-        session!.accessToken,
+        session!.user.id!,
+        session!.accessToken!,
       );
     },
     onSuccess: () => {

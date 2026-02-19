@@ -3,7 +3,7 @@
 // Connects this device as a node to the gateway's node registry,
 // exposing device capabilities (camera, location, etc.) for remote invocation
 
-import { getPlatform, isNative } from "@/lib/platform";
+import { getPlatform } from "@/lib/platform";
 
 import { executeCommand, getSupportedCommands } from "./commands";
 import { loadOrCreateIdentity } from "./identity";

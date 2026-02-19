@@ -73,6 +73,7 @@ async function handleLocationGet(
     const position = await getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 15000,
+      maximumAge: 0,
     });
 
     return success({
