@@ -166,6 +166,7 @@ function buildProvidersResponse(keys: SynapseProviderKey[]): ProvidersResponse {
 
 export function useProviders() {
   const { session } = useRouteContext({ from: "__root__" });
+  const queryClient = useQueryClient();
   const token = session?.accessToken ?? "";
 
   const query = useQuery({
@@ -174,9 +175,11 @@ export function useProviders() {
       const data = await synapseGraphql<{
         myProviderKeys: SynapseProviderKey[];
       }>(MY_PROVIDER_KEYS_QUERY, {}, token);
+      // Cache raw keys for useRemoveProvider to avoid a redundant fetch
+      queryClient.setQueryData(["providerKeys"], data.myProviderKeys);
       return buildProvidersResponse(data.myProviderKeys);
     },
-    enabled: !!token,
+    enabled: !!token && !!SYNAPSE_API_URL,
     retry: 1,
   });
 
@@ -245,13 +248,10 @@ export function useRemoveProvider() {
 
   return useMutation({
     mutationFn: async (provider: ProviderType) => {
-      // Fetch keys to resolve the Synapse UUID for the given provider name
-      const keysData = await synapseGraphql<{
-        myProviderKeys: SynapseProviderKey[];
-      }>(MY_PROVIDER_KEYS_QUERY, {}, token);
-      const match = keysData.myProviderKeys.find(
-        (k) => k.provider === provider,
-      );
+      // Use cached keys to resolve UUID — avoids extra network round-trip
+      const cachedKeys =
+        queryClient.getQueryData<SynapseProviderKey[]>(["providerKeys"]) ?? [];
+      const match = cachedKeys.find((k) => k.provider === provider);
       const keyId = match?.id ?? null;
 
       if (!keyId) {
