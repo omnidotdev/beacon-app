@@ -41,6 +41,7 @@ interface WsIncoming {
   type: "chat" | "ping";
   content?: string;
   persona_id?: string;
+  model_override?: string;
 }
 
 interface WsOutgoing {
@@ -451,8 +452,9 @@ export function createGatewayClient(
       const callbackId = `${conversationId}-${Date.now()}`;
       messageCallbacks.set(callbackId, { onToken, onComplete, onError });
 
-      // Send message with explicit persona to prevent server-side drift
-      sendWsMessage({ type: "chat", content, persona_id: personaId });
+      // Send message with explicit persona and model to prevent server-side drift
+      const modelOverride = localStorage.getItem("beacon-selected-model") ?? undefined;
+      sendWsMessage({ type: "chat", content, persona_id: personaId, model_override: modelOverride });
     },
 
     // Persona

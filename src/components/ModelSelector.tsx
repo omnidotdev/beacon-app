@@ -1,6 +1,5 @@
 import { Check, ChevronDown, ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 import { useApi, useProviders } from "@/hooks";
 import type { SystemStatus } from "@/lib/api";
@@ -16,7 +15,6 @@ const STORAGE_KEY = "beacon-selected-model";
 function ModelSelector() {
   const api = useApi();
   const { data: providersData } = useProviders();
-  const [isSwitching, setIsSwitching] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(() =>
@@ -53,34 +51,15 @@ function ModelSelector() {
   const grouped = getAvailableModels(configuredProviderIds);
   const groupEntries = Object.entries(grouped);
 
-  const handleSelect = async (model: ModelOption) => {
+  const handleSelect = (model: ModelOption) => {
     if (model.id === currentModelId) {
       setIsOpen(false);
       return;
     }
 
-    const previousModelId = selectedModelId;
-
-    // Optimistic update
     setSelectedModelId(model.id);
     localStorage.setItem(STORAGE_KEY, model.id);
     setIsOpen(false);
-
-    setIsSwitching(true);
-    try {
-      await api.configureProvider({ provider: model.provider, model: model.id });
-    } catch {
-      // Rollback
-      setSelectedModelId(previousModelId);
-      if (previousModelId) {
-        localStorage.setItem(STORAGE_KEY, previousModelId);
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-      toast.error("Failed to switch model");
-    } finally {
-      setIsSwitching(false);
-    }
   };
 
   // Auto-select first available model when none is selected (local only, no API call)
@@ -100,7 +79,6 @@ function ModelSelector() {
       <ModelPill
         name={displayName}
         isOpen={isOpen}
-        isPending={isSwitching}
         onToggle={() => setIsOpen(!isOpen)}
       />
 
@@ -120,38 +98,25 @@ function ModelSelector() {
 function ModelPill({
   name,
   isOpen,
-  isPending,
   onToggle,
 }: {
   name: string;
   isOpen: boolean;
-  isPending: boolean;
   onToggle: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onToggle}
-      disabled={isPending}
       className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
         isOpen ? "bg-surface-elevated text-text" : "text-muted hover:text-text"
-      } disabled:opacity-50`}
+      }`}
     >
-      {isPending ? (
-        <span className="inline-flex gap-0.5">
-          <span className="streaming-dot" />
-          <span className="streaming-dot" />
-          <span className="streaming-dot" />
-        </span>
-      ) : (
-        <>
-          {name}
-          <ChevronDown
-            size={12}
-            className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
-          />
-        </>
-      )}
+      {name}
+      <ChevronDown
+        size={12}
+        className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+      />
     </button>
   );
 }
