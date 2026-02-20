@@ -132,7 +132,6 @@ function InstalledSkillsTab() {
   }
 
   if (error) {
-    if (isAccessError(error)) return <EarlyAccessState />;
     return <ErrorState message={error.message} />;
   }
 
@@ -179,7 +178,6 @@ function BrowseSkillsTab({ searchQuery }: { searchQuery: string }) {
   }
 
   if (error) {
-    if (isAccessError(error)) return <EarlyAccessState />;
     return <ErrorState message={error.message} />;
   }
 
@@ -315,32 +313,6 @@ function SkillCard({
           </button>
         )}
       </div>
-    </div>
-  );
-}
-
-function isAccessError(err: Error): boolean {
-  const msg = err.message.toLowerCase();
-  return (
-    msg.includes("access not granted") ||
-    msg.includes("not authorized") ||
-    msg.includes("unauthorized") ||
-    msg.includes("forbidden") ||
-    msg.includes("(401)") ||
-    msg.includes("(403)")
-  );
-}
-
-function EarlyAccessState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="glass-panel mb-4 rounded-full p-4">
-        <Zap size={28} className="text-primary" />
-      </div>
-      <h3 className="font-semibold text-text">Skills marketplace</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted">
-        Coming soon for your account
-      </p>
     </div>
   );
 }
