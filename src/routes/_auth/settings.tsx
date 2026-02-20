@@ -16,12 +16,14 @@ import {
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { BeaconLogo } from "@/components/Sidebar";
 import SubscriptionSettings from "@/components/SubscriptionSettings";
 import {
   useConfigureProvider,
   usePersona,
   useProviders,
   useRemoveProvider,
+  useSetActiveProvider,
 } from "@/hooks";
 import type { ProviderInfo, ProviderType } from "@/lib/api";
 import { isCloudDeployment } from "@/lib/api";
@@ -30,7 +32,6 @@ import { db } from "@/lib/db";
 import * as localDb from "@/lib/db/conversations";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import createMetaTags from "@/lib/util/createMetaTags";
-import { BeaconLogo } from "@/components/Sidebar";
 
 export const Route = createFileRoute("/_auth/settings")({
   head: () => createMetaTags({ title: "Settings" }),
@@ -104,7 +105,6 @@ function SettingsPage() {
     a.id === "omni_credits" ? -1 : b.id === "omni_credits" ? 1 : 0,
   );
   const activeProvider = providersData?.active_provider;
-  const activeProviderInfo = providers.find((p) => p.id === activeProvider);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -188,9 +188,6 @@ function SettingsPage() {
           </SettingsSection>
 
           <SettingsSection title="AI Providers">
-            <p className="mb-4 text-sm text-muted">
-              Connect your AI provider to power conversations
-            </p>
             <div className="space-y-3">
               {providersLoading ? (
                 <>
@@ -206,7 +203,6 @@ function SettingsPage() {
                       key={provider.id}
                       provider={provider}
                       isActive={activeProvider === provider.id}
-                      activeProviderName={activeProviderInfo?.name}
                     />
                   ))
               )}
@@ -214,10 +210,7 @@ function SettingsPage() {
 
             {/* Security note */}
             <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-accent/15 bg-accent/5 px-3.5 py-2.5">
-              <Lock
-                size={14}
-                className="mt-0.5 flex-shrink-0 text-accent/60"
-              />
+              <Lock size={14} className="mt-0.5 flex-shrink-0 text-accent/60" />
               <p className="text-xs leading-relaxed text-muted">
                 Keys are encrypted and stored securely with your account, never
                 in your browser. Cleared from memory after saving.
@@ -361,18 +354,18 @@ function ProviderSkeleton() {
 interface ProviderCardProps {
   provider: ProviderInfo;
   isActive: boolean;
-  activeProviderName?: string;
   disabled?: boolean;
 }
 
-function ProviderCard({ provider, isActive, activeProviderName, disabled }: ProviderCardProps) {
+function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
   const { mutateAsync: configure, isPending } = useConfigureProvider();
   const { mutateAsync: remove, isPending: isRemoving } = useRemoveProvider();
+  const { mutateAsync: setActive, isPending: isSettingActive } =
+    useSetActiveProvider();
   const [showForm, setShowForm] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   const isConfigured = provider.status === "configured";
@@ -383,7 +376,7 @@ function ProviderCard({ provider, isActive, activeProviderName, disabled }: Prov
     try {
       await remove(provider.id as ProviderType);
       setShowRemoveConfirm(false);
-      toast.success(`${provider.name} API key removed`);
+      toast.success(`${provider.name} removed`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to remove key");
     }
@@ -394,7 +387,6 @@ function ProviderCard({ provider, isActive, activeProviderName, disabled }: Prov
     if (!apiKey.trim()) return;
 
     setError(null);
-    setSuccess(false);
 
     try {
       const result = await configure({
@@ -403,15 +395,23 @@ function ProviderCard({ provider, isActive, activeProviderName, disabled }: Prov
       });
 
       if (result.success) {
-        setSuccess(true);
         setApiKey("");
         setShowForm(false);
-        setTimeout(() => setSuccess(false), 3000);
       } else {
-        setError(result.message || "Failed to configure provider");
+        setError(result.message || "Failed to save key");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save key");
+    }
+  };
+
+  const handleSetActive = async () => {
+    try {
+      await setActive(provider.id as ProviderType);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to set active provider",
+      );
     }
   };
 
@@ -425,25 +425,14 @@ function ProviderCard({ provider, isActive, activeProviderName, disabled }: Prov
             : "glass-surface hover:border-border"
       }`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      {/* Header row */}
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="font-medium text-text">{provider.name}</span>
           {isActive && (
-            <span className="flex items-center gap-1 rounded-full bg-purple-500/15 px-2 py-0.5 text-xs text-purple-400">
+            <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
               <Check size={10} />
-              In use
-            </span>
-          )}
-          {isConfigured && !isActive && !isOmniCredits && (
-            <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-400">
-              <Check size={10} />
-              Connected
-            </span>
-          )}
-          {success && (
-            <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
-              <Check size={10} />
-              Saved
+              Active
             </span>
           )}
           {isComingSoon && (
@@ -454,95 +443,98 @@ function ProviderCard({ provider, isActive, activeProviderName, disabled }: Prov
           )}
         </div>
 
-        {!disabled && isOmniCredits && isConfigured && (
-          <span className="text-xs font-medium text-emerald-400">
-            Included with your account
-          </span>
-        )}
-
-        {!disabled && !isOmniCredits && (
+        {/* Actions */}
+        {!disabled && !isComingSoon && (
           <div className="flex shrink-0 items-center gap-2">
-            {provider.api_key_url && (
-              <a
-                href={provider.api_key_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-text"
+            {/* "Use" button — shown for configured but not active providers */}
+            {isConfigured && !isActive && (
+              <button
+                type="button"
+                onClick={handleSetActive}
+                disabled={isSettingActive}
+                className="flex items-center gap-1 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:opacity-50"
               >
-                Get Key
-                <ExternalLink size={12} />
-              </a>
+                {isSettingActive ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  "Use"
+                )}
+              </button>
             )}
-            <button
-              type="button"
-              onClick={() => setShowForm(!showForm)}
-              className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                showForm
-                  ? "bg-surface-elevated text-text"
-                  : isConfigured
-                    ? "text-muted hover:text-text"
-                    : "bg-primary/10 text-primary hover:bg-primary/20"
-              }`}
-            >
-              <Key size={12} />
-              {isConfigured ? "Update" : "Add Key"}
-            </button>
-            {isConfigured &&
-              (showRemoveConfirm ? (
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={handleRemove}
-                    disabled={isRemoving}
-                    className="rounded-lg bg-red-500/20 px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
+
+            {/* Key management (BYOK providers only) */}
+            {!isOmniCredits && (
+              <>
+                {provider.api_key_url && !isConfigured && (
+                  <a
+                    href={provider.api_key_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-text"
                   >
-                    {isRemoving ? "Removing..." : "Confirm"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowRemoveConfirm(false)}
-                    className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:text-text"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
+                    Get Key
+                    <ExternalLink size={12} />
+                  </a>
+                )}
                 <button
                   type="button"
-                  onClick={() => setShowRemoveConfirm(true)}
-                  className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted transition-colors hover:text-red-400"
-                  title="Remove API key"
+                  onClick={() => setShowForm(!showForm)}
+                  className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    showForm
+                      ? "bg-surface-elevated text-text"
+                      : isConfigured
+                        ? "text-muted hover:text-text"
+                        : "bg-primary/10 text-primary hover:bg-primary/20"
+                  }`}
                 >
-                  <Trash2 size={12} />
-                  Remove
+                  <Key size={12} />
+                  {isConfigured ? "Update" : "Connect"}
                 </button>
-              ))}
+                {isConfigured &&
+                  (showRemoveConfirm ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={handleRemove}
+                        disabled={isRemoving}
+                        className="rounded-lg bg-red-500/20 px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
+                      >
+                        {isRemoving ? "Removing..." : "Confirm"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowRemoveConfirm(false)}
+                        className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:text-text"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowRemoveConfirm(true)}
+                      className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted transition-colors hover:text-red-400"
+                      title="Remove API key"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  ))}
+              </>
+            )}
           </div>
         )}
       </div>
 
+      {/* Description + key hint */}
       <p className="mt-1 text-sm text-muted">{provider.description}</p>
-      {provider.features.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {provider.features.slice(0, 3).map((feature) => (
-            <span
-              key={feature}
-              className="rounded-md bg-primary/10 px-1.5 py-0.5 text-xs text-primary/70"
-            >
-              {feature}
-            </span>
-          ))}
-        </div>
+      {isConfigured && provider.keyHint && (
+        <p className="mt-1 text-xs text-muted/60">•••• {provider.keyHint}</p>
+      )}
+      {isOmniCredits && isConfigured && (
+        <p className="mt-1 text-xs text-muted/60">Powered by your account</p>
       )}
 
-      {isOmniCredits && isConfigured && !isActive && activeProviderName && (
-        <p className="mt-2 text-xs text-amber-400/80">
-          Not currently in use — your {activeProviderName} key takes priority.
-          Remove it to route through Omni Credits.
-        </p>
-      )}
-
-      {/* API key input form */}
+      {/* Key input form */}
       {showForm && !disabled && !isOmniCredits && (
         <form onSubmit={handleSubmit} className="mt-3 space-y-2">
           <div className="flex gap-2">
