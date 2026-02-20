@@ -317,9 +317,12 @@ export function useRemoveProvider() {
   return useMutation({
     mutationFn: async (provider: ProviderType) => {
       if (!USE_SYNAPSE) {
-        await gatewayFetch<unknown>(`/api/providers/${provider}`, {
-          method: "DELETE",
-        });
+        await gatewayFetch<{ success: boolean; message: string }>(
+          `/api/providers/${provider}`,
+          {
+            method: "DELETE",
+          },
+        );
         return;
       }
 
