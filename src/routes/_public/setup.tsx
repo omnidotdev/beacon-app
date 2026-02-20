@@ -40,38 +40,37 @@ function SetupPage() {
   const [apiKey, setApiKey] = useState("");
   const [isConfiguring, setIsConfiguring] = useState(false);
 
-  // Check provider status after gateway connection
-  const checkProviderStatus = async (gatewayUrl: string) => {
-    try {
-      const statusRes = await fetch(`${gatewayUrl}/api/status`);
-      const status: SystemStatus = await statusRes.json();
-
-      // If model is configured, gateway is ready
-      if (status.model) {
-        navigate({ to: "/" });
-        return;
-      }
-
-      // No model configured, need provider setup
-      const providersRes = await fetch(`${gatewayUrl}/api/providers`);
-      const providersData: ProvidersResponse = await providersRes.json();
-      setProviders(providersData.providers);
-      setStep("provider");
-    } catch (e) {
-      console.error("Failed to check provider status:", e);
-      // If we can't check, just navigate and let the app handle it
-      navigate({ to: "/" });
-    }
-  };
-
   // Start discovery on mount
   useEffect(() => {
     const discovery = getGatewayDiscovery();
 
+    // Check provider status after gateway connection
+    const checkProviderStatus = async (gatewayUrl: string) => {
+      try {
+        const statusRes = await fetch(`${gatewayUrl}/api/status`);
+        const status: SystemStatus = await statusRes.json();
+
+        // If model is configured, gateway is ready
+        if (status.model) {
+          navigate({ to: "/" });
+          return;
+        }
+
+        // No model configured, need provider setup
+        const providersRes = await fetch(`${gatewayUrl}/api/providers`);
+        const providersData: ProvidersResponse = await providersRes.json();
+        setProviders(providersData.providers);
+        setStep("provider");
+      } catch (e) {
+        console.error("Failed to check provider status:", e);
+        // If we can't check, just navigate and let the app handle it
+        navigate({ to: "/" });
+      }
+    };
+
     const unsubscribe = discovery.subscribe((state) => {
       setConnectionState(state);
       if (state.status === "connected" && state.gateway) {
-        // Check if provider is configured before navigating
         checkProviderStatus(state.gateway.url);
       }
     });
@@ -122,7 +121,8 @@ function SetupPage() {
     setError(null);
 
     try {
-      const gateway = connectionState.status === "connected" ? connectionState.gateway : null;
+      const gateway =
+        connectionState.status === "connected" ? connectionState.gateway : null;
       if (!gateway) throw new Error("Not connected to gateway");
 
       const res = await fetch(`${gateway.url}/api/providers/configure`, {
@@ -137,10 +137,8 @@ function SetupPage() {
       const data = await res.json();
 
       if (data.success) {
-        // Provider configured, but gateway needs restart to use new key
-        setError(
-          "Provider configured. Please restart the gateway to apply changes, then refresh this page."
-        );
+        // Key saved to gateway — navigate to app
+        navigate({ to: "/" });
       } else {
         setError(data.message || "Failed to configure provider");
       }
@@ -160,7 +158,9 @@ function SetupPage() {
 
   // Provider setup step
   if (step === "provider") {
-    const byokProviders = providers.filter((p) => !p.coming_soon && p.api_key_url);
+    const byokProviders = providers.filter(
+      (p) => !p.coming_soon && p.api_key_url,
+    );
     const comingSoonProviders = providers.filter((p) => p.coming_soon);
 
     return (
@@ -170,7 +170,9 @@ function SetupPage() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
               <Key className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-text">Configure AI Provider</h1>
+            <h1 className="text-2xl font-bold text-text">
+              Configure AI Provider
+            </h1>
             <p className="mt-2 text-muted">
               Connect an AI provider to start chatting
             </p>
@@ -201,7 +203,9 @@ function SetupPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h4 className="font-medium text-text">{provider.name}</h4>
-                    <p className="mt-1 text-sm text-muted">{provider.description}</p>
+                    <p className="mt-1 text-sm text-muted">
+                      {provider.description}
+                    </p>
                   </div>
                   {provider.api_key_url && (
                     <a
@@ -267,13 +271,17 @@ function SetupPage() {
                     className="glass-surface rounded-xl p-4 opacity-60"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-text">{provider.name}</span>
+                      <span className="font-medium text-text">
+                        {provider.name}
+                      </span>
                       <span className="flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
                         <Zap size={10} />
                         Soon
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-muted">{provider.description}</p>
+                    <p className="mt-1 text-sm text-muted">
+                      {provider.description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -305,7 +313,6 @@ function SetupPage() {
           >
             Skip for now
           </button>
-
         </div>
       </div>
     );
@@ -352,9 +359,7 @@ function SetupPage() {
                 </div>
                 <span
                   className={`text-xs ${
-                    gateway.source === "mdns"
-                      ? "text-green-400"
-                      : "text-muted"
+                    gateway.source === "mdns" ? "text-green-400" : "text-muted"
                   }`}
                 >
                   {gateway.source === "mdns" ? "Auto-discovered" : "Saved"}
