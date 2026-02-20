@@ -86,8 +86,10 @@ function MemoriesContent() {
   }, [filteredMemories]);
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden">
-      <Brain size={14} className="absolute left-4 top-3.5 z-10 text-muted/40" />
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="px-5 pb-1 pt-4">
+        <Brain size={20} className="text-primary/70" />
+      </div>
 
       {/* Category filter tabs */}
       <div className="px-6">

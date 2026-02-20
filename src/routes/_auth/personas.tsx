@@ -70,11 +70,10 @@ function PersonasContent() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden">
-      <VenetianMask
-        size={14}
-        className="absolute left-4 top-3.5 z-10 text-muted/40"
-      />
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="px-5 pb-1 pt-4">
+        <VenetianMask size={20} className="text-primary/70" />
+      </div>
 
       <div className="px-6">
         <div className="flex gap-6">
