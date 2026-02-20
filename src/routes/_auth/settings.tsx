@@ -188,27 +188,81 @@ function SettingsPage() {
           </SettingsSection>
 
           <SettingsSection title="AI Providers">
-            <div className="space-y-3">
+            <div className="space-y-4">
               {providersLoading ? (
                 <>
                   <ProviderSkeleton />
                   <ProviderSkeleton />
-                  <ProviderSkeleton />
                 </>
               ) : (
-                providers
-                  .filter((p) => !p.coming_soon)
-                  .map((provider) => (
-                    <ProviderCard
-                      key={provider.id}
-                      provider={provider}
-                      isActive={activeProvider === provider.id}
-                    />
-                  ))
+                <>
+                  {/* Omni Credits — primary, always first */}
+                  {(() => {
+                    const omniCredits = providers.find(
+                      (p) => p.id === "omni_credits",
+                    );
+                    return omniCredits ? (
+                      <OmniCreditsCard
+                        provider={omniCredits}
+                        isActive={activeProvider === "omni_credits"}
+                      />
+                    ) : null;
+                  })()}
+
+                  {/* BYOK — advanced, optional */}
+                  <div className="mt-2">
+                    <div className="mb-2 flex items-center gap-2">
+                      <h3 className="text-xs font-medium uppercase tracking-wider text-muted/60">
+                        Bring Your Own Keys
+                      </h3>
+                      <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-[10px] font-medium text-muted/50">
+                        Advanced
+                      </span>
+                    </div>
+                    <p className="mb-3 text-xs text-muted/60">
+                      Optional. Connect your own provider API keys for direct
+                      billing, cost control, or access to models not available
+                      through Omni Credits.
+                    </p>
+                    <div className="space-y-3">
+                      {providers
+                        .filter(
+                          (p) => p.id !== "omni_credits" && !p.coming_soon,
+                        )
+                        .map((provider) => (
+                          <ProviderCard
+                            key={provider.id}
+                            provider={provider}
+                            isActive={activeProvider === provider.id}
+                          />
+                        ))}
+                    </div>
+                  </div>
+
+                  {providers.some((p) => p.coming_soon) && (
+                    <div className="mt-6">
+                      <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted/60">
+                        <Sparkles size={12} />
+                        Coming Soon
+                      </h3>
+                      <div className="space-y-3">
+                        {providers
+                          .filter((p) => p.coming_soon)
+                          .map((provider) => (
+                            <ProviderCard
+                              key={provider.id}
+                              provider={provider}
+                              isActive={false}
+                              disabled
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
-            {/* Security note */}
             <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-accent/15 bg-accent/5 px-3.5 py-2.5">
               <Lock size={14} className="mt-0.5 flex-shrink-0 text-accent/60" />
               <p className="text-xs leading-relaxed text-muted">
@@ -216,28 +270,6 @@ function SettingsPage() {
                 in your browser. Cleared from memory after saving.
               </p>
             </div>
-
-            {/* Coming Soon */}
-            {providers.some((p) => p.coming_soon) && (
-              <div className="mt-6">
-                <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted/60">
-                  <Sparkles size={12} />
-                  Coming Soon
-                </h3>
-                <div className="space-y-3">
-                  {providers
-                    .filter((p) => p.coming_soon)
-                    .map((provider) => (
-                      <ProviderCard
-                        key={provider.id}
-                        provider={provider}
-                        isActive={false}
-                        disabled
-                      />
-                    ))}
-                </div>
-              </div>
-            )}
           </SettingsSection>
 
           <SettingsSection title="Data">
@@ -347,6 +379,66 @@ function ProviderSkeleton() {
         <div className="h-5 w-12 rounded-md bg-surface-elevated" />
         <div className="h-5 w-12 rounded-md bg-surface-elevated" />
       </div>
+    </div>
+  );
+}
+
+interface OmniCreditsCardProps {
+  provider: ProviderInfo;
+  isActive: boolean;
+}
+
+function OmniCreditsCard({ provider, isActive }: OmniCreditsCardProps) {
+  const { mutateAsync: setActive, isPending: isSettingActive } =
+    useSetActiveProvider();
+
+  const handleSetActive = async () => {
+    try {
+      await setActive("omni_credits" as ProviderType);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to set active provider",
+      );
+    }
+  };
+
+  return (
+    <div
+      className={`relative rounded-xl p-4 transition-all ${
+        isActive
+          ? "glass-panel border-primary/50 glow-soft"
+          : "glass-surface hover:border-border"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-text">{provider.name}</span>
+          {isActive && (
+            <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
+              <Check size={10} />
+              Active
+            </span>
+          )}
+        </div>
+        {!isActive && (
+          <button
+            type="button"
+            onClick={handleSetActive}
+            disabled={isSettingActive}
+            className="flex items-center gap-1 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:opacity-50"
+          >
+            {isSettingActive ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              "Use"
+            )}
+          </button>
+        )}
+      </div>
+      <p className="mt-1 text-sm text-muted">
+        Smart routing across Claude, GPT-4o, and Kimi — included with your
+        account.
+      </p>
     </div>
   );
 }

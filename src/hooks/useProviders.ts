@@ -133,14 +133,14 @@ const PROVIDER_METADATA: Omit<
   },
 ];
 
-// Fallback when Synapse is unreachable
+// Fallback when Synapse is unreachable — omni_credits is always available
 const DEFAULT_PROVIDERS: ProvidersResponse = {
   providers: PROVIDER_METADATA.map((p) => ({
     ...p,
-    status: "not_configured",
-    active: false,
+    status: p.id === "omni_credits" ? ("configured" as const) : ("not_configured" as const),
+    active: p.id === "omni_credits",
   })),
-  active_provider: null,
+  active_provider: "omni_credits",
 };
 
 /**

@@ -8,7 +8,21 @@ interface ModelOption {
 
 /** Curated models per provider */
 const MODELS: ModelOption[] = [
-  // Anthropic
+  // Omni Credits — routed through Synapse gateway
+  { id: "auto", name: "Auto (Smart Routing)", provider: "omni_credits" },
+  {
+    id: "anthropic/claude-sonnet-4-20250514",
+    name: "Claude Sonnet 4",
+    provider: "omni_credits",
+  },
+  { id: "openai/gpt-4o", name: "GPT-4o", provider: "omni_credits" },
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini", provider: "omni_credits" },
+  {
+    id: "nvidia/moonshotai/kimi-k2.5",
+    name: "Kimi K2.5",
+    provider: "omni_credits",
+  },
+  // Anthropic (BYOK)
   {
     id: "claude-sonnet-4-5-20250929",
     name: "Sonnet 4.5",
@@ -25,13 +39,14 @@ const MODELS: ModelOption[] = [
     name: "Sonnet 4",
     provider: "anthropic",
   },
-  // OpenAI
+  // OpenAI (BYOK)
   { id: "gpt-4o", name: "GPT-4o", provider: "openai" },
   { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "openai" },
   { id: "o3-mini", name: "o3-mini", provider: "openai" },
 ];
 
 const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
+  omni_credits: "Omni Credits",
   anthropic: "Anthropic",
   openai: "OpenAI",
   openrouter: "OpenRouter",
