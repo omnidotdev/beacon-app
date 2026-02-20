@@ -475,7 +475,7 @@ export function createGatewayClient(
 
     // Marketplace Personas
     async listInstalledPersonas(): Promise<MarketplacePersonaListResponse> {
-      return fetchWithAuth("/api/personas/marketplace/installed");
+      return fetchWithAuth("/api/personas/marketplace");
     },
 
     async searchMarketplacePersonas(
