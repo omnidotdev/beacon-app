@@ -234,12 +234,9 @@ function SettingsPage() {
                             cross-device sync
                           </p>
                         </div>
-                        <a
-                          href="/login?redirect=/settings"
-                          className="text-xs text-primary hover:text-primary/80"
-                        >
-                          Connect
-                        </a>
+                        <span className="text-xs text-muted/50">
+                          Not available
+                        </span>
                       </div>
                     </div>
                   )}

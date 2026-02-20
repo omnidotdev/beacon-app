@@ -191,7 +191,7 @@ function buildProvidersResponse(
     const byokKeys = keys.filter((k) => k.provider !== "omni_credits");
     if (byokKeys.length > 0) {
       activeProvider = toProviderType(byokKeys[0].provider);
-    } else if (configuredProviders.has("omni_credits")) {
+    } else {
       activeProvider = "omni_credits";
     }
   }
@@ -200,9 +200,10 @@ function buildProvidersResponse(
     const key = keys.find((k) => k.provider === meta.id);
     return {
       ...meta,
-      status: configuredProviders.has(meta.id)
-        ? ("configured" as const)
-        : ("not_configured" as const),
+      status:
+        meta.id === "omni_credits" || configuredProviders.has(meta.id)
+          ? ("configured" as const)
+          : ("not_configured" as const),
       active: activeProvider === meta.id,
       keyHint: key?.keyHint ?? null,
     };
