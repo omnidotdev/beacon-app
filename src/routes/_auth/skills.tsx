@@ -320,7 +320,15 @@ function SkillCard({
 }
 
 function isAccessError(err: Error): boolean {
-  return err.message.toLowerCase().includes("access not granted");
+  const msg = err.message.toLowerCase();
+  return (
+    msg.includes("access not granted") ||
+    msg.includes("not authorized") ||
+    msg.includes("unauthorized") ||
+    msg.includes("forbidden") ||
+    msg.includes("(401)") ||
+    msg.includes("(403)")
+  );
 }
 
 function EarlyAccessState() {

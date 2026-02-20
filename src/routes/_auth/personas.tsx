@@ -1,5 +1,5 @@
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
-import { Search, Sparkles, User } from "lucide-react";
+import { Search, User, VenetianMask } from "lucide-react";
 import { useState } from "react";
 import {
   useInstallMarketplacePersona,
@@ -31,7 +31,7 @@ function AuthGate() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
       <div className="glass-panel mb-4 rounded-full p-4">
-        <Sparkles size={28} className="text-primary" />
+        <VenetianMask size={28} className="text-primary" />
       </div>
       <h2 className="font-semibold text-text">Persona Marketplace</h2>
       <p className="mt-2 max-w-sm text-sm text-muted">
@@ -302,7 +302,7 @@ function CustomPersonaTeaser() {
   return (
     <div className="mt-8 flex items-center gap-4 rounded-2xl border border-dashed border-primary/20 bg-primary/5 p-5">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-        <Sparkles size={18} className="text-primary/70" />
+        <VenetianMask size={18} className="text-primary/70" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-text">Create custom personas</p>
@@ -316,14 +316,22 @@ function CustomPersonaTeaser() {
 }
 
 function isAccessError(err: Error): boolean {
-  return err.message.toLowerCase().includes("access not granted");
+  const msg = err.message.toLowerCase();
+  return (
+    msg.includes("access not granted") ||
+    msg.includes("not authorized") ||
+    msg.includes("unauthorized") ||
+    msg.includes("forbidden") ||
+    msg.includes("(401)") ||
+    msg.includes("(403)")
+  );
 }
 
 function EarlyAccessState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="glass-panel mb-4 rounded-full p-4">
-        <Sparkles size={28} className="text-primary" />
+        <VenetianMask size={28} className="text-primary" />
       </div>
       <h3 className="font-semibold text-text">Persona marketplace</h3>
       <p className="mt-1 max-w-sm text-sm text-muted">
@@ -366,7 +374,7 @@ function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="glass-panel mb-4 rounded-full p-4">
-        <Sparkles size={28} className="text-primary" />
+        <VenetianMask size={28} className="text-primary" />
       </div>
       <h3 className="font-semibold text-text">{title}</h3>
       <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>
