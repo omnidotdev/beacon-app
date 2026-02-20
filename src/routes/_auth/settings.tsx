@@ -28,7 +28,7 @@ import {
 import type { ProviderInfo, ProviderType } from "@/lib/api";
 import { isCloudDeployment } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
-import { SYNAPSE_API_URL } from "@/lib/config/env.config";
+import { CONSOLE_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
 import { db } from "@/lib/db";
 import * as localDb from "@/lib/db/conversations";
 import { NO_PERSONA_ID } from "@/lib/persona";
@@ -145,15 +145,28 @@ function SettingsPage() {
                     <p className="text-sm text-muted">{session.user.email}</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  disabled={isSigningOut}
-                  className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
-                >
-                  <LogOut size={16} />
-                  {isSigningOut ? "Signing out..." : "Sign out"}
-                </button>
+                <div className="flex items-center gap-2">
+                  {CONSOLE_URL && (
+                    <a
+                      href={CONSOLE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-elevated"
+                    >
+                      <ExternalLink size={16} />
+                      Manage account
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    <LogOut size={16} />
+                    {isSigningOut ? "Signing out..." : "Sign out"}
+                  </button>
+                </div>
               </div>
             </SettingsSection>
           )}
