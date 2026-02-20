@@ -26,7 +26,6 @@ import {
   useSetActiveProvider,
 } from "@/hooks";
 import type { ProviderInfo, ProviderType } from "@/lib/api";
-import { isCloudDeployment } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
 import { CONSOLE_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
 import { db } from "@/lib/db";
@@ -51,7 +50,7 @@ function SettingsPage() {
   const [isClearing, setIsClearing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const showAccountSection = isCloudDeployment() && session?.user;
+  const showAccountSection = !!session?.user;
 
   const handleExportChats = useCallback(async () => {
     setIsExporting(true);

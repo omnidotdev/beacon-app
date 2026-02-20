@@ -100,7 +100,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
   const isCloud = isCloudDeployment();
   const isAuthenticated = !!session?.user;
-  const showUserSection = isCloud && isAuthenticated;
+  const showUserSection = isAuthenticated;
 
   const handlePersonaSwitch = (personaId: string) => {
     switchPersona(personaId);
