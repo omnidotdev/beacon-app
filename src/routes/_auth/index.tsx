@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MessageSquare, Mic, Settings } from "lucide-react";
+import { Brain, ChevronRight, MessageSquare, Mic, Settings, VenetianMask, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApi, useConversations } from "@/hooks";
 import type { SystemStatus } from "@/lib/api";
@@ -75,6 +75,33 @@ function DashboardHome() {
         </div>
       </section>
 
+      {/* Explore features */}
+      <section className="mt-10">
+        <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted/60">
+          Explore
+        </h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <FeatureCard
+            to="/memories"
+            icon={<Brain size={20} />}
+            title="Memories"
+            description="Recall and manage what Beacon remembers about you"
+          />
+          <FeatureCard
+            to="/skills"
+            icon={<Zap size={20} />}
+            title="Skills"
+            description="Install and configure tools that extend Beacon's abilities"
+          />
+          <FeatureCard
+            to="/personas"
+            icon={<VenetianMask size={20} />}
+            title="Personas"
+            description="Shape Beacon's personality and communication style"
+          />
+        </div>
+      </section>
+
       {/* Model info */}
       {status?.model && (
         <section className="mt-10">
@@ -93,6 +120,34 @@ function DashboardHome() {
         </section>
       )}
     </div>
+  );
+}
+
+interface FeatureCardProps {
+  to: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+function FeatureCard({ to, icon, title, description }: FeatureCardProps) {
+  return (
+    <Link
+      to={to}
+      className="glass-panel group flex items-center gap-4 rounded-2xl p-4 transition-all hover:glow-soft"
+    >
+      <span className="text-muted/70 transition-colors group-hover:text-primary">
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-medium text-text">{title}</p>
+        <p className="truncate text-xs text-muted">{description}</p>
+      </div>
+      <ChevronRight
+        size={16}
+        className="shrink-0 text-muted/40 transition-colors group-hover:text-primary"
+      />
+    </Link>
   );
 }
 
