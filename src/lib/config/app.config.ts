@@ -6,6 +6,7 @@ const app = {
   description: "AI-powered voice and messaging gateway for personalized AI assistants",
   links: {
     website: "https://beacon.omni.dev",
+    console: "https://console.omni.dev",
     discord: "https://discord.gg/omnidotdev",
     docs: "https://docs.omni.dev/armory/beacon",
     github: "https://github.com/omnidotdev",

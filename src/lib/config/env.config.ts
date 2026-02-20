@@ -1,3 +1,5 @@
+import app from "./app.config";
+
 const env = { ...import.meta.env, ...process.env };
 
 /**
@@ -15,8 +17,9 @@ export const {
   AUTH_CLIENT_SECRET,
 } = env;
 
-// SSR-safe: try non-prefixed (process.env) then VITE_-prefixed (import.meta.env)
-export const CONSOLE_URL = env.CONSOLE_URL || env.VITE_CONSOLE_URL;
+// SSR-safe: try non-prefixed (process.env) then VITE_-prefixed (import.meta.env), fallback to known production URL
+export const CONSOLE_URL =
+  env.CONSOLE_URL || env.VITE_CONSOLE_URL || app.links.console;
 
 // Feature flags
 export const FLAGS_API_HOST = env.FLAGS_API_HOST || env.VITE_FLAGS_API_HOST;
