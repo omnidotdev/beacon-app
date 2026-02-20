@@ -7,6 +7,15 @@ import { isNative } from "@/lib/platform";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import { useApi } from "./useApi";
 
+export interface ToolCallState {
+  toolId: string;
+  name: string;
+  status: "pending" | "done" | "error";
+  invocation?: string;
+  output?: string;
+}
+
+
 // Track the last persona ID we successfully synced with the gateway
 // so we only call switchPersona once per persona, not on every message
 let syncedPersonaId: string | null = null;
@@ -36,6 +45,9 @@ export function useChat({
     null,
   );
   const streamingContentRef = useRef("");
+  const [toolCalls, setToolCalls] = useState<Map<string, ToolCallState>>(
+    new Map(),
+  );
   const activeConversationRef = useRef<string | null>(conversationId);
 
   // Track active conversation for event filtering
@@ -151,6 +163,7 @@ export function useChat({
         async (message: Message) => {
           setIsLoading(false);
           setStreamingMessage(null);
+          setToolCalls(new Map());
 
           // Save assistant message to local DB
           const finalContent = message.content || streamingContentRef.current;
@@ -168,6 +181,7 @@ export function useChat({
         async (error) => {
           setIsLoading(false);
           setStreamingMessage(null);
+          setToolCalls(new Map());
           if (targetConversation) {
             await localDb.addMessage(targetConversation, "assistant", error, {
               isError: true,
@@ -179,6 +193,28 @@ export function useChat({
         },
         // Pass NO_PERSONA_ID through so the gateway skips the system prompt
         personaId,
+        // onToolStart
+        (toolId, name) => {
+          setToolCalls((prev) => {
+            const next = new Map(prev);
+            next.set(toolId, { toolId, name, status: "pending" });
+            return next;
+          });
+        },
+        // onToolResult
+        (toolId, name, invocation, output, isError) => {
+          setToolCalls((prev) => {
+            const next = new Map(prev);
+            next.set(toolId, {
+              toolId,
+              name,
+              status: isError ? "error" : "done",
+              invocation,
+              output,
+            });
+            return next;
+          });
+        },
       );
 
       // Navigate to new conversation after WebSocket is established
@@ -197,6 +233,7 @@ export function useChat({
     messages,
     isConnected,
     isLoading,
+    toolCalls,
     sendMessage,
     clearMessages,
   };
