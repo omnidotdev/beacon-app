@@ -155,6 +155,7 @@ export interface ProviderInfo {
   api_key_url: string | null;
   coming_soon: boolean;
   features: string[];
+  keyHint?: string | null;
 }
 
 export interface ProvidersResponse {

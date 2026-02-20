@@ -14,14 +14,15 @@ const SYNAPSE_GRAPHQL_URL = `${SYNAPSE_API_URL ?? ""}/graphql`;
 
 // GraphQL operations for provider key management
 
-const MY_PROVIDER_KEYS_QUERY = `
-  query MyProviderKeys {
+const PROVIDERS_QUERY = `
+  query ProvidersAndPreferences {
     myProviderKeys {
       id
       provider
       keyHint
-      modelPreference
-      createdAt
+    }
+    myPreferences {
+      defaultProvider
     }
   }
 `;
@@ -43,12 +44,18 @@ const REMOVE_PROVIDER_KEY_MUTATION = `
   }
 `;
 
+const SET_ACTIVE_PROVIDER_MUTATION = `
+  mutation SetActiveProvider($provider: String!) {
+    updateUserPreferences(input: { defaultProvider: $provider }) {
+      defaultProvider
+    }
+  }
+`;
+
 type SynapseProviderKey = {
   id: string;
   provider: string;
   keyHint: string | null;
-  modelPreference: string | null;
-  createdAt: string;
 };
 
 type GraphQLResponse<T> = {
@@ -139,27 +146,41 @@ const DEFAULT_PROVIDERS: ProvidersResponse = {
 /**
  * Build a ProvidersResponse from Synapse provider keys merged with static metadata
  */
-function buildProvidersResponse(keys: SynapseProviderKey[]): ProvidersResponse {
+function buildProvidersResponse(
+  keys: SynapseProviderKey[],
+  defaultProvider: string | null,
+): ProvidersResponse {
   const configuredProviders = new Set(keys.map((k) => k.provider));
+  const knownProviderIds = new Set(PROVIDER_METADATA.map((m) => m.id));
 
-  // Determine the active provider: first configured non-omni_credits key,
-  // or omni_credits if it is the only configured provider
-  const byokKeys = keys.filter((k) => k.provider !== "omni_credits");
+  const toProviderType = (p: string): ProviderType | null =>
+    knownProviderIds.has(p as ProviderType) ? (p as ProviderType) : null;
+
+  // Determine active provider: explicit preference first, then first configured key
   let activeProvider: ProviderType | null = null;
-
-  if (byokKeys.length > 0) {
-    activeProvider = byokKeys[0].provider as ProviderType;
-  } else if (configuredProviders.has("omni_credits")) {
-    activeProvider = "omni_credits";
+  if (defaultProvider && configuredProviders.has(defaultProvider)) {
+    activeProvider = toProviderType(defaultProvider);
+  }
+  if (!activeProvider) {
+    const byokKeys = keys.filter((k) => k.provider !== "omni_credits");
+    if (byokKeys.length > 0) {
+      activeProvider = toProviderType(byokKeys[0].provider);
+    } else if (configuredProviders.has("omni_credits")) {
+      activeProvider = "omni_credits";
+    }
   }
 
-  const providers = PROVIDER_METADATA.map((meta) => ({
-    ...meta,
-    status: configuredProviders.has(meta.id)
-      ? ("configured" as const)
-      : ("not_configured" as const),
-    active: activeProvider === meta.id,
-  }));
+  const providers = PROVIDER_METADATA.map((meta) => {
+    const key = keys.find((k) => k.provider === meta.id);
+    return {
+      ...meta,
+      status: configuredProviders.has(meta.id)
+        ? ("configured" as const)
+        : ("not_configured" as const),
+      active: activeProvider === meta.id,
+      keyHint: key?.keyHint ?? null,
+    };
+  });
 
   return { providers, active_provider: activeProvider };
 }
@@ -174,10 +195,14 @@ export function useProviders() {
     queryFn: async () => {
       const data = await synapseGraphql<{
         myProviderKeys: SynapseProviderKey[];
-      }>(MY_PROVIDER_KEYS_QUERY, {}, token);
+        myPreferences: { defaultProvider: string | null } | null;
+      }>(PROVIDERS_QUERY, {}, token);
       // Cache raw keys for useRemoveProvider to avoid a redundant fetch
       queryClient.setQueryData(["providerKeys"], data.myProviderKeys);
-      return buildProvidersResponse(data.myProviderKeys);
+      return buildProvidersResponse(
+        data.myProviderKeys,
+        data.myPreferences?.defaultProvider ?? null,
+      );
     },
     enabled: !!token && !!SYNAPSE_API_URL,
     retry: 1,
@@ -263,6 +288,24 @@ export function useRemoveProvider() {
         { id: keyId },
         token,
       );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["providers"] });
+      queryClient.invalidateQueries({ queryKey: ["status"] });
+    },
+  });
+}
+
+export function useSetActiveProvider() {
+  const { session } = useRouteContext({ from: "__root__" });
+  const queryClient = useQueryClient();
+  const token = session?.accessToken ?? "";
+
+  return useMutation({
+    mutationFn: async (provider: ProviderType) => {
+      await synapseGraphql<{
+        updateUserPreferences: { defaultProvider: string | null };
+      }>(SET_ACTIVE_PROVIDER_MUTATION, { provider }, token);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["providers"] });

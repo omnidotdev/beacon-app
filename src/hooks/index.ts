@@ -17,6 +17,7 @@ export {
   usePersonas,
   useUpdateConversationTitle,
 } from "./useConversations";
+export { useDeleteMemory, useMemories, useUpdateMemory } from "./useMemories";
 export {
   useInstallMarketplacePersona,
   useMarketplacePersonas,
@@ -27,6 +28,7 @@ export {
   useConfigureProvider,
   useProviders,
   useRemoveProvider,
+  useSetActiveProvider,
 } from "./useProviders";
 export {
   useInstalledSkills,
@@ -35,6 +37,5 @@ export {
   useToggleSkill,
   useUninstallSkill,
 } from "./useSkills";
-export { useDeleteMemory, useMemories, useUpdateMemory } from "./useMemories";
 export { useTheme } from "./useTheme";
 export { useVoice } from "./useVoice";
