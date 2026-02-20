@@ -221,7 +221,13 @@ export function useProviders() {
     queryKey: ["providers"],
     queryFn: async () => {
       if (!USE_SYNAPSE) {
-        return gatewayFetch<ProvidersResponse>("/api/providers");
+        // Pass the user's JWT so the gateway can identify the user and mark
+        // omni_credits as configured for authenticated cloud-mode sessions
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        return gatewayFetch<ProvidersResponse>("/api/providers", { headers });
       }
       const data = await synapseGraphql<{
         myProviderKeys: SynapseProviderKey[];
