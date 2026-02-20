@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use std::process::Child;
 use std::sync::Arc;
 
-use directories::ProjectDirs;
+use directories::BaseDirs;
 use tauri::Manager;
 use tokio::sync::RwLock;
 
@@ -80,9 +80,9 @@ pub fn run() {
         .init();
 
     // Determine data directory
-    let data_dir = ProjectDirs::from("dev", "omni", "omni")
-        .map(|d| d.data_dir().join("beacon-app"))
-        .unwrap_or_else(|| PathBuf::from(".beacon-app"));
+    let data_dir = BaseDirs::new()
+        .map(|d| d.data_dir().join("omni").join("beacon"))
+        .unwrap_or_else(|| PathBuf::from(".local/share/omni/beacon"));
     std::fs::create_dir_all(&data_dir).ok();
 
     tracing::info!(data_dir = %data_dir.display(), "app starting");
