@@ -234,9 +234,14 @@ function SettingsPage() {
                             cross-device sync
                           </p>
                         </div>
-                        <span className="text-xs text-muted/50">
-                          Not available
-                        </span>
+                        <a
+                          href="https://synapse.omni.dev"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-muted/50 hover:text-muted transition-colors"
+                        >
+                          Learn more
+                        </a>
                       </div>
                     </div>
                   )}
@@ -467,10 +472,20 @@ function OmniCreditsCard({ provider, isActive }: OmniCreditsCardProps) {
           </button>
         )}
       </div>
-      <p className="mt-1 text-sm text-muted">
-        Smart routing across Claude, GPT-4o, and Kimi — included with your
-        account.
-      </p>
+      <div className="mt-2 flex items-center justify-between">
+        <p className="text-sm text-muted">
+          Smart routing across Claude, GPT-4o, and Kimi — included with your
+          account.
+        </p>
+        <a
+          href="https://synapse.omni.dev/dashboard"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-primary/70 hover:text-primary transition-colors"
+        >
+          Manage
+        </a>
+      </div>
     </div>
   );
 }
