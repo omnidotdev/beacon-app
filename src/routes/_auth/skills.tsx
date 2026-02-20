@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { Search, Zap } from "lucide-react";
 import { useState } from "react";
 import {
@@ -8,6 +8,7 @@ import {
   useToggleSkill,
   useUninstallSkill,
 } from "@/hooks";
+import { isCloudDeployment } from "@/lib/api";
 import type { Skill, SkillSource } from "@/lib/api";
 
 export const Route = createFileRoute("/_auth/skills")({
@@ -17,6 +18,31 @@ export const Route = createFileRoute("/_auth/skills")({
 type Tab = "installed" | "browse";
 
 function SkillsPage() {
+  const { session } = useRouteContext({ from: "__root__" });
+  const isAuthenticated = isCloudDeployment() && !!session?.user;
+
+  if (!isAuthenticated) {
+    return <AuthGate />;
+  }
+
+  return <SkillsContent />;
+}
+
+function AuthGate() {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+      <div className="glass-panel mb-4 rounded-full p-4">
+        <Zap size={28} className="text-primary" />
+      </div>
+      <h2 className="font-semibold text-text">Skills</h2>
+      <p className="mt-2 max-w-sm text-sm text-muted">
+        Sign in with your Omni account to browse and install skills
+      </p>
+    </div>
+  );
+}
+
+function SkillsContent() {
   const [activeTab, setActiveTab] = useState<Tab>("installed");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -308,11 +334,8 @@ function LoadingState() {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="glass-panel rounded-2xl border-red-500/20 bg-red-500/5 p-6 text-center">
-      <p className="break-words text-red-400">Error: {message}</p>
-      <p className="mt-2 text-sm text-muted">
-        Make sure the Beacon gateway is running
-      </p>
+    <div className="glass-panel mx-auto max-w-sm rounded-2xl p-6 text-center">
+      <p className="break-words text-sm text-muted">{message}</p>
     </div>
   );
 }

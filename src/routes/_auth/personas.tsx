@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { Search, Sparkles, User } from "lucide-react";
 import { useState } from "react";
 import {
@@ -7,6 +7,7 @@ import {
   useSearchMarketplacePersonas,
   useUninstallMarketplacePersona,
 } from "@/hooks";
+import { isCloudDeployment } from "@/lib/api";
 import type { MarketplacePersona, PersonaSource } from "@/lib/api";
 
 export const Route = createFileRoute("/_auth/personas")({
@@ -16,6 +17,31 @@ export const Route = createFileRoute("/_auth/personas")({
 type Tab = "installed" | "browse";
 
 function PersonasPage() {
+  const { session } = useRouteContext({ from: "__root__" });
+  const isAuthenticated = isCloudDeployment() && !!session?.user;
+
+  if (!isAuthenticated) {
+    return <AuthGate />;
+  }
+
+  return <PersonasContent />;
+}
+
+function AuthGate() {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+      <div className="glass-panel mb-4 rounded-full p-4">
+        <Sparkles size={28} className="text-primary" />
+      </div>
+      <h2 className="font-semibold text-text">Persona Marketplace</h2>
+      <p className="mt-2 max-w-sm text-sm text-muted">
+        Sign in with your Omni account to browse and install personas
+      </p>
+    </div>
+  );
+}
+
+function PersonasContent() {
   const [activeTab, setActiveTab] = useState<Tab>("installed");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -304,11 +330,8 @@ function LoadingState() {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="glass-panel rounded-2xl border-red-500/20 bg-red-500/5 p-6 text-center">
-      <p className="break-words text-red-400">Error: {message}</p>
-      <p className="mt-2 text-sm text-muted">
-        Make sure the Beacon gateway is running
-      </p>
+    <div className="glass-panel mx-auto max-w-sm rounded-2xl p-6 text-center">
+      <p className="break-words text-sm text-muted">{message}</p>
     </div>
   );
 }
