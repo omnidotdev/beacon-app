@@ -8,13 +8,15 @@ export const {
   VITE_BASE_URL: BASE_URL,
   VITE_API_BASE_URL: API_BASE_URL,
   VITE_AUTH_BASE_URL: AUTH_BASE_URL,
-  VITE_CONSOLE_URL: CONSOLE_URL,
   VITE_GATEWAY_URL: GATEWAY_URL,
   VITE_SYNAPSE_API_URL: SYNAPSE_API_URL,
   // Auth (server-side secrets)
   AUTH_CLIENT_ID,
   AUTH_CLIENT_SECRET,
 } = env;
+
+// SSR-safe: try non-prefixed (process.env) then VITE_-prefixed (import.meta.env)
+export const CONSOLE_URL = env.CONSOLE_URL || env.VITE_CONSOLE_URL;
 
 // Feature flags
 export const FLAGS_API_HOST = env.FLAGS_API_HOST || env.VITE_FLAGS_API_HOST;
