@@ -68,6 +68,7 @@ function PersonasPage() {
         ) : (
           <BrowsePersonasTab searchQuery={searchQuery} />
         )}
+        <CustomPersonaTeaser />
       </div>
     </div>
   );
@@ -264,6 +265,23 @@ function PersonaCard({
             {isLoading ? "Installing..." : "Install"}
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function CustomPersonaTeaser() {
+  return (
+    <div className="mt-8 flex items-center gap-4 rounded-2xl border border-dashed border-primary/20 bg-primary/5 p-5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+        <Sparkles size={18} className="text-primary/70" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-text">Create custom personas</p>
+        <p className="mt-0.5 text-xs text-muted">
+          Build and configure your own personas with custom instructions, tools,
+          and styles — coming soon
+        </p>
       </div>
     </div>
   );
