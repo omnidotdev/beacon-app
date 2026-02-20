@@ -28,10 +28,13 @@ import {
 import type { ProviderInfo, ProviderType } from "@/lib/api";
 import { isCloudDeployment } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
+import { SYNAPSE_API_URL } from "@/lib/config/env.config";
 import { db } from "@/lib/db";
 import * as localDb from "@/lib/db/conversations";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import createMetaTags from "@/lib/util/createMetaTags";
+
+const USE_SYNAPSE = !!SYNAPSE_API_URL;
 
 export const Route = createFileRoute("/_auth/settings")({
   head: () => createMetaTags({ title: "Settings" }),
@@ -197,17 +200,37 @@ function SettingsPage() {
               ) : (
                 <>
                   {/* Omni Credits — primary, always first */}
-                  {(() => {
-                    const omniCredits = providers.find(
-                      (p) => p.id === "omni_credits",
-                    );
-                    return omniCredits ? (
-                      <OmniCreditsCard
-                        provider={omniCredits}
-                        isActive={activeProvider === "omni_credits"}
-                      />
-                    ) : null;
-                  })()}
+                  {USE_SYNAPSE ? (
+                    (() => {
+                      const omniCredits = providers.find(
+                        (p) => p.id === "omni_credits",
+                      );
+                      return omniCredits ? (
+                        <OmniCreditsCard
+                          provider={omniCredits}
+                          isActive={activeProvider === "omni_credits"}
+                        />
+                      ) : null;
+                    })()
+                  ) : (
+                    <div className="glass-surface rounded-xl p-4 opacity-60">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-text">Omni Cloud</h4>
+                          <p className="mt-1 text-sm text-muted">
+                            Sign in with Omni for smart routing, credits, and
+                            cross-device sync
+                          </p>
+                        </div>
+                        <a
+                          href="/login"
+                          className="text-xs text-primary hover:text-primary/80"
+                        >
+                          Connect
+                        </a>
+                      </div>
+                    </div>
+                  )}
 
                   {/* BYOK — advanced, optional */}
                   <div className="mt-2">
@@ -216,7 +239,7 @@ function SettingsPage() {
                         Bring Your Own Keys
                       </h3>
                       <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-[10px] font-medium text-muted/50">
-                        Advanced
+                        {USE_SYNAPSE ? "Advanced" : "AI Providers"}
                       </span>
                     </div>
                     <p className="mb-3 text-xs text-muted/60">
