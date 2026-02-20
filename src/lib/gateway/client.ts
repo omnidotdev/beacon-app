@@ -452,8 +452,10 @@ export function createGatewayClient(
       const callbackId = `${conversationId}-${Date.now()}`;
       messageCallbacks.set(callbackId, { onToken, onComplete, onError });
 
-      // Send message with explicit persona and model to prevent server-side drift
-      const modelOverride = localStorage.getItem("beacon-selected-model") ?? undefined;
+      // Send message with explicit persona and model to prevent server-side drift.
+      // "auto" means use Synapse's default threshold routing — don't send an override.
+      const storedModel = localStorage.getItem("beacon-selected-model");
+      const modelOverride = storedModel && storedModel !== "auto" ? storedModel : undefined;
       sendWsMessage({ type: "chat", content, persona_id: personaId, model_override: modelOverride });
     },
 

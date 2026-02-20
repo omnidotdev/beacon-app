@@ -10,18 +10,14 @@ interface ModelOption {
 const MODELS: ModelOption[] = [
   // Omni Synapse — routed through Synapse gateway
   { id: "auto", name: "Auto (Smart Routing)", provider: "omni_credits" },
-  {
-    id: "anthropic/claude-sonnet-4-20250514",
-    name: "Claude Sonnet 4",
-    provider: "omni_credits",
-  },
+  { id: "anthropic/claude-opus-4-6", name: "Claude Opus 4.6", provider: "omni_credits" },
+  { id: "anthropic/claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5", provider: "omni_credits" },
+  { id: "anthropic/claude-sonnet-4-20250514", name: "Claude Sonnet 4", provider: "omni_credits" },
+  { id: "anthropic/claude-haiku-4-5-20251001", name: "Claude Haiku 4.5", provider: "omni_credits" },
   { id: "openai/gpt-4o", name: "GPT-4o", provider: "omni_credits" },
   { id: "openai/gpt-4o-mini", name: "GPT-4o Mini", provider: "omni_credits" },
-  {
-    id: "nvidia/moonshotai/kimi-k2.5",
-    name: "Kimi K2.5",
-    provider: "omni_credits",
-  },
+  { id: "openai/o3-mini", name: "o3-mini", provider: "omni_credits" },
+  { id: "nvidia/moonshotai/kimi-k2.5", name: "Kimi K2.5", provider: "omni_credits" },
   // Anthropic (BYOK)
   {
     id: "claude-sonnet-4-5-20250929",
