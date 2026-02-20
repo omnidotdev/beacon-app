@@ -20,6 +20,7 @@ import {
   Settings,
   Sun,
   Users,
+  VenetianMask,
   X,
   Zap,
 } from "lucide-react";
@@ -61,7 +62,7 @@ const navItems: NavItem[] = [
   { to: "/chat", label: "Chat", icon: <MessageSquare size={18} /> },
   { to: "/memories", label: "Memories", icon: <Brain size={18} /> },
   { to: "/skills", label: "Skills", icon: <Zap size={18} /> },
-  { to: "/personas", label: "Personas", icon: <Users size={18} /> },
+  { to: "/personas", label: "Personas", icon: <VenetianMask size={18} /> },
 ];
 
 interface SidebarProps {

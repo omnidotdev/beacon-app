@@ -10,6 +10,30 @@ import {
 import { isCloudDeployment } from "@/lib/api";
 import type { MarketplacePersona, PersonaSource } from "@/lib/api";
 
+// Flagship personas that are always shown as installed
+const FLAGSHIP_PERSONAS: MarketplacePersona[] = [
+  {
+    id: "orin",
+    name: "Orin",
+    tagline: "Your friendly otter guide",
+    avatar: "/img/orin-avatar.png",
+    accent_color: "#4ECDC4",
+    icon: null,
+    source: { type: "local" },
+    installed_at: null,
+  },
+  {
+    id: "microcap",
+    name: "Microcap",
+    tagline: "100,000x loading...",
+    avatar: "/img/mc-avatar.jpg",
+    accent_color: "#FF69B4",
+    icon: null,
+    source: { type: "local" },
+    installed_at: null,
+  },
+];
+
 export const Route = createFileRoute("/_auth/personas")({
   component: PersonasPage,
 });
@@ -46,12 +70,11 @@ function PersonasContent() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <header className="glass-surface border-b border-border/50 px-6 py-4">
-        <h1 className="bg-gradient-to-r from-text to-text/70 bg-clip-text text-xl font-semibold text-transparent">
-          Personas
-        </h1>
-      </header>
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      <VenetianMask
+        size={14}
+        className="absolute left-4 top-3.5 z-10 text-muted/40"
+      />
 
       <div className="px-6">
         <div className="flex gap-6">
@@ -134,29 +157,33 @@ function InstalledPersonasTab() {
     return <ErrorState message={error.message} />;
   }
 
-  if (!data?.personas.length) {
-    return (
-      <EmptyState
-        title="No personas installed"
-        description="Browse the marketplace to discover and install personas"
-      />
-    );
-  }
+  const flagshipIds = new Set(FLAGSHIP_PERSONAS.map((p) => p.id));
+  const additionalPersonas =
+    data?.personas.filter((p) => !flagshipIds.has(p.id)) ?? [];
+  const allPersonas = [...FLAGSHIP_PERSONAS, ...additionalPersonas];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {data.personas.map((persona) => (
-        <PersonaCard
-          key={persona.id}
-          persona={persona}
-          installed
-          onUninstall={() => uninstallPersona.mutate(persona.id)}
-          isLoading={
-            uninstallPersona.isPending &&
-            uninstallPersona.variables === persona.id
-          }
-        />
-      ))}
+      {allPersonas.map((persona) => {
+        const isFlagship = flagshipIds.has(persona.id);
+        return (
+          <PersonaCard
+            key={persona.id}
+            persona={persona}
+            installed
+            isBuiltIn={isFlagship}
+            onUninstall={
+              isFlagship
+                ? undefined
+                : () => uninstallPersona.mutate(persona.id)
+            }
+            isLoading={
+              uninstallPersona.isPending &&
+              uninstallPersona.variables === persona.id
+            }
+          />
+        );
+      })}
     </div>
   );
 }
@@ -168,7 +195,10 @@ function BrowsePersonasTab({ searchQuery }: { searchQuery: string }) {
   const { data: installed } = useMarketplacePersonas();
   const installPersona = useInstallMarketplacePersona();
 
-  const installedIds = new Set(installed?.personas.map((p) => p.id) ?? []);
+  const installedIds = new Set([
+    ...FLAGSHIP_PERSONAS.map((p) => p.id),
+    ...(installed?.personas.map((p) => p.id) ?? []),
+  ]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -226,6 +256,7 @@ function BrowsePersonasTab({ searchQuery }: { searchQuery: string }) {
 interface PersonaCardProps {
   persona: MarketplacePersona;
   installed: boolean;
+  isBuiltIn?: boolean;
   onUninstall?: () => void;
   onInstall?: () => void;
   isLoading?: boolean;
@@ -234,6 +265,7 @@ interface PersonaCardProps {
 function PersonaCard({
   persona,
   installed,
+  isBuiltIn,
   onUninstall,
   onInstall,
   isLoading,
@@ -273,14 +305,20 @@ function PersonaCard({
 
       <div className="mt-4 flex gap-2">
         {installed ? (
-          <button
-            type="button"
-            onClick={onUninstall}
-            disabled={isLoading}
-            className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted hover:border-red-500/50 hover:text-red-400"
-          >
-            Uninstall
-          </button>
+          isBuiltIn ? (
+            <span className="flex-1 rounded-xl py-2 text-center text-xs text-muted/60">
+              Built-in
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={onUninstall}
+              disabled={isLoading}
+              className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted hover:border-red-500/50 hover:text-red-400"
+            >
+              Uninstall
+            </button>
+          )
         ) : (
           <button
             type="button"

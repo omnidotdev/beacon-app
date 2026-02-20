@@ -47,12 +47,8 @@ function SkillsContent() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <header className="glass-surface border-b border-border/50 px-6 py-4">
-        <h1 className="bg-gradient-to-r from-text to-text/70 bg-clip-text text-xl font-semibold text-transparent">
-          Skills
-        </h1>
-      </header>
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      <Zap size={14} className="absolute left-4 top-3.5 z-10 text-muted/40" />
 
       <div className="px-6">
         <div className="flex gap-6">

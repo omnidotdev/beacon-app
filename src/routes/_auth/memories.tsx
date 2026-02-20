@@ -86,19 +86,8 @@ function MemoriesContent() {
   }, [filteredMemories]);
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <header className="glass-surface border-b border-border/50 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="bg-gradient-to-r from-text to-text/70 bg-clip-text text-xl font-semibold text-transparent">
-            Memories
-          </h1>
-          {memories && (
-            <span className="text-sm text-muted">
-              {memories.length} {memories.length === 1 ? "memory" : "memories"}
-            </span>
-          )}
-        </div>
-      </header>
+    <div className="relative flex flex-1 flex-col overflow-hidden">
+      <Brain size={14} className="absolute left-4 top-3.5 z-10 text-muted/40" />
 
       {/* Category filter tabs */}
       <div className="px-6">
