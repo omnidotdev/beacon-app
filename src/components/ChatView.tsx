@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Mic, Settings, User } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ToolCallState } from "@/hooks/useChat";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import Markdown from "./Markdown";
 import ModelSelector from "./ModelSelector";
 import { BeaconLogo } from "./Sidebar";
+import ToolCallBlock from "./ToolCallBlock";
 
 interface UserInfo {
   name?: string | null;
@@ -24,6 +26,7 @@ interface ChatViewProps {
   personaLoading?: boolean;
   user?: UserInfo | null;
   modelLoaded?: boolean;
+  toolCalls?: Map<string, ToolCallState>;
 }
 
 function ChatView({
@@ -36,6 +39,7 @@ function ChatView({
   personaLoading,
   user,
   modelLoaded,
+  toolCalls,
 }: ChatViewProps) {
   const [input, setInput] = useState("");
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -182,9 +186,20 @@ function ChatView({
                   />
                 ),
               )}
-              {isLoading && messages[messages.length - 1]?.content === "" && (
-                <ThinkingIndicator persona={persona} />
+              {isLoading && toolCalls && toolCalls.size > 0 && (
+                <div className="mx-auto max-w-2xl">
+                  <div className="bubble-assistant rounded-2xl rounded-bl-md px-4 py-2">
+                    {Array.from(toolCalls.values()).map((tc) => (
+                      <ToolCallBlock key={tc.toolId} toolCall={tc} />
+                    ))}
+                  </div>
+                </div>
               )}
+              {isLoading &&
+                (!toolCalls || toolCalls.size === 0) &&
+                messages[messages.length - 1]?.content === "" && (
+                  <ThinkingIndicator persona={persona} />
+                )}
               {error && <ErrorMessage error={error} />}
             </div>
           )}
@@ -271,7 +286,12 @@ function EmptyState({
         {personaLoading ? (
           <div className="h-20 w-20 animate-pulse rounded-full bg-surface-elevated" />
         ) : (
-          <Avatar name={name} avatar={persona?.avatar} size="xl" personaId={persona?.id} />
+          <Avatar
+            name={name}
+            avatar={persona?.avatar}
+            size="xl"
+            personaId={persona?.id}
+          />
         )}
         <div className="relative z-10 rounded-full ring-2 ring-primary/20">
           {user?.image ? (

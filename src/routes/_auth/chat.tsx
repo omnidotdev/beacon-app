@@ -94,7 +94,7 @@ function ChatPage() {
     [navigate],
   );
 
-  const { messages, isConnected, isLoading, sendMessage, clearMessages } =
+  const { messages, isConnected, isLoading, toolCalls, sendMessage, clearMessages } =
     useChat({
       conversationId,
       personaId: persona?.id,
@@ -184,6 +184,7 @@ function ChatPage() {
         messages={messages}
         isLoading={isLoading}
         isConnected={isConnected}
+        toolCalls={toolCalls}
         onSendMessage={handleSendMessage}
         error={error}
         voiceAvailable={status?.voice_available}
