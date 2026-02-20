@@ -8,7 +8,7 @@ interface ModelOption {
 
 /** Curated models per provider */
 const MODELS: ModelOption[] = [
-  // Omni Credits — routed through Synapse gateway
+  // Omni Synapse — routed through Synapse gateway
   { id: "auto", name: "Auto (Smart Routing)", provider: "omni_credits" },
   {
     id: "anthropic/claude-sonnet-4-20250514",
@@ -46,7 +46,7 @@ const MODELS: ModelOption[] = [
 ];
 
 const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
-  omni_credits: "Omni Credits",
+  omni_credits: "Omni Synapse",
   anthropic: "Anthropic",
   openai: "OpenAI",
   openrouter: "OpenRouter",

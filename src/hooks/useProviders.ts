@@ -101,7 +101,7 @@ const PROVIDER_METADATA: Omit<
 >[] = [
   {
     id: "omni_credits",
-    name: "Omni Credits",
+    name: "Omni Synapse",
     description: "Omni's AI router with smart model selection",
     api_key_url: null,
     coming_soon: false,

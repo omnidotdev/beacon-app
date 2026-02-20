@@ -222,7 +222,7 @@ function SettingsPage() {
                     <p className="mb-3 text-xs text-muted/60">
                       Optional. Connect your own provider API keys for direct
                       billing, cost control, or access to models not available
-                      through Omni Credits.
+                      through Omni Synapse.
                     </p>
                     <div className="space-y-3">
                       {providers

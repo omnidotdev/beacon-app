@@ -1,8 +1,8 @@
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { useApi, useConfigureProvider, useProviders } from "@/hooks";
+import { useApi, useProviders } from "@/hooks";
 import type { SystemStatus } from "@/lib/api";
 import type { ModelOption } from "@/lib/models";
 import {
@@ -16,7 +16,7 @@ const STORAGE_KEY = "beacon-selected-model";
 function ModelSelector() {
   const api = useApi();
   const { data: providersData } = useProviders();
-  const { mutateAsync: configure, isPending } = useConfigureProvider();
+  const [isSwitching, setIsSwitching] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(() =>
@@ -66,8 +66,9 @@ function ModelSelector() {
     localStorage.setItem(STORAGE_KEY, model.id);
     setIsOpen(false);
 
+    setIsSwitching(true);
     try {
-      await configure({ provider: model.provider, model: model.id });
+      await api.configureProvider({ provider: model.provider, model: model.id });
     } catch {
       // Rollback
       setSelectedModelId(previousModelId);
@@ -77,6 +78,8 @@ function ModelSelector() {
         localStorage.removeItem(STORAGE_KEY);
       }
       toast.error("Failed to switch model");
+    } finally {
+      setIsSwitching(false);
     }
   };
 
@@ -97,7 +100,7 @@ function ModelSelector() {
       <ModelPill
         name={displayName}
         isOpen={isOpen}
-        isPending={isPending}
+        isPending={isSwitching}
         onToggle={() => setIsOpen(!isOpen)}
       />
 
@@ -198,8 +201,22 @@ function ModelDropdown({
       {groups.map(([providerId, models], i) => (
         <div key={providerId}>
           {i > 0 && <div className="mx-2 my-1 border-t border-subtle" />}
-          <div className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted/50">
-            {getProviderDisplayName(providerId)}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted/50">
+              {getProviderDisplayName(providerId)}
+            </span>
+            {providerId === "omni_credits" && (
+              <a
+                href="https://synapse.omni.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-0.5 text-[10px] text-primary/70 hover:text-primary transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Learn more
+                <ExternalLink size={9} />
+              </a>
+            )}
           </div>
           {models.map((model) => {
             const isSelected = model.id === currentModelId;

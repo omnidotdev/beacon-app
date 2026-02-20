@@ -26,7 +26,7 @@ export const CLOUD_FEATURES = {
   // Usage tracking and billing
   usageTracking: {
     id: "usage_tracking",
-    name: "Omni Credits",
+    name: "Omni Synapse",
     description: "Use Omni-hosted AI models with pay-per-use credits",
     requiresAuth: true,
   },
