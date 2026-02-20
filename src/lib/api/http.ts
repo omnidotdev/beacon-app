@@ -65,12 +65,30 @@ function getSessionId(): string {
 }
 
 interface WsIncoming {
-  type: "chat_chunk" | "chat_complete" | "error" | "pong" | "connected";
+  type:
+    | "chat_chunk"
+    | "chat_complete"
+    | "error"
+    | "pong"
+    | "connected"
+    | "tool_start"
+    | "tool_result";
+  // chat_chunk
   content?: string;
+  // chat_complete
   message_id?: string;
+  // connected
   session_id?: string;
+  // error
   code?: string;
   message?: string;
+  // tool_start / tool_result
+  tool_id?: string;
+  name?: string;
+  // tool_result only
+  invocation?: string;
+  output?: string;
+  is_error?: boolean;
 }
 
 // Voice capabilities response from server
@@ -239,6 +257,16 @@ export function createHttpClient(): ApiClient {
   let tokenCallback: ((token: string) => void) | null = null;
   let completeCallback: ((message: Message) => void) | null = null;
   let errorCallback: ((error: string) => void) | null = null;
+  let toolStartCallback: ((toolId: string, name: string) => void) | null = null;
+  let toolResultCallback:
+    | ((
+        toolId: string,
+        name: string,
+        invocation: string,
+        output: string,
+        isError: boolean,
+      ) => void)
+    | null = null;
   let streamingContent = "";
 
   function connect(sessionId: string) {
@@ -278,6 +306,24 @@ export function createHttpClient(): ApiClient {
           case "error":
             errorCallback?.(msg.message ?? "Unknown error");
             streamingContent = "";
+            break;
+
+          case "tool_start":
+            if (msg.tool_id && msg.name) {
+              toolStartCallback?.(msg.tool_id, msg.name);
+            }
+            break;
+
+          case "tool_result":
+            if (msg.tool_id && msg.name) {
+              toolResultCallback?.(
+                msg.tool_id,
+                msg.name,
+                msg.invocation ?? "",
+                msg.output ?? "",
+                msg.is_error ?? false,
+              );
+            }
             break;
         }
       } catch {
@@ -422,6 +468,14 @@ export function createHttpClient(): ApiClient {
       onComplete?: (message: Message) => void,
       onError?: (error: string) => void,
       personaId?: string,
+      onToolStart?: (toolId: string, name: string) => void,
+      onToolResult?: (
+        toolId: string,
+        name: string,
+        invocation: string,
+        output: string,
+        isError: boolean,
+      ) => void,
     ): Promise<void> {
       // Ensure WebSocket is connected
       connect(conversationId);
@@ -461,6 +515,8 @@ export function createHttpClient(): ApiClient {
       tokenCallback = onToken ?? null;
       completeCallback = onComplete ?? null;
       errorCallback = onError ?? null;
+      toolStartCallback = onToolStart ?? null;
+      toolResultCallback = onToolResult ?? null;
       streamingContent = "";
 
       // Send message with explicit persona to prevent server-side drift

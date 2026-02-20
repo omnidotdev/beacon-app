@@ -233,6 +233,14 @@ export interface ApiClient {
     onComplete?: (message: Message) => void,
     onError?: (error: string) => void,
     personaId?: string,
+    onToolStart?: (toolId: string, name: string) => void,
+    onToolResult?: (
+      toolId: string,
+      name: string,
+      invocation: string,
+      output: string,
+      isError: boolean,
+    ) => void,
   ): Promise<void>;
 
   // Persona
