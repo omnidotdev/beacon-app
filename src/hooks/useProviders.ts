@@ -8,9 +8,13 @@ import type {
   ProviderType,
 } from "@/lib/api";
 import { SYNAPSE_API_URL } from "@/lib/config/env.config";
+import { getGatewayDiscovery } from "@/lib/gateway";
 
 // Synapse GraphQL endpoint
 const SYNAPSE_GRAPHQL_URL = `${SYNAPSE_API_URL ?? ""}/graphql`;
+
+// Whether this deployment uses Synapse for provider management
+const USE_SYNAPSE = !!SYNAPSE_API_URL;
 
 // GraphQL operations for provider key management
 
@@ -94,6 +98,25 @@ async function synapseGraphql<T>(
   return result.data;
 }
 
+async function gatewayFetch<T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
+  const state = getGatewayDiscovery().getState();
+  const gatewayUrl = state.status === "connected" ? state.gateway.url : null;
+  if (!gatewayUrl) {
+    throw new Error("Not connected to a gateway");
+  }
+  const res = await fetch(`${gatewayUrl}${path}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  if (!res.ok) {
+    throw new Error(`Gateway request failed (${res.status})`);
+  }
+  return res.json() as Promise<T>;
+}
+
 // Static provider metadata — status is derived from Synapse key records
 const PROVIDER_METADATA: Omit<
   ProvidersResponse["providers"][number],
@@ -137,7 +160,10 @@ const PROVIDER_METADATA: Omit<
 const DEFAULT_PROVIDERS: ProvidersResponse = {
   providers: PROVIDER_METADATA.map((p) => ({
     ...p,
-    status: p.id === "omni_credits" ? ("configured" as const) : ("not_configured" as const),
+    status:
+      p.id === "omni_credits"
+        ? ("configured" as const)
+        : ("not_configured" as const),
     active: p.id === "omni_credits",
   })),
   active_provider: "omni_credits",
@@ -193,6 +219,9 @@ export function useProviders() {
   const query = useQuery({
     queryKey: ["providers"],
     queryFn: async () => {
+      if (!USE_SYNAPSE) {
+        return gatewayFetch<ProvidersResponse>("/api/providers");
+      }
       const data = await synapseGraphql<{
         myProviderKeys: SynapseProviderKey[];
         myPreferences: { defaultProvider: string | null } | null;
@@ -204,7 +233,7 @@ export function useProviders() {
         data.myPreferences?.defaultProvider ?? null,
       );
     },
-    enabled: !!token && !!SYNAPSE_API_URL,
+    enabled: !USE_SYNAPSE || (!!token && !!SYNAPSE_API_URL),
     retry: 1,
   });
 
@@ -223,6 +252,20 @@ export function useConfigureProvider() {
     mutationFn: async (
       params: ConfigureProviderParams,
     ): Promise<ConfigureProviderResponse> => {
+      if (!USE_SYNAPSE) {
+        return gatewayFetch<ConfigureProviderResponse>(
+          "/api/providers/configure",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              provider: params.provider,
+              api_key: params.api_key,
+              model_preference: params.model ?? null,
+            }),
+          },
+        );
+      }
+
       await synapseGraphql<{
         setProviderKey: SynapseProviderKey;
       }>(
@@ -273,6 +316,13 @@ export function useRemoveProvider() {
 
   return useMutation({
     mutationFn: async (provider: ProviderType) => {
+      if (!USE_SYNAPSE) {
+        await gatewayFetch<unknown>(`/api/providers/${provider}`, {
+          method: "DELETE",
+        });
+        return;
+      }
+
       // Use cached keys to resolve UUID — avoids extra network round-trip
       const cachedKeys =
         queryClient.getQueryData<SynapseProviderKey[]>(["providerKeys"]) ?? [];
@@ -303,6 +353,10 @@ export function useSetActiveProvider() {
 
   return useMutation({
     mutationFn: async (provider: ProviderType) => {
+      if (!USE_SYNAPSE) {
+        // No remote preference storage for self-hosted deployments
+        return;
+      }
       await synapseGraphql<{
         updateUserPreferences: { defaultProvider: string | null };
       }>(SET_ACTIVE_PROVIDER_MUTATION, { provider }, token);
