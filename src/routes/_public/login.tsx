@@ -11,6 +11,7 @@ import { fetchIdpLogoutUrl } from "@/server/functions/auth";
 type LoginSearch = {
   error?: string;
   error_description?: string;
+  redirect?: string;
 };
 
 export const Route = createFileRoute("/_public/login")({
@@ -19,6 +20,13 @@ export const Route = createFileRoute("/_public/login")({
     error_description:
       typeof search.error_description === "string"
         ? search.error_description
+        : undefined,
+    // Only allow relative paths to prevent open redirect attacks
+    redirect:
+      typeof search.redirect === "string" &&
+      search.redirect.startsWith("/") &&
+      !search.redirect.startsWith("//")
+        ? search.redirect
         : undefined,
   }),
   head: () =>
@@ -31,7 +39,7 @@ export const Route = createFileRoute("/_public/login")({
 });
 
 function LoginPage() {
-  const { error: oauthError } = Route.useSearch();
+  const { error: oauthError, redirect } = Route.useSearch();
   const hasOAuthError = !!oauthError;
 
   const [isRedirecting, setIsRedirecting] = useState(!hasOAuthError);
@@ -45,9 +53,13 @@ function LoginPage() {
     setError(null);
     setIsRedirecting(true);
 
+    const callbackURL = redirect
+      ? `${BASE_URL || ""}${redirect}`
+      : BASE_URL || "/";
+
     const result = await authClient.signIn.oauth2({
       providerId: "omni",
-      callbackURL: BASE_URL || "/",
+      callbackURL,
     });
 
     // better-auth returns { error } instead of throwing

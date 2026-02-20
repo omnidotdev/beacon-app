@@ -228,14 +228,14 @@ function SettingsPage() {
                     <div className="glass-surface rounded-xl p-4 opacity-60">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium text-text">Omni Cloud</h4>
+                          <h4 className="font-medium text-text">Omni Synapse</h4>
                           <p className="mt-1 text-sm text-muted">
                             Sign in with Omni for smart routing, credits, and
                             cross-device sync
                           </p>
                         </div>
                         <a
-                          href="/login"
+                          href="/login?redirect=/settings"
                           className="text-xs text-primary hover:text-primary/80"
                         >
                           Connect
