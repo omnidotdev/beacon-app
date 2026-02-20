@@ -53,7 +53,7 @@ function PersonasContent() {
         </h1>
       </header>
 
-      <div className="border-b border-border/50 px-6">
+      <div className="px-6">
         <div className="flex gap-6">
           <TabButton
             active={activeTab === "installed"}
@@ -71,7 +71,7 @@ function PersonasContent() {
       </div>
 
       {activeTab === "browse" && (
-        <div className="border-b border-border/50 px-6 py-4">
+        <div className="px-6 py-4">
           <div className="relative max-w-md">
             <Search
               size={18}
@@ -131,6 +131,7 @@ function InstalledPersonasTab() {
   }
 
   if (error) {
+    if (isAccessError(error)) return <EarlyAccessState />;
     return <ErrorState message={error.message} />;
   }
 
@@ -175,6 +176,7 @@ function BrowsePersonasTab({ searchQuery }: { searchQuery: string }) {
   }
 
   if (error) {
+    if (isAccessError(error)) return <EarlyAccessState />;
     return <ErrorState message={error.message} />;
   }
 
@@ -309,6 +311,24 @@ function CustomPersonaTeaser() {
           and styles — coming soon
         </p>
       </div>
+    </div>
+  );
+}
+
+function isAccessError(err: Error): boolean {
+  return err.message.toLowerCase().includes("access not granted");
+}
+
+function EarlyAccessState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="glass-panel mb-4 rounded-full p-4">
+        <Sparkles size={28} className="text-primary" />
+      </div>
+      <h3 className="font-semibold text-text">Persona marketplace</h3>
+      <p className="mt-1 max-w-sm text-sm text-muted">
+        Coming soon for your account
+      </p>
     </div>
   );
 }
