@@ -22,6 +22,7 @@ export interface LocalMessage {
   role: "user" | "assistant" | "system";
   content: string;
   timestamp: number;
+  isError?: boolean;
 }
 
 // Database class

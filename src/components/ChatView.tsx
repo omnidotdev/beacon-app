@@ -171,7 +171,9 @@ function ChatView({
           ) : (
             <div className="mx-auto max-w-2xl space-y-4">
               {messages.map((msg) =>
-                msg.isStreaming && !msg.content ? null : (
+                msg.isStreaming && !msg.content ? null : msg.isError ? (
+                  <ErrorMessage key={msg.id} error={msg.content} />
+                ) : (
                   <MessageBubble
                     key={msg.id}
                     message={msg}

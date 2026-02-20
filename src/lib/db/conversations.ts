@@ -19,6 +19,7 @@ function toApiMessage(local: LocalMessage): Message {
     role: local.role,
     content: local.content,
     timestamp: local.timestamp,
+    isError: local.isError,
   };
 }
 
@@ -114,6 +115,7 @@ export async function addMessage(
   conversationId: string,
   role: "user" | "assistant" | "system",
   content: string,
+  options?: { isError?: boolean },
 ): Promise<Message> {
   const now = Date.now();
   const message: LocalMessage = {
@@ -122,6 +124,7 @@ export async function addMessage(
     role,
     content,
     timestamp: now,
+    isError: options?.isError,
   };
 
   await db.transaction("rw", [db.conversations, db.messages], async () => {

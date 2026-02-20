@@ -58,6 +58,7 @@ export interface Message {
   role: "user" | "assistant" | "system";
   content: string;
   timestamp: number;
+  isError?: boolean;
 }
 
 // Users
@@ -196,6 +197,7 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   isStreaming?: boolean;
+  isError?: boolean;
 }
 
 // API client interface

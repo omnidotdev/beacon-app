@@ -60,6 +60,7 @@ export function useChat({
       role: m.role as "user" | "assistant",
       content: m.content,
       timestamp: new Date(m.timestamp),
+      isError: m.isError,
     })),
     ...(streamingMessage ? [streamingMessage] : []),
   ];
@@ -164,10 +165,16 @@ export function useChat({
           streamingContentRef.current = "";
         },
         // onError
-        (error) => {
+        async (error) => {
           setIsLoading(false);
           setStreamingMessage(null);
-          onError?.(error);
+          if (targetConversation) {
+            await localDb.addMessage(targetConversation, "assistant", error, {
+              isError: true,
+            });
+          } else {
+            onError?.(error);
+          }
           streamingContentRef.current = "";
         },
         // Pass NO_PERSONA_ID through so the gateway skips the system prompt
