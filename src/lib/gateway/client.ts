@@ -45,12 +45,18 @@ interface WsIncoming {
 }
 
 interface WsOutgoing {
-  type: "chat_chunk" | "chat_complete" | "error" | "pong" | "connected";
+  type: "chat_chunk" | "chat_complete" | "error" | "pong" | "connected" | "tool_start" | "tool_result";
   content?: string;
   message_id?: string;
   code?: string;
   message?: string;
   session_id?: string;
+  // Tool event fields
+  tool_id?: string;
+  name?: string;
+  invocation?: string;
+  output?: string;
+  is_error?: boolean;
 }
 
 export interface GatewayClientConfig {
@@ -87,6 +93,8 @@ export function createGatewayClient(
       onToken?: (token: string) => void;
       onComplete?: (message: Message) => void;
       onError?: (error: string) => void;
+      onToolStart?: (toolId: string, name: string) => void;
+      onToolResult?: (toolId: string, name: string, invocation: string, output: string, isError: boolean) => void;
     }
   > = new Map();
 
@@ -312,6 +320,28 @@ export function createGatewayClient(
       case "pong":
         // Keepalive response
         break;
+
+      case "tool_start":
+        if (msg.tool_id && msg.name) {
+          for (const cb of messageCallbacks.values()) {
+            cb.onToolStart?.(msg.tool_id, msg.name);
+          }
+        }
+        break;
+
+      case "tool_result":
+        if (msg.tool_id && msg.name) {
+          for (const cb of messageCallbacks.values()) {
+            cb.onToolResult?.(
+              msg.tool_id,
+              msg.name,
+              msg.invocation ?? "",
+              msg.output ?? "",
+              msg.is_error ?? false,
+            );
+          }
+        }
+        break;
     }
   }
 
@@ -408,6 +438,8 @@ export function createGatewayClient(
       onComplete?: (message: Message) => void,
       onError?: (error: string) => void,
       personaId?: string,
+      onToolStart?: (toolId: string, name: string) => void,
+      onToolResult?: (toolId: string, name: string, invocation: string, output: string, isError: boolean) => void,
     ): Promise<void> {
       // Ensure WebSocket is connected to the right session
       if (sessionId !== conversationId || ws?.readyState !== WebSocket.OPEN) {
@@ -450,7 +482,7 @@ export function createGatewayClient(
 
       // Register callbacks
       const callbackId = `${conversationId}-${Date.now()}`;
-      messageCallbacks.set(callbackId, { onToken, onComplete, onError });
+      messageCallbacks.set(callbackId, { onToken, onComplete, onError, onToolStart, onToolResult });
 
       // Send message with explicit persona and model to prevent server-side drift.
       // "auto" means use Synapse's default threshold routing — don't send an override.
