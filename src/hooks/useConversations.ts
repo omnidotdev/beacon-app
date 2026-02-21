@@ -136,9 +136,13 @@ export function usePersona() {
       ? NO_PERSONA
       : DEFAULT_PERSONAS.find((p) => p.id === storedId) ?? DEFAULT_PERSONAS[0];
 
+  // Always return fallback data immediately — we have a reliable local fallback
+  // (stored persona ID → DEFAULT_PERSONAS), so there's no need to block on the
+  // gateway response. The real data replaces the fallback once the query resolves.
   return {
     ...query,
-    data: query.data ?? (query.isError ? fallback : undefined),
+    data: query.data ?? fallback,
+    isLoading: false,
   };
 }
 
