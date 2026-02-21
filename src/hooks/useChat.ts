@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ChatMessage, Message } from "@/lib/api";
 import * as localDb from "@/lib/db/conversations";
@@ -45,6 +45,7 @@ export function useChat({
     null,
   );
   const streamingContentRef = useRef("");
+  const rafIdRef = useRef<number | null>(null);
   const [toolCalls, setToolCalls] = useState<Map<string, ToolCallState>>(
     new Map(),
   );
@@ -66,16 +67,19 @@ export function useChat({
   );
 
   // Convert to ChatMessage format and append streaming message
-  const messages: ChatMessage[] = [
-    ...(localMessages ?? []).map((m) => ({
-      id: m.id,
-      role: m.role as "user" | "assistant",
-      content: m.content,
-      timestamp: new Date(m.timestamp),
-      isError: m.isError,
-    })),
-    ...(streamingMessage ? [streamingMessage] : []),
-  ];
+  const messages: ChatMessage[] = useMemo(
+    () => [
+      ...(localMessages ?? []).map((m) => ({
+        id: m.id,
+        role: m.role as "user" | "assistant",
+        content: m.content,
+        timestamp: new Date(m.timestamp),
+        isError: m.isError,
+      })),
+      ...(streamingMessage ? [streamingMessage] : []),
+    ],
+    [localMessages, streamingMessage],
+  );
 
   // Pre-connect WebSocket when conversation is active (web mode)
   useEffect(() => {
@@ -152,15 +156,26 @@ export function useChat({
       await api.sendMessage(
         targetConversation,
         content.trim(),
-        // onToken
+        // onToken — batch via rAF to cap renders at ~60fps
         (token) => {
           streamingContentRef.current += token;
-          setStreamingMessage((prev) =>
-            prev ? { ...prev, content: streamingContentRef.current } : null,
-          );
+          if (rafIdRef.current === null) {
+            rafIdRef.current = requestAnimationFrame(() => {
+              rafIdRef.current = null;
+              setStreamingMessage((prev) =>
+                prev
+                  ? { ...prev, content: streamingContentRef.current }
+                  : null,
+              );
+            });
+          }
         },
         // onComplete
         async (message: Message) => {
+          if (rafIdRef.current !== null) {
+            cancelAnimationFrame(rafIdRef.current);
+            rafIdRef.current = null;
+          }
           setIsLoading(false);
           setStreamingMessage(null);
           setToolCalls(new Map());
@@ -179,6 +194,10 @@ export function useChat({
         },
         // onError
         async (error) => {
+          if (rafIdRef.current !== null) {
+            cancelAnimationFrame(rafIdRef.current);
+            rafIdRef.current = null;
+          }
           setIsLoading(false);
           setStreamingMessage(null);
           setToolCalls(new Map());

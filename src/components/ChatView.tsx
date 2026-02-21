@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Mic, Settings, User } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { ToolCallState } from "@/hooks/useChat";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
 import { NO_PERSONA_ID } from "@/lib/persona";
@@ -97,8 +97,8 @@ function ChatView({
     };
   }, []);
 
-  // Auto-scroll on new messages/streaming, respecting user scroll intent
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional scroll on message changes
+  // Auto-scroll when new messages appear (user sends, assistant finishes)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional scroll on message count
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
@@ -107,7 +107,6 @@ function ChatView({
       prevMessageCountRef.current === 0 && messages.length > 0;
     prevMessageCountRef.current = messages.length;
 
-    // First message appears at the top naturally
     if (isNewConversation) return;
 
     const isUserMessage =
@@ -123,7 +122,24 @@ function ChatView({
         behavior: "smooth",
       });
     });
-  }, [messages.length, messages[messages.length - 1]?.content]);
+  }, [messages.length]);
+
+  // Interval-based scroll during streaming (avoids per-token firing)
+  useEffect(() => {
+    if (!isLoading) return;
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const id = setInterval(() => {
+      if (userScrolledRef.current) return;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 100);
+
+    return () => clearInterval(id);
+  }, [isLoading]);
 
   const canSend = isConnected && modelLoaded !== false;
 
@@ -342,7 +358,7 @@ function EmptyState({
   );
 }
 
-function MessageBubble({
+const MessageBubble = memo(function MessageBubble({
   message,
   persona,
   user,
@@ -385,7 +401,7 @@ function MessageBubble({
       </div>
     </div>
   );
-}
+});
 
 function StreamingIndicator() {
   return (
