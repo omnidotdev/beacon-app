@@ -125,7 +125,7 @@ function ChatView({
     });
   }, [messages.length, messages[messages.length - 1]?.content]);
 
-  const canSend = isConnected && modelLoaded === true;
+  const canSend = isConnected && modelLoaded !== false;
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
