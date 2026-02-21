@@ -519,8 +519,19 @@ export function createHttpClient(): ApiClient {
       toolResultCallback = onToolResult ?? null;
       streamingContent = "";
 
-      // Send message with explicit persona to prevent server-side drift
-      ws.send(JSON.stringify({ type: "chat", content, persona_id: personaId }));
+      // Send message with explicit persona and model to prevent server-side drift.
+      // "auto" means use Synapse's default threshold routing — don't send an override.
+      const storedModel = localStorage.getItem("beacon-selected-model");
+      const modelOverride =
+        storedModel && storedModel !== "auto" ? storedModel : undefined;
+      ws.send(
+        JSON.stringify({
+          type: "chat",
+          content,
+          persona_id: personaId,
+          model_override: modelOverride,
+        }),
+      );
     },
 
     // Persona
