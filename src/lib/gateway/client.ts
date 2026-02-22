@@ -86,6 +86,7 @@ export function createGatewayClient(
   let accessToken: string | null = null;
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
+  let streamingContent = "";
   let nodeService: NodeRegistrationService | null = null;
   const messageCallbacks: Map<
     string,
@@ -291,23 +292,27 @@ export function createGatewayClient(
         break;
 
       case "chat_chunk":
-        // Route to all active callbacks (we don't have message ID yet)
+        // Accumulate streaming content and route to active callbacks
+        if (msg.content) {
+          streamingContent += msg.content;
+        }
         for (const cb of messageCallbacks.values()) {
           cb.onToken?.(msg.content || "");
         }
         break;
 
       case "chat_complete":
-        // Complete the message
+        // Complete the message with accumulated content
         for (const [key, cb] of messageCallbacks.entries()) {
           cb.onComplete?.({
             id: msg.message_id || key,
             role: "assistant",
-            content: "", // Content was streamed
+            content: streamingContent,
             timestamp: Date.now(),
           });
           messageCallbacks.delete(key);
         }
+        streamingContent = "";
         break;
 
       case "error":
@@ -315,6 +320,7 @@ export function createGatewayClient(
           cb.onError?.(msg.message || "Unknown error");
         }
         messageCallbacks.clear();
+        streamingContent = "";
         break;
 
       case "pong":
