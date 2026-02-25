@@ -1,6 +1,6 @@
+import type { FlagContext } from "@omnidotdev/providers";
 import { createServerFn } from "@tanstack/react-start";
-import type { FlagContext } from "./client";
-import { isEnabled } from "./client";
+import { flags } from "@/lib/providers";
 
 export const FLAGS = {
   MAINTENANCE: "beacon-app-maintenance-mode",
@@ -16,10 +16,6 @@ export const FLAGS = {
 export const fetchMaintenanceMode = createServerFn({ method: "GET" })
   .inputValidator((data: FlagContext | undefined) => data)
   .handler(async ({ data: context }) => {
-    const isMaintenanceMode = await isEnabled(
-      FLAGS.MAINTENANCE,
-      false,
-      context,
-    );
+    const isMaintenanceMode = await flags.isEnabled(FLAGS.MAINTENANCE, context);
     return { isMaintenanceMode };
   });
