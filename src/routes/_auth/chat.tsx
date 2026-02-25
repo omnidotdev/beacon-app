@@ -40,27 +40,6 @@ function ChatPage() {
   const api = useApi();
   const { data: persona, isLoading: personaLoading } = usePersona();
 
-  // On cloud deployment, require sign-in to chat
-  if (!native && isCloudDeployment() && !session) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-        <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-          <LogIn size={28} className="text-primary" />
-        </div>
-        <h2 className="text-xl font-medium text-text">Sign in to chat</h2>
-        <p className="max-w-sm text-muted">
-          Create an account or sign in to start chatting with your AI assistant
-        </p>
-        <Link
-          to="/login"
-          className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-[#0a0a0f] transition-all hover:glow-primary"
-        >
-          Sign in
-        </Link>
-      </div>
-    );
-  }
-
   // Use conversation ID from URL search params
   const conversationId = search.c ?? null;
 
@@ -183,6 +162,27 @@ function ChatPage() {
       setError(err instanceof Error ? err.message : "Voice error");
     }
   }, [api]);
+
+  // On cloud deployment, require sign-in to chat
+  if (!native && isCloudDeployment() && !session) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+        <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+          <LogIn size={28} className="text-primary" />
+        </div>
+        <h2 className="text-xl font-medium text-text">Sign in to chat</h2>
+        <p className="max-w-sm text-muted">
+          Create an account or sign in to start chatting with your AI assistant
+        </p>
+        <Link
+          to="/login"
+          className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-[#0a0a0f] transition-all hover:glow-primary"
+        >
+          Sign in
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">

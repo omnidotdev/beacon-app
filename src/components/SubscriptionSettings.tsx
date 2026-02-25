@@ -176,7 +176,7 @@ function SubscriptionSettingsInner() {
 
             {isCancelingScheduled && (
               <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-medium text-amber-400">
-                Cancels {formatDate(subscription!.cancelAt!)}
+                Cancels {formatDate(subscription?.cancelAt ?? 0)}
               </span>
             )}
           </div>
@@ -260,43 +260,41 @@ function SubscriptionSettingsInner() {
               </button>
             )}
 
-            {isActive && !isCancelingScheduled && (
-              <>
-                {showCancelConfirm ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      disabled={isCancelling}
-                      className="flex items-center gap-2 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
-                    >
-                      {isCancelling ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <X size={14} />
-                      )}
-                      Confirm Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowCancelConfirm(false)}
-                      className="btn-glass px-4 py-2 text-sm"
-                    >
-                      Keep
-                    </button>
-                  </div>
-                ) : (
+            {isActive &&
+              !isCancelingScheduled &&
+              (showCancelConfirm ? (
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setShowCancelConfirm(true)}
-                    className="flex items-center gap-2 rounded-lg border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+                    onClick={handleCancel}
+                    disabled={isCancelling}
+                    className="flex items-center gap-2 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
                   >
-                    <X size={14} />
-                    Cancel Subscription
+                    {isCancelling ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <X size={14} />
+                    )}
+                    Confirm Cancel
                   </button>
-                )}
-              </>
-            )}
+                  <button
+                    type="button"
+                    onClick={() => setShowCancelConfirm(false)}
+                    className="btn-glass px-4 py-2 text-sm"
+                  >
+                    Keep
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="flex items-center gap-2 rounded-lg border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+                >
+                  <X size={14} />
+                  Cancel Subscription
+                </button>
+              ))}
 
             {isCancelingScheduled && (
               <button

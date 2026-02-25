@@ -69,7 +69,7 @@ function ModelSelector() {
       setSelectedModelId(firstModel.id);
       localStorage.setItem(STORAGE_KEY, firstModel.id);
     }
-  }, [currentModelId, firstModel?.id]);
+  }, [currentModelId, firstModel]);
 
   // No models available if no providers configured
   if (groupEntries.length === 0 || !displayName) return null;

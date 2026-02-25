@@ -329,7 +329,9 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   <div className="my-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                   {(personas && personas.length > 0
                     ? personas
-                    : [persona!]
+                    : persona
+                      ? [persona]
+                      : []
                   ).map((p) => (
                     <button
                       key={p.id}

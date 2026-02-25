@@ -25,8 +25,8 @@ export function useSubscription() {
 
       return billingProvider.getSubscription(
         ENTITY_TYPE,
-        session!.user.id!,
-        session!.accessToken!,
+        session?.user.id ?? "",
+        session?.accessToken ?? "",
       );
     },
     enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
@@ -46,7 +46,7 @@ export function useCreditBalance() {
     queryFn: async () => {
       const res = await fetch(`${SYNAPSE_API_URL}/credits/me/balance`, {
         headers: {
-          Authorization: `Bearer ${session!.accessToken}`,
+          Authorization: `Bearer ${session?.accessToken ?? ""}`,
         },
       });
 
@@ -80,7 +80,7 @@ export function useCreditCheckout() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session!.accessToken}`,
+          Authorization: `Bearer ${session?.accessToken ?? ""}`,
         },
         body: JSON.stringify({ amount, successUrl, cancelUrl }),
       });
@@ -114,10 +114,10 @@ export function useBillingPortal() {
 
       return billingProvider.getBillingPortalUrl(
         ENTITY_TYPE,
-        session!.user.id!,
+        session?.user.id ?? "",
         productId,
         returnUrl,
-        session!.accessToken!,
+        session?.accessToken ?? "",
       );
     },
     onSuccess: (url) => {
@@ -153,7 +153,7 @@ export function useCheckout() {
         priceId,
         successUrl,
         cancelUrl,
-        accessToken: session!.accessToken!,
+        accessToken: session?.accessToken ?? "",
         workspaceId,
         createWorkspace,
       });
@@ -177,8 +177,8 @@ export function useCancelSubscription() {
 
       return billingProvider.cancelSubscription(
         ENTITY_TYPE,
-        session!.user.id!,
-        session!.accessToken!,
+        session?.user.id ?? "",
+        session?.accessToken ?? "",
       );
     },
     onSuccess: () => {
@@ -200,8 +200,8 @@ export function useRenewSubscription() {
 
       return billingProvider.renewSubscription(
         ENTITY_TYPE,
-        session!.user.id!,
-        session!.accessToken!,
+        session?.user.id ?? "",
+        session?.accessToken ?? "",
       );
     },
     onSuccess: () => {

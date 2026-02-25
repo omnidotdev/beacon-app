@@ -226,7 +226,7 @@ export function useProviders() {
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
         };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
+        if (token) headers.Authorization = `Bearer ${token}`;
         return gatewayFetch<ProvidersResponse>("/api/providers", { headers });
       }
       const data = await synapseGraphql<{
