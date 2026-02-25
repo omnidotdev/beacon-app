@@ -33,7 +33,7 @@
   "dependencies": {
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^2.0.0",
-    "@omnidotdev/providers": "github:omnidotdev/providers#64ba2c0",
+    "@omnidotdev/providers": "github:omnidotdev/providers#316498f",
     "@tanstack/nitro-v2-vite-plugin": "^1.141.0",
     "@tanstack/react-query": "^5.90.16",
     "@tanstack/react-router": "1.145.7",
