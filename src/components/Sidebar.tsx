@@ -318,8 +318,12 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                       <BeaconLogo className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1 text-left">
-                      <span className="block text-sm text-text">{NO_PERSONA.name}</span>
-                      <span className="block text-xs text-muted">{NO_PERSONA.tagline}</span>
+                      <span className="block text-sm text-text">
+                        {NO_PERSONA.name}
+                      </span>
+                      <span className="block text-xs text-muted">
+                        {NO_PERSONA.tagline}
+                      </span>
                     </div>
                   </button>
                   <div className="my-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -343,9 +347,13 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                         size="sm"
                       />
                       <div className="min-w-0 flex-1 text-left">
-                        <span className="block text-sm text-text">{p.name}</span>
+                        <span className="block text-sm text-text">
+                          {p.name}
+                        </span>
                         {p.tagline && (
-                          <span className="block text-xs text-muted">{p.tagline}</span>
+                          <span className="block text-xs text-muted">
+                            {p.tagline}
+                          </span>
                         )}
                       </div>
                     </button>

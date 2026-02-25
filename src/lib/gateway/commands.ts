@@ -42,9 +42,11 @@ async function handleDeviceInfo(_params: InvokeParams): Promise<InvokeResult> {
     // Add native-specific info via Tauri OS plugin if available
     if (isNative()) {
       try {
-        const { arch, platform: osPlatform, version } = await import(
-          "@tauri-apps/plugin-os"
-        );
+        const {
+          arch,
+          platform: osPlatform,
+          version,
+        } = await import("@tauri-apps/plugin-os");
         info.arch = arch();
         info.osPlatform = osPlatform();
         info.osVersion = version();
@@ -62,9 +64,7 @@ async function handleDeviceInfo(_params: InvokeParams): Promise<InvokeResult> {
 }
 
 /** Get current geolocation */
-async function handleLocationGet(
-  _params: InvokeParams,
-): Promise<InvokeResult> {
+async function handleLocationGet(_params: InvokeParams): Promise<InvokeResult> {
   try {
     const { getCurrentPosition } = await import(
       "@tauri-apps/plugin-geolocation"
@@ -94,9 +94,7 @@ async function handleLocationGet(
 }
 
 /** Trigger a barcode/QR scan using the camera */
-async function handleCameraSnap(
-  _params: InvokeParams,
-): Promise<InvokeResult> {
+async function handleCameraSnap(_params: InvokeParams): Promise<InvokeResult> {
   try {
     const { scan } = await import("@tauri-apps/plugin-barcode-scanner");
 

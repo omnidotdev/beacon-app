@@ -4,8 +4,6 @@
 // that connects to the beacon-gateway over HTTP/WebSocket
 
 import { getCloudGatewayUrl, isCloudDeployment } from "../api";
-import { isNative } from "../platform";
-import { NodeRegistrationService } from "./node";
 import type {
   ApiClient,
   ConfigureProviderParams,
@@ -29,12 +27,14 @@ import type {
   VoiceState,
   VoiceTranscriptResult,
 } from "../api/types";
+import { isNative } from "../platform";
 import {
   type ConnectionState,
   type DiscoveredGateway,
   getGatewayDiscovery,
 } from "./discovery";
 import { type DeviceIdentity, loadOrCreateIdentity } from "./identity";
+import { NodeRegistrationService } from "./node";
 
 // WebSocket message types (matching gateway)
 interface WsIncoming {
@@ -45,7 +45,14 @@ interface WsIncoming {
 }
 
 interface WsOutgoing {
-  type: "chat_chunk" | "chat_complete" | "error" | "pong" | "connected" | "tool_start" | "tool_result";
+  type:
+    | "chat_chunk"
+    | "chat_complete"
+    | "error"
+    | "pong"
+    | "connected"
+    | "tool_start"
+    | "tool_result";
   content?: string;
   message_id?: string;
   code?: string;
@@ -95,7 +102,13 @@ export function createGatewayClient(
       onComplete?: (message: Message) => void;
       onError?: (error: string) => void;
       onToolStart?: (toolId: string, name: string) => void;
-      onToolResult?: (toolId: string, name: string, invocation: string, output: string, isError: boolean) => void;
+      onToolResult?: (
+        toolId: string,
+        name: string,
+        invocation: string,
+        output: string,
+        isError: boolean,
+      ) => void;
     }
   > = new Map();
 
@@ -445,7 +458,13 @@ export function createGatewayClient(
       onError?: (error: string) => void,
       personaId?: string,
       onToolStart?: (toolId: string, name: string) => void,
-      onToolResult?: (toolId: string, name: string, invocation: string, output: string, isError: boolean) => void,
+      onToolResult?: (
+        toolId: string,
+        name: string,
+        invocation: string,
+        output: string,
+        isError: boolean,
+      ) => void,
     ): Promise<void> {
       // Ensure WebSocket is connected to the right session
       if (sessionId !== conversationId || ws?.readyState !== WebSocket.OPEN) {
@@ -488,13 +507,25 @@ export function createGatewayClient(
 
       // Register callbacks
       const callbackId = `${conversationId}-${Date.now()}`;
-      messageCallbacks.set(callbackId, { onToken, onComplete, onError, onToolStart, onToolResult });
+      messageCallbacks.set(callbackId, {
+        onToken,
+        onComplete,
+        onError,
+        onToolStart,
+        onToolResult,
+      });
 
       // Send message with explicit persona and model to prevent server-side drift.
       // "auto" means use Synapse's default threshold routing — don't send an override.
       const storedModel = localStorage.getItem("beacon-selected-model");
-      const modelOverride = storedModel && storedModel !== "auto" ? storedModel : undefined;
-      sendWsMessage({ type: "chat", content, persona_id: personaId, model_override: modelOverride });
+      const modelOverride =
+        storedModel && storedModel !== "auto" ? storedModel : undefined;
+      sendWsMessage({
+        type: "chat",
+        content,
+        persona_id: personaId,
+        model_override: modelOverride,
+      });
     },
 
     // Persona

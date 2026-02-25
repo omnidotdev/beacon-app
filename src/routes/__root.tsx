@@ -79,7 +79,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     return {
       meta: [
         { charSet: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" },
+        {
+          name: "viewport",
+          content:
+            "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content",
+        },
         { name: "theme-color", content: "#0f172a" },
         ...meta,
       ],
@@ -100,7 +104,9 @@ function MaintenancePage() {
     <div className="flex min-h-screen flex-col items-center justify-center p-8">
       <div className="text-center">
         <div className="mb-6 text-9xl">🗼</div>
-        <h1 className="mb-4 font-bold text-4xl text-text">Signal Maintenance</h1>
+        <h1 className="mb-4 font-bold text-4xl text-text">
+          Signal Maintenance
+        </h1>
         <p className="max-w-md text-lg text-muted">
           Beacon is recalibrating. We'll be back online shortly.
         </p>

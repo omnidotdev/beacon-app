@@ -94,13 +94,19 @@ function ChatPage() {
     [navigate],
   );
 
-  const { messages, isConnected, isLoading, toolCalls, sendMessage, clearMessages } =
-    useChat({
-      conversationId,
-      personaId: persona?.id,
-      onError: setError,
-      onConversationCreated: handleConversationCreated,
-    });
+  const {
+    messages,
+    isConnected,
+    isLoading,
+    toolCalls,
+    sendMessage,
+    clearMessages,
+  } = useChat({
+    conversationId,
+    personaId: persona?.id,
+    onError: setError,
+    onConversationCreated: handleConversationCreated,
+  });
 
   // Clean up empty conversations when navigating away
   const prevConversationRef = useRef<string | null>(null);

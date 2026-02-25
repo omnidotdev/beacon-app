@@ -28,7 +28,9 @@ const CLOUD_GATEWAY_URL = "/gateway";
 export function isCloudDeployment(): boolean {
   if (typeof window === "undefined") return false;
   const hostname = window.location.hostname;
-  return hostname === "beacon.omni.dev" || hostname.endsWith(".beacon.omni.dev");
+  return (
+    hostname === "beacon.omni.dev" || hostname.endsWith(".beacon.omni.dev")
+  );
 }
 
 /**

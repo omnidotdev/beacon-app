@@ -42,7 +42,9 @@ async function graphqlFetch<T>(
       404: "API endpoint not found",
       500: "Server error",
     };
-    throw new Error(messages[response.status] ?? `Request failed (${response.status})`);
+    throw new Error(
+      messages[response.status] ?? `Request failed (${response.status})`,
+    );
   }
 
   const result: GraphQLResponse<T> = await response.json();

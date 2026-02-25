@@ -8,14 +8,13 @@ export {
   type GatewayClientExtensions,
   getGatewayClient,
 } from "./client";
-
+export { executeCommand, getSupportedCommands } from "./commands";
 export {
   type ConnectionState,
   type DiscoveredGateway,
   GatewayDiscovery,
   getGatewayDiscovery,
 } from "./discovery";
-
 export {
   type DeviceIdentity,
   generateIdentity,
@@ -25,12 +24,9 @@ export {
   signPayload,
   verifySignature,
 } from "./identity";
-
 export {
-  type NodeRegistrationConfig,
-  NodeRegistrationService,
   getDeviceCapabilities,
   getDeviceFamily,
+  type NodeRegistrationConfig,
+  NodeRegistrationService,
 } from "./node";
-
-export { executeCommand, getSupportedCommands } from "./commands";

@@ -54,8 +54,7 @@ export function useCreditBalance() {
 
       return res.json() as Promise<{ balance: number }>;
     },
-    enabled:
-      isCloudDeployment() && !!SYNAPSE_API_URL && !!session?.user?.id,
+    enabled: isCloudDeployment() && !!SYNAPSE_API_URL && !!session?.user?.id,
     staleTime: CREDIT_STALE_TIME_MS,
   });
 }
@@ -72,7 +71,11 @@ export function useCreditCheckout() {
       amount,
       successUrl,
       cancelUrl,
-    }: { amount: number; successUrl: string; cancelUrl: string }) => {
+    }: {
+      amount: number;
+      successUrl: string;
+      cancelUrl: string;
+    }) => {
       const res = await fetch(`${SYNAPSE_API_URL}/credits/me/checkout`, {
         method: "POST",
         headers: {
@@ -103,7 +106,10 @@ export function useBillingPortal() {
     mutationFn: ({
       productId,
       returnUrl,
-    }: { productId: string; returnUrl: string }) => {
+    }: {
+      productId: string;
+      returnUrl: string;
+    }) => {
       if (!billingProvider) throw new Error("Billing is not configured");
 
       return billingProvider.getBillingPortalUrl(

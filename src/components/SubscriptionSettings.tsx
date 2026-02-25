@@ -84,8 +84,7 @@ function SubscriptionSettingsInner() {
     useCreditCheckout();
   const { mutateAsync: cancel, isPending: isCancelling } =
     useCancelSubscription();
-  const { mutateAsync: renew, isPending: isRenewing } =
-    useRenewSubscription();
+  const { mutateAsync: renew, isPending: isRenewing } = useRenewSubscription();
 
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
@@ -127,7 +126,9 @@ function SubscriptionSettingsInner() {
     try {
       await cancel();
       setShowCancelConfirm(false);
-      toast.success("Subscription will cancel at the end of the billing period");
+      toast.success(
+        "Subscription will cancel at the end of the billing period",
+      );
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to cancel subscription",

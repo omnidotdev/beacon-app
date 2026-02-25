@@ -62,7 +62,12 @@ function MemoriesContent() {
 
   // Pass undefined for "all" so the API returns everything
   const categoryFilter = activeCategory === "all" ? undefined : activeCategory;
-  const { data: memories, isLoading, error, refetch } = useMemories(categoryFilter);
+  const {
+    data: memories,
+    isLoading,
+    error,
+    refetch,
+  } = useMemories(categoryFilter);
 
   // Filter by search query client-side
   const filteredMemories = useMemo(() => {
@@ -342,7 +347,13 @@ function LoadingState() {
   );
 }
 
-function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
   return (
     <div className="glass-panel mx-auto max-w-sm rounded-2xl p-6 text-center">
       <p className="break-words text-sm text-muted">{message}</p>

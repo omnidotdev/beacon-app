@@ -1,7 +1,12 @@
 // Conversation and message operations for local IndexedDB storage
 
-import { db, generateId, type LocalConversation, type LocalMessage } from "./index";
 import type { Conversation, Message } from "../api/types";
+import {
+  db,
+  generateId,
+  type LocalConversation,
+  type LocalMessage,
+} from "./index";
 
 // Convert local format to API format
 function toApiConversation(local: LocalConversation): Conversation {
@@ -24,7 +29,9 @@ function toApiMessage(local: LocalMessage): Message {
 }
 
 // Conversation operations
-export async function getConversations(personaId: string): Promise<Conversation[]> {
+export async function getConversations(
+  personaId: string,
+): Promise<Conversation[]> {
   const conversations = await db.conversations
     .where("personaId")
     .equals(personaId)
@@ -50,7 +57,9 @@ export async function getConversations(personaId: string): Promise<Conversation[
   return results;
 }
 
-export async function getConversation(id: string): Promise<Conversation | null> {
+export async function getConversation(
+  id: string,
+): Promise<Conversation | null> {
   const conv = await db.conversations.get(id);
   if (!conv) return null;
 
@@ -67,7 +76,10 @@ export async function getConversation(id: string): Promise<Conversation | null> 
   };
 }
 
-export async function createConversation(personaId: string, title?: string): Promise<Conversation> {
+export async function createConversation(
+  personaId: string,
+  title?: string,
+): Promise<Conversation> {
   const now = Date.now();
   const conversation: LocalConversation = {
     id: generateId(),
@@ -87,7 +99,10 @@ export async function createConversation(personaId: string, title?: string): Pro
   };
 }
 
-export async function updateConversationTitle(id: string, title: string): Promise<void> {
+export async function updateConversationTitle(
+  id: string,
+  title: string,
+): Promise<void> {
   await db.conversations.update(id, {
     title,
     updatedAt: Date.now(),
@@ -147,7 +162,10 @@ export async function getMessageCount(conversationId: string): Promise<number> {
   return db.messages.where("conversationId").equals(conversationId).count();
 }
 
-export async function updateMessage(id: string, content: string): Promise<void> {
+export async function updateMessage(
+  id: string,
+  content: string,
+): Promise<void> {
   await db.messages.update(id, { content });
 }
 

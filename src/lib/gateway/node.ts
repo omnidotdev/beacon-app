@@ -6,9 +6,8 @@
 import { getPlatform } from "@/lib/platform";
 
 import { executeCommand, getSupportedCommands } from "./commands";
-import { loadOrCreateIdentity } from "./identity";
-
 import type { DeviceIdentity } from "./identity";
+import { loadOrCreateIdentity } from "./identity";
 
 // WS message types matching the gateway node protocol
 
@@ -157,9 +156,7 @@ class NodeRegistrationService {
 
   /** Check if currently connected and registered */
   isRegistered(): boolean {
-    return (
-      this.ws?.readyState === WebSocket.OPEN && this.nodeId !== null
-    );
+    return this.ws?.readyState === WebSocket.OPEN && this.nodeId !== null;
   }
 
   /** Get the assigned node ID (null if not registered) */
@@ -260,9 +257,7 @@ class NodeRegistrationService {
     if (this.stopped) return;
 
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.warn(
-        "[node] Max reconnect attempts reached, giving up",
-      );
+      console.warn("[node] Max reconnect attempts reached, giving up");
       return;
     }
 

@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ChatMessage, Message } from "@/lib/api";
 import * as localDb from "@/lib/db/conversations";
-import { isNative } from "@/lib/platform";
 import { NO_PERSONA_ID } from "@/lib/persona";
+import { isNative } from "@/lib/platform";
 import { useApi } from "./useApi";
 
 export interface ToolCallState {
@@ -14,7 +14,6 @@ export interface ToolCallState {
   invocation?: string;
   output?: string;
 }
-
 
 // Track the last persona ID we successfully synced with the gateway
 // so we only call switchPersona once per persona, not on every message
@@ -124,7 +123,11 @@ export function useChat({
       // gateway has a different one active (e.g. after a failed
       // initial sync during page load)
       // Skip sync in no-persona mode — the gateway has no endpoint for NO_PERSONA_ID
-      if (personaId && personaId !== NO_PERSONA_ID && syncedPersonaId !== personaId) {
+      if (
+        personaId &&
+        personaId !== NO_PERSONA_ID &&
+        syncedPersonaId !== personaId
+      ) {
         try {
           await api.switchPersona(personaId);
           syncedPersonaId = personaId;
@@ -163,9 +166,7 @@ export function useChat({
             rafIdRef.current = requestAnimationFrame(() => {
               rafIdRef.current = null;
               setStreamingMessage((prev) =>
-                prev
-                  ? { ...prev, content: streamingContentRef.current }
-                  : null,
+                prev ? { ...prev, content: streamingContentRef.current } : null,
               );
             });
           }

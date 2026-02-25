@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Brain, ChevronRight, MessageSquare, Mic, Settings, VenetianMask, Zap } from "lucide-react";
+import {
+  Brain,
+  ChevronRight,
+  MessageSquare,
+  Mic,
+  Settings,
+  VenetianMask,
+  Zap,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApi, useConversations } from "@/hooks";
 import type { SystemStatus } from "@/lib/api";
@@ -39,11 +47,7 @@ function DashboardHome() {
           value={sessionCount.toString()}
           icon={<MessageSquare size={24} />}
         />
-        <StatCard
-          title="Voice"
-          value="Coming soon"
-          icon={<Mic size={24} />}
-        />
+        <StatCard title="Voice" value="Coming soon" icon={<Mic size={24} />} />
       </div>
 
       {/* Quick actions */}

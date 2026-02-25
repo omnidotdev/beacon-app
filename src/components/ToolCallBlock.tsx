@@ -44,7 +44,9 @@ function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
         type="button"
         onClick={() => hasDetail && setExpanded((v) => !v)}
         className={`flex items-center gap-1.5 rounded px-2 py-0.5 text-left transition-colors ${
-          hasDetail ? "cursor-pointer hover:bg-surface-elevated" : "cursor-default"
+          hasDetail
+            ? "cursor-pointer hover:bg-surface-elevated"
+            : "cursor-default"
         } ${statusColor}`}
       >
         {toolCall.status === "pending" ? (

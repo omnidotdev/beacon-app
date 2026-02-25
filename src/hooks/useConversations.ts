@@ -134,7 +134,8 @@ export function usePersona() {
   const fallback =
     storedId === NO_PERSONA_ID
       ? NO_PERSONA
-      : DEFAULT_PERSONAS.find((p) => p.id === storedId) ?? DEFAULT_PERSONAS[0];
+      : (DEFAULT_PERSONAS.find((p) => p.id === storedId) ??
+        DEFAULT_PERSONAS[0]);
 
   // Always return fallback data immediately — we have a reliable local fallback
   // (stored persona ID → DEFAULT_PERSONAS), so there's no need to block on the
@@ -189,8 +190,9 @@ export function usePersonas() {
   const raw =
     query.data?.personas ?? (query.isError ? DEFAULT_PERSONAS : undefined);
   // Filter hidden personas and pin Orin to the top
-  const personas = raw
-    ?.sort((a, b) => (a.id === "orin" ? -1 : b.id === "orin" ? 1 : 0));
+  const personas = raw?.sort((a, b) =>
+    a.id === "orin" ? -1 : b.id === "orin" ? 1 : 0,
+  );
   const activeId =
     query.data?.active_id ?? (query.isError ? getStoredPersonaId() : undefined);
 

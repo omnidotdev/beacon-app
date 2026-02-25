@@ -8,8 +8,8 @@ import {
   useToggleSkill,
   useUninstallSkill,
 } from "@/hooks";
-import { isCloudDeployment } from "@/lib/api";
 import type { Skill, SkillSource } from "@/lib/api";
+import { isCloudDeployment } from "@/lib/api";
 
 export const Route = createFileRoute("/_auth/skills")({
   component: SkillsPage,

@@ -3,7 +3,8 @@
  */
 const app = {
   name: "Beacon",
-  description: "AI-powered voice and messaging gateway for personalized AI assistants",
+  description:
+    "AI-powered voice and messaging gateway for personalized AI assistants",
   links: {
     website: "https://beacon.omni.dev",
     console: "https://console.omni.dev",

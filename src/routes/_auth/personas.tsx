@@ -7,8 +7,8 @@ import {
   useSearchMarketplacePersonas,
   useUninstallMarketplacePersona,
 } from "@/hooks";
-import { isCloudDeployment } from "@/lib/api";
 import type { MarketplacePersona, PersonaSource } from "@/lib/api";
+import { isCloudDeployment } from "@/lib/api";
 
 // Flagship personas that are always shown as installed
 const FLAGSHIP_PERSONAS: MarketplacePersona[] = [
@@ -172,9 +172,7 @@ function InstalledPersonasTab() {
             installed
             isBuiltIn={isFlagship}
             onUninstall={
-              isFlagship
-                ? undefined
-                : () => uninstallPersona.mutate(persona.id)
+              isFlagship ? undefined : () => uninstallPersona.mutate(persona.id)
             }
             isLoading={
               uninstallPersona.isPending &&
