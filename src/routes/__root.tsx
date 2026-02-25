@@ -15,7 +15,7 @@ import { ApiProvider } from "@/hooks";
 import appCss from "@/index.css?url";
 import app from "@/lib/config/app.config";
 import { isDevEnv } from "@/lib/config/env.config";
-import { fetchMaintenanceMode } from "@/lib/flags";
+import { fetchMaintenanceMode } from "@/lib/providers";
 import { isNative } from "@/lib/platform";
 import createMetaTags from "@/lib/util/createMetaTags";
 import { fetchSession } from "@/server/functions/auth";
