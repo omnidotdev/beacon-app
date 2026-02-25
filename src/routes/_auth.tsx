@@ -1,11 +1,18 @@
-import { createEventsProvider } from "@omnidotdev/providers";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { Layout } from "@/components";
 import { isCloudDeployment } from "@/lib/api";
 import { EventsProvider } from "@/providers/EventsProvider";
 
-const eventsProvider = createEventsProvider({});
+// Noop provider for client-side (main @omnidotdev/providers entry requires Node.js)
+const eventsProvider = {
+  async emit() {
+    return {
+      eventId: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+    };
+  },
+};
 
 export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ context: { session } }) => {
