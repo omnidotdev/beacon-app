@@ -568,14 +568,19 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       ) : isCloud ? (
         <>
           <div className="px-3 py-2">
-            <Link
-              to="/login"
-              onClick={handleNavClick}
+            <button
+              type="button"
+              onClick={() => {
+                handleNavClick();
+                import("@/lib/auth/signIn").then(({ default: signIn }) =>
+                  signIn(),
+                );
+              }}
               className="flex w-full items-center gap-3 rounded-xl bg-primary/10 p-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
             >
               <LogIn size={18} />
               Sign in
-            </Link>
+            </button>
           </div>
 
           {/* Crystalline divider */}

@@ -1,6 +1,5 @@
 import {
   createFileRoute,
-  Link,
   useNavigate,
   useRouteContext,
   useSearch,
@@ -11,6 +10,7 @@ import { ChatView } from "@/components";
 import { useApi, useChat, usePersona, useProviders } from "@/hooks";
 import type { SystemStatus } from "@/lib/api";
 import { isCloudDeployment } from "@/lib/api";
+import signIn from "@/lib/auth/signIn";
 import * as localDb from "@/lib/db/conversations";
 import { isNative } from "@/lib/platform";
 import createMetaTags from "@/lib/util/createMetaTags";
@@ -174,12 +174,13 @@ function ChatPage() {
         <p className="max-w-sm text-muted">
           Create an account or sign in to start chatting with your AI assistant
         </p>
-        <Link
-          to="/login"
+        <button
+          type="button"
+          onClick={() => signIn({ redirectUrl: window.location.href })}
           className="mt-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-[#0a0a0f] transition-all hover:glow-primary"
         >
           Sign in
-        </Link>
+        </button>
       </div>
     );
   }

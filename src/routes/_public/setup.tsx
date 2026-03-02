@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ExternalLink, Key, Sparkles, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { ProviderInfo, ProvidersResponse, SystemStatus } from "@/lib/api";
+import signIn from "@/lib/auth/signIn";
 import { BASE_URL } from "@/lib/config/env.config";
 import {
   type ConnectionState,
@@ -299,12 +300,13 @@ function SetupPage() {
           </div>
 
           {/* Cloud Login */}
-          <Link
-            to="/login"
+          <button
+            type="button"
+            onClick={() => signIn()}
             className="mb-3 block w-full rounded-xl border border-primary/50 px-4 py-3 text-center font-medium text-primary transition-colors hover:border-primary hover:bg-primary/10"
           >
             Sign in with Omni (Cloud)
-          </Link>
+          </button>
 
           <button
             type="button"
@@ -428,12 +430,13 @@ function SetupPage() {
         </div>
 
         {/* Cloud Login */}
-        <Link
-          to="/login"
+        <button
+          type="button"
+          onClick={() => signIn()}
           className="block w-full rounded-xl border border-primary/50 px-4 py-3 text-center font-medium text-primary transition-colors hover:border-primary hover:bg-primary/10"
         >
           Sign in with Omni (Cloud)
-        </Link>
+        </button>
 
         <p className="mt-4 text-center text-xs text-muted/60">
           Cloud features require an Omni account

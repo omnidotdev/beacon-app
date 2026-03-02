@@ -14,7 +14,6 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as PublicSetupRouteImport } from './routes/_public/setup'
 import { Route as PublicPairRouteImport } from './routes/_public/pair'
-import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as AuthSkillsRouteImport } from './routes/_auth/skills'
 import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
 import { Route as AuthPersonasRouteImport } from './routes/_auth/personas'
@@ -43,11 +42,6 @@ const PublicSetupRoute = PublicSetupRouteImport.update({
 const PublicPairRoute = PublicPairRouteImport.update({
   id: '/pair',
   path: '/pair',
-  getParentRoute: () => PublicRoute,
-} as any)
-const PublicLoginRoute = PublicLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => PublicRoute,
 } as any)
 const AuthSkillsRoute = AuthSkillsRouteImport.update({
@@ -82,27 +76,25 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthIndexRoute
   '/chat': typeof AuthChatRoute
   '/memories': typeof AuthMemoriesRoute
   '/personas': typeof AuthPersonasRoute
   '/settings': typeof AuthSettingsRoute
   '/skills': typeof AuthSkillsRoute
-  '/login': typeof PublicLoginRoute
   '/pair': typeof PublicPairRoute
   '/setup': typeof PublicSetupRoute
-  '/': typeof AuthIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AuthIndexRoute
   '/chat': typeof AuthChatRoute
   '/memories': typeof AuthMemoriesRoute
   '/personas': typeof AuthPersonasRoute
   '/settings': typeof AuthSettingsRoute
   '/skills': typeof AuthSkillsRoute
-  '/login': typeof PublicLoginRoute
   '/pair': typeof PublicPairRoute
   '/setup': typeof PublicSetupRoute
-  '/': typeof AuthIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -114,7 +106,6 @@ export interface FileRoutesById {
   '/_auth/personas': typeof AuthPersonasRoute
   '/_auth/settings': typeof AuthSettingsRoute
   '/_auth/skills': typeof AuthSkillsRoute
-  '/_public/login': typeof PublicLoginRoute
   '/_public/pair': typeof PublicPairRoute
   '/_public/setup': typeof PublicSetupRoute
   '/_auth/': typeof AuthIndexRoute
@@ -123,27 +114,25 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/chat'
     | '/memories'
     | '/personas'
     | '/settings'
     | '/skills'
-    | '/login'
     | '/pair'
     | '/setup'
-    | '/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/chat'
     | '/memories'
     | '/personas'
     | '/settings'
     | '/skills'
-    | '/login'
     | '/pair'
     | '/setup'
-    | '/'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -154,7 +143,6 @@ export interface FileRouteTypes {
     | '/_auth/personas'
     | '/_auth/settings'
     | '/_auth/skills'
-    | '/_public/login'
     | '/_public/pair'
     | '/_public/setup'
     | '/_auth/'
@@ -172,14 +160,14 @@ declare module '@tanstack/react-router' {
     '/_public': {
       id: '/_public'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth': {
       id: '/_auth'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -202,13 +190,6 @@ declare module '@tanstack/react-router' {
       path: '/pair'
       fullPath: '/pair'
       preLoaderRoute: typeof PublicPairRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/login': {
-      id: '/_public/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_auth/skills': {
@@ -277,13 +258,11 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface PublicRouteChildren {
-  PublicLoginRoute: typeof PublicLoginRoute
   PublicPairRoute: typeof PublicPairRoute
   PublicSetupRoute: typeof PublicSetupRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
-  PublicLoginRoute: PublicLoginRoute,
   PublicPairRoute: PublicPairRoute,
   PublicSetupRoute: PublicSetupRoute,
 }
@@ -299,12 +278,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
