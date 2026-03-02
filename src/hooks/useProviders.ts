@@ -20,13 +20,15 @@ const USE_SYNAPSE = !!SYNAPSE_API_URL;
 
 const PROVIDERS_QUERY = `
   query ProvidersAndPreferences {
-    myProviderKeys {
-      id
-      provider
-      keyHint
-    }
-    myPreferences {
-      defaultProvider
+    observer {
+      providerKeys {
+        id
+        provider
+        keyHint
+      }
+      preferences {
+        defaultProvider
+      }
     }
   }
 `;
@@ -230,14 +232,17 @@ export function useProviders() {
         return gatewayFetch<ProvidersResponse>("/api/providers", { headers });
       }
       const data = await synapseGraphql<{
-        myProviderKeys: SynapseProviderKey[];
-        myPreferences: { defaultProvider: string | null } | null;
+        observer: {
+          providerKeys: SynapseProviderKey[];
+          preferences: { defaultProvider: string | null } | null;
+        } | null;
       }>(PROVIDERS_QUERY, {}, token);
+      const providerKeys = data.observer?.providerKeys ?? [];
       // Cache raw keys for useRemoveProvider to avoid a redundant fetch
-      queryClient.setQueryData(["providerKeys"], data.myProviderKeys);
+      queryClient.setQueryData(["providerKeys"], providerKeys);
       return buildProvidersResponse(
-        data.myProviderKeys,
-        data.myPreferences?.defaultProvider ?? null,
+        providerKeys,
+        data.observer?.preferences?.defaultProvider ?? null,
       );
     },
     enabled: !USE_SYNAPSE || (!!token && !!SYNAPSE_API_URL),

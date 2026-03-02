@@ -22,20 +22,22 @@ export type Memory = {
 
 // GraphQL queries
 
-const MY_MEMORIES_QUERY = `
-  query MyMemories($category: String, $limit: Int) {
-    myMemories(category: $category, limit: $limit) {
-      id
-      gatewayMemoryId
-      category
-      content
-      contentHash
-      tags
-      pinned
-      accessCount
-      createdAt
-      updatedAt
-      deletedAt
+const MEMORIES_QUERY = `
+  query Memories($category: String, $limit: Int) {
+    observer {
+      memories(category: $category, limit: $limit) {
+        id
+        gatewayMemoryId
+        category
+        content
+        contentHash
+        tags
+        pinned
+        accessCount
+        createdAt
+        updatedAt
+        deletedAt
+      }
     }
   }
 `;
@@ -72,13 +74,15 @@ export async function fetchMemories(
   category?: string,
   limit?: number,
 ): Promise<Memory[]> {
-  const data = await graphqlFetch<{ myMemories: Memory[] }>(
-    MY_MEMORIES_QUERY,
+  const data = await graphqlFetch<{
+    observer: { memories: Memory[] } | null;
+  }>(
+    MEMORIES_QUERY,
     { category: category ?? null, limit: limit ?? null },
     accessToken,
   );
 
-  return data.myMemories;
+  return data.observer?.memories ?? [];
 }
 
 /**
