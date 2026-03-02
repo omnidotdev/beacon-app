@@ -24,7 +24,32 @@ export default defineConfig(({ command }) => ({
       nitroV2Plugin({
         preset: "node-server",
         externals: {
-          inline: ["srvx", "react-dom", "dexie", "dexie-react-hooks"],
+          inline: [
+            "srvx",
+            "react-dom",
+            "dexie",
+            "dexie-react-hooks",
+            "@omnidotdev/providers",
+          ],
+        },
+        hooks: {
+          // Fix CJS `require` shim in pre-bundled ESM packages (e.g. @omnidotdev/providers)
+          // that use `typeof require !== "undefined" ? require : ...` which fails in Node.js ESM
+          "rollup:before": (_nitro, config) => {
+            (config.plugins as any[]).push({
+              name: "fix-esm-require-shim",
+              renderChunk(code: string) {
+                if (
+                  !code.includes(
+                    'var __require = typeof require !== "undefined"',
+                  )
+                )
+                  return null;
+
+                return `import { createRequire as __createRequire } from "node:module";\nvar require = __createRequire(import.meta.url);\n${code}`;
+              },
+            });
+          },
         },
         routeRules: {
           "/gateway/**": {
