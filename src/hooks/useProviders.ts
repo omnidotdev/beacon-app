@@ -7,7 +7,7 @@ import type {
   ProvidersResponse,
   ProviderType,
 } from "@/lib/api";
-import { SYNAPSE_API_URL } from "@/lib/config/env.config";
+import { GATEKEEPER_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
 import { getGatewayDiscovery } from "@/lib/gateway";
 
 // Synapse GraphQL endpoint
@@ -15,6 +15,9 @@ const SYNAPSE_GRAPHQL_URL = `${SYNAPSE_API_URL ?? ""}/graphql`;
 
 // Whether this deployment uses Synapse for provider management
 const USE_SYNAPSE = !!SYNAPSE_API_URL;
+
+// Whether Gatekeeper vault is available for direct key management
+const USE_GATEKEEPER = !!GATEKEEPER_URL;
 
 // GraphQL operations for provider key management
 
@@ -117,6 +120,58 @@ async function gatewayFetch<T>(
     throw new Error(`Gateway request failed (${res.status})`);
   }
   return res.json() as Promise<T>;
+}
+
+// Gatekeeper vault API helpers
+
+type VaultKey = {
+  provider: string;
+  key_hint?: string | null;
+};
+
+async function fetchVaultKeys(accessToken: string): Promise<VaultKey[]> {
+  const res = await fetch(`${GATEKEEPER_URL}/api/vault/keys`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) return [];
+
+  const body = await res.json();
+
+  return body.data ?? [];
+}
+
+async function storeVaultKey(
+  accessToken: string,
+  provider: string,
+  apiKey: string,
+  model?: string,
+): Promise<boolean> {
+  const res = await fetch(`${GATEKEEPER_URL}/api/vault/keys`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ provider, api_key: apiKey, category: "ai", model }),
+  });
+
+  return res.ok;
+}
+
+async function deleteVaultKey(
+  accessToken: string,
+  provider: string,
+): Promise<boolean> {
+  const res = await fetch(
+    `${GATEKEEPER_URL}/api/vault/keys/${encodeURIComponent(provider)}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+
+  return res.ok;
 }
 
 // Static provider metadata — status is derived from Synapse key records
@@ -222,6 +277,18 @@ export function useProviders() {
   const query = useQuery({
     queryKey: ["providers"],
     queryFn: async () => {
+      // Gatekeeper vault — direct key management, skip Synapse proxy
+      if (USE_GATEKEEPER && token) {
+        const vaultKeys = await fetchVaultKeys(token);
+        const synapseKeys: SynapseProviderKey[] = vaultKeys.map((k) => ({
+          id: k.provider,
+          provider: k.provider,
+          keyHint: k.key_hint ?? null,
+        }));
+
+        return buildProvidersResponse(synapseKeys, null);
+      }
+
       if (!USE_SYNAPSE) {
         // Pass the user's JWT so the gateway can identify the user and mark
         // omni_credits as configured for authenticated cloud-mode sessions
@@ -245,7 +312,10 @@ export function useProviders() {
         data.observer?.preferences?.defaultProvider ?? null,
       );
     },
-    enabled: !USE_SYNAPSE || (!!token && !!SYNAPSE_API_URL),
+    enabled:
+      (USE_GATEKEEPER && !!token) ||
+      !USE_SYNAPSE ||
+      (!!token && !!SYNAPSE_API_URL),
     retry: 1,
   });
 
@@ -264,6 +334,41 @@ export function useConfigureProvider() {
     mutationFn: async (
       params: ConfigureProviderParams,
     ): Promise<ConfigureProviderResponse> => {
+      // Gatekeeper vault — store key directly
+      if (USE_GATEKEEPER && token) {
+        const ok = await storeVaultKey(
+          token,
+          params.provider,
+          params.api_key ?? "",
+          params.model,
+        );
+
+        if (!ok) {
+          throw new Error("Failed to store key in Gatekeeper vault");
+        }
+
+        const meta = PROVIDER_METADATA.find((p) => p.id === params.provider);
+
+        return {
+          success: true,
+          message: "Provider key saved",
+          provider: {
+            ...(meta ?? {
+              id: params.provider,
+              name: params.provider,
+              description: "",
+              api_key_url: null,
+              coming_soon: false,
+              features: [],
+            }),
+            status: "configured",
+            active: false,
+            id: params.provider,
+            // biome-ignore lint/suspicious/noExplicitAny: runtime cast is safe here
+          } as any,
+        };
+      }
+
       if (!USE_SYNAPSE) {
         return gatewayFetch<ConfigureProviderResponse>(
           "/api/providers/configure",
@@ -328,6 +433,17 @@ export function useRemoveProvider() {
 
   return useMutation({
     mutationFn: async (provider: ProviderType) => {
+      // Gatekeeper vault — delete key directly
+      if (USE_GATEKEEPER && token) {
+        const ok = await deleteVaultKey(token, provider);
+
+        if (!ok) {
+          throw new Error("Failed to delete key from Gatekeeper vault");
+        }
+
+        return;
+      }
+
       if (!USE_SYNAPSE) {
         await gatewayFetch<{ success: boolean; message: string }>(
           `/api/providers/${provider}`,
