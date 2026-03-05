@@ -19,7 +19,7 @@ interface ChatSearch {
   c?: string;
 }
 
-export const Route = createFileRoute("/_auth/chat")({
+export const Route = createFileRoute("/_app/chat")({
   head: () => createMetaTags({ title: "Chat" }),
   component: ChatPage,
   validateSearch: (search: Record<string, unknown>): ChatSearch => ({
@@ -33,7 +33,7 @@ if (typeof window !== "undefined") {
 }
 
 function ChatPage() {
-  const search = useSearch({ from: "/_auth/chat" });
+  const search = useSearch({ from: "/_app/chat" });
   const navigate = useNavigate();
   const { session } = useRouteContext({ from: "__root__" });
   const native = isNative();

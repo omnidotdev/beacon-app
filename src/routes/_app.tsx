@@ -16,7 +16,7 @@ const eventsProvider = {
   },
 };
 
-export const Route = createFileRoute("/_auth")({
+export const Route = createFileRoute("/_app")({
   component: AuthLayout,
 });
 

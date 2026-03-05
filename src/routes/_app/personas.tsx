@@ -34,7 +34,7 @@ const FLAGSHIP_PERSONAS: MarketplacePersona[] = [
   },
 ];
 
-export const Route = createFileRoute("/_auth/personas")({
+export const Route = createFileRoute("/_app/personas")({
   component: PersonasPage,
 });
 

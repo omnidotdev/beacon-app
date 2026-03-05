@@ -35,7 +35,7 @@ import createMetaTags from "@/lib/util/createMetaTags";
 
 const USE_SYNAPSE = !!SYNAPSE_API_URL;
 
-export const Route = createFileRoute("/_auth/settings")({
+export const Route = createFileRoute("/_app/settings")({
   head: () => createMetaTags({ title: "Settings" }),
   component: SettingsPage,
 });

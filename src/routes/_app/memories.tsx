@@ -15,7 +15,7 @@ import { isCloudDeployment } from "@/lib/api";
 import type { Memory, MemoryCategory } from "@/lib/api/memories";
 import createMetaTags from "@/lib/util/createMetaTags";
 
-export const Route = createFileRoute("/_auth/memories")({
+export const Route = createFileRoute("/_app/memories")({
   head: () => createMetaTags({ title: "Memories" }),
   component: MemoriesPage,
 });

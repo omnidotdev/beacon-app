@@ -11,7 +11,7 @@ import {
 import type { Skill, SkillSource } from "@/lib/api";
 import { isCloudDeployment } from "@/lib/api";
 
-export const Route = createFileRoute("/_auth/skills")({
+export const Route = createFileRoute("/_app/skills")({
   component: SkillsPage,
 });
 
