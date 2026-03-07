@@ -1,20 +1,28 @@
-import { createFlagProvider } from "@omnidotdev/providers";
+import { createFlagProvider } from "@omnidotdev/providers/flags";
 import { createServerFn } from "@tanstack/react-start";
 
 import { FLAGS_API_HOST, FLAGS_CLIENT_KEY } from "@/lib/config/env.config";
 
-import type { FlagContext } from "@omnidotdev/providers";
+import type { FlagContext } from "@omnidotdev/providers/flags";
 
-export const flags = createFlagProvider(
-  FLAGS_API_HOST
-    ? {
-        provider: "unleash",
-        url: FLAGS_API_HOST,
-        apiKey: FLAGS_CLIENT_KEY!,
-        appName: "beacon",
-      }
-    : {},
-);
+let flags: ReturnType<typeof createFlagProvider> | undefined;
+
+/** Lazily initialize the flag provider (server-only) */
+function getFlagProvider() {
+  if (!flags) {
+    flags = createFlagProvider(
+      FLAGS_API_HOST
+        ? {
+            provider: "unleash",
+            url: FLAGS_API_HOST,
+            apiKey: FLAGS_CLIENT_KEY!,
+            appName: "beacon",
+          }
+        : {},
+    );
+  }
+  return flags;
+}
 
 export const FLAGS = {
   MAINTENANCE: "beacon-app-maintenance-mode",
@@ -30,6 +38,9 @@ export const FLAGS = {
 export const fetchMaintenanceMode = createServerFn({ method: "GET" })
   .inputValidator((data: FlagContext | undefined) => data)
   .handler(async ({ data: context }) => {
-    const isMaintenanceMode = await flags.isEnabled(FLAGS.MAINTENANCE, context);
+    const isMaintenanceMode = await getFlagProvider().isEnabled(
+      FLAGS.MAINTENANCE,
+      context,
+    );
     return { isMaintenanceMode };
   });
