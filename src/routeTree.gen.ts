@@ -10,29 +10,29 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
-import { Route as AuthRouteImport } from './routes/_auth'
-import { Route as AuthIndexRouteImport } from './routes/_auth/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as PublicSetupRouteImport } from './routes/_public/setup'
 import { Route as PublicPairRouteImport } from './routes/_public/pair'
-import { Route as AuthSkillsRouteImport } from './routes/_auth/skills'
-import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
-import { Route as AuthPersonasRouteImport } from './routes/_auth/personas'
-import { Route as AuthMemoriesRouteImport } from './routes/_auth/memories'
-import { Route as AuthChatRouteImport } from './routes/_auth/chat'
+import { Route as AppSkillsRouteImport } from './routes/_app/skills'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppPersonasRouteImport } from './routes/_app/personas'
+import { Route as AppMemoriesRouteImport } from './routes/_app/memories'
+import { Route as AppChatRouteImport } from './routes/_app/chat'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/_auth',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthIndexRoute = AuthIndexRouteImport.update({
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AppRoute,
 } as any)
 const PublicSetupRoute = PublicSetupRouteImport.update({
   id: '/setup',
@@ -44,30 +44,30 @@ const PublicPairRoute = PublicPairRouteImport.update({
   path: '/pair',
   getParentRoute: () => PublicRoute,
 } as any)
-const AuthSkillsRoute = AuthSkillsRouteImport.update({
+const AppSkillsRoute = AppSkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const AuthSettingsRoute = AuthSettingsRouteImport.update({
+const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const AuthPersonasRoute = AuthPersonasRouteImport.update({
+const AppPersonasRoute = AppPersonasRouteImport.update({
   id: '/personas',
   path: '/personas',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const AuthMemoriesRoute = AuthMemoriesRouteImport.update({
+const AppMemoriesRoute = AppMemoriesRouteImport.update({
   id: '/memories',
   path: '/memories',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AppRoute,
 } as any)
-const AuthChatRoute = AuthChatRouteImport.update({
+const AppChatRoute = AppChatRouteImport.update({
   id: '/chat',
   path: '/chat',
-  getParentRoute: () => AuthRoute,
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -76,45 +76,44 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthIndexRoute
-  '/chat': typeof AuthChatRoute
-  '/memories': typeof AuthMemoriesRoute
-  '/personas': typeof AuthPersonasRoute
-  '/settings': typeof AuthSettingsRoute
-  '/skills': typeof AuthSkillsRoute
+  '/chat': typeof AppChatRoute
+  '/memories': typeof AppMemoriesRoute
+  '/personas': typeof AppPersonasRoute
+  '/settings': typeof AppSettingsRoute
+  '/skills': typeof AppSkillsRoute
   '/pair': typeof PublicPairRoute
   '/setup': typeof PublicSetupRoute
+  '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AuthIndexRoute
-  '/chat': typeof AuthChatRoute
-  '/memories': typeof AuthMemoriesRoute
-  '/personas': typeof AuthPersonasRoute
-  '/settings': typeof AuthSettingsRoute
-  '/skills': typeof AuthSkillsRoute
+  '/chat': typeof AppChatRoute
+  '/memories': typeof AppMemoriesRoute
+  '/personas': typeof AppPersonasRoute
+  '/settings': typeof AppSettingsRoute
+  '/skills': typeof AppSkillsRoute
   '/pair': typeof PublicPairRoute
   '/setup': typeof PublicSetupRoute
+  '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_auth': typeof AuthRouteWithChildren
+  '/_app': typeof AppRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
-  '/_auth/chat': typeof AuthChatRoute
-  '/_auth/memories': typeof AuthMemoriesRoute
-  '/_auth/personas': typeof AuthPersonasRoute
-  '/_auth/settings': typeof AuthSettingsRoute
-  '/_auth/skills': typeof AuthSkillsRoute
+  '/_app/chat': typeof AppChatRoute
+  '/_app/memories': typeof AppMemoriesRoute
+  '/_app/personas': typeof AppPersonasRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/skills': typeof AppSkillsRoute
   '/_public/pair': typeof PublicPairRoute
   '/_public/setup': typeof PublicSetupRoute
-  '/_auth/': typeof AuthIndexRoute
+  '/_app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/chat'
     | '/memories'
     | '/personas'
@@ -122,10 +121,10 @@ export interface FileRouteTypes {
     | '/skills'
     | '/pair'
     | '/setup'
+    | '/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/chat'
     | '/memories'
     | '/personas'
@@ -133,24 +132,25 @@ export interface FileRouteTypes {
     | '/skills'
     | '/pair'
     | '/setup'
+    | '/'
     | '/api/auth/$'
   id:
     | '__root__'
-    | '/_auth'
+    | '/_app'
     | '/_public'
-    | '/_auth/chat'
-    | '/_auth/memories'
-    | '/_auth/personas'
-    | '/_auth/settings'
-    | '/_auth/skills'
+    | '/_app/chat'
+    | '/_app/memories'
+    | '/_app/personas'
+    | '/_app/settings'
+    | '/_app/skills'
     | '/_public/pair'
     | '/_public/setup'
-    | '/_auth/'
+    | '/_app/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthRoute: typeof AuthRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -160,23 +160,23 @@ declare module '@tanstack/react-router' {
     '/_public': {
       id: '/_public'
       path: ''
-      fullPath: '/'
+      fullPath: ''
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth': {
-      id: '/_auth'
+    '/_app': {
+      id: '/_app'
       path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthRouteImport
+      fullPath: ''
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth/': {
-      id: '/_auth/'
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthIndexRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_public/setup': {
       id: '/_public/setup'
@@ -192,40 +192,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicPairRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_auth/skills': {
-      id: '/_auth/skills'
+    '/_app/skills': {
+      id: '/_app/skills'
       path: '/skills'
       fullPath: '/skills'
-      preLoaderRoute: typeof AuthSkillsRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AppSkillsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_auth/settings': {
-      id: '/_auth/settings'
+    '/_app/settings': {
+      id: '/_app/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof AuthSettingsRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_auth/personas': {
-      id: '/_auth/personas'
+    '/_app/personas': {
+      id: '/_app/personas'
       path: '/personas'
       fullPath: '/personas'
-      preLoaderRoute: typeof AuthPersonasRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AppPersonasRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_auth/memories': {
-      id: '/_auth/memories'
+    '/_app/memories': {
+      id: '/_app/memories'
       path: '/memories'
       fullPath: '/memories'
-      preLoaderRoute: typeof AuthMemoriesRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AppMemoriesRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_auth/chat': {
-      id: '/_auth/chat'
+    '/_app/chat': {
+      id: '/_app/chat'
       path: '/chat'
       fullPath: '/chat'
-      preLoaderRoute: typeof AuthChatRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -237,25 +237,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthRouteChildren {
-  AuthChatRoute: typeof AuthChatRoute
-  AuthMemoriesRoute: typeof AuthMemoriesRoute
-  AuthPersonasRoute: typeof AuthPersonasRoute
-  AuthSettingsRoute: typeof AuthSettingsRoute
-  AuthSkillsRoute: typeof AuthSkillsRoute
-  AuthIndexRoute: typeof AuthIndexRoute
+interface AppRouteChildren {
+  AppChatRoute: typeof AppChatRoute
+  AppMemoriesRoute: typeof AppMemoriesRoute
+  AppPersonasRoute: typeof AppPersonasRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppSkillsRoute: typeof AppSkillsRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthChatRoute: AuthChatRoute,
-  AuthMemoriesRoute: AuthMemoriesRoute,
-  AuthPersonasRoute: AuthPersonasRoute,
-  AuthSettingsRoute: AuthSettingsRoute,
-  AuthSkillsRoute: AuthSkillsRoute,
-  AuthIndexRoute: AuthIndexRoute,
+const AppRouteChildren: AppRouteChildren = {
+  AppChatRoute: AppChatRoute,
+  AppMemoriesRoute: AppMemoriesRoute,
+  AppPersonasRoute: AppPersonasRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppSkillsRoute: AppSkillsRoute,
+  AppIndexRoute: AppIndexRoute,
 }
 
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface PublicRouteChildren {
   PublicPairRoute: typeof PublicPairRoute
@@ -271,10 +271,19 @@ const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  AuthRoute: AuthRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
