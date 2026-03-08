@@ -9,6 +9,22 @@ import {
   BASE_URL,
 } from "@/lib/config/env.config";
 
+// Leeway in seconds before actual expiry to trigger refresh early
+const EXPIRY_LEEWAY_S = 60;
+
+/**
+ * Check if a JWT is expired (or within leeway of expiring)
+ */
+function isJwtExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp) return false;
+    return payload.exp - EXPIRY_LEEWAY_S < Date.now() / 1000;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Fetch the current user session
  */
@@ -37,7 +53,24 @@ export const fetchSession = createServerFn().handler(async () => {
         }),
     });
 
-    accessToken = tokenResult?.idToken ?? tokenResult?.accessToken;
+    let idToken = tokenResult?.idToken;
+
+    // ensureFreshAccessToken only checks accessTokenExpiresAt, but beacon
+    // uses the id_token (JWT) for downstream auth. The id_token can expire
+    // independently, so check its exp claim and force refresh when needed.
+    if (idToken && isJwtExpired(idToken)) {
+      try {
+        const refreshResult = await auth.api.refreshToken({
+          body: { providerId: "omni" },
+          headers,
+        });
+        idToken = refreshResult?.idToken ?? undefined;
+      } catch (err) {
+        console.warn("[fetchSession] id_token refresh failed:", err);
+      }
+    }
+
+    accessToken = idToken ?? tokenResult?.accessToken;
   } catch (err) {
     console.error("[fetchSession] Error getting access token:", err);
 
