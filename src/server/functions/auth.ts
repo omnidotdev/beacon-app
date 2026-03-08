@@ -40,6 +40,28 @@ export const fetchSession = createServerFn().handler(async () => {
     accessToken = tokenResult?.idToken ?? tokenResult?.accessToken;
   } catch (err) {
     console.error("[fetchSession] Error getting access token:", err);
+
+    // If the refresh token is permanently invalid, clear the stale session
+    // so the UI redirects to sign-in instead of showing a broken auth state
+    const isInvalidGrant =
+      err instanceof Error &&
+      (err.message.includes("invalid_grant") ||
+        err.message.includes("invalid refresh token") ||
+        ("cause" in err &&
+          typeof err.cause === "object" &&
+          err.cause !== null &&
+          "error" in err.cause &&
+          (err.cause as { error: string }).error === "invalid_grant"));
+
+    if (isInvalidGrant) {
+      console.warn("[fetchSession] Invalid refresh token, clearing session");
+      try {
+        await auth.api.signOut({ headers });
+      } catch {
+        // Sign-out may fail if session is already corrupt
+      }
+      return { session: null };
+    }
   }
 
   return {
