@@ -8,6 +8,22 @@ import {
   BASE_URL,
 } from "@/lib/config/env.config";
 
+// Leeway in seconds before actual expiry to trigger refresh early
+const EXPIRY_LEEWAY_S = 60;
+
+/**
+ * Check if a JWT is expired (or within leeway of expiring)
+ */
+function isJwtExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp) return false;
+    return payload.exp - EXPIRY_LEEWAY_S < Date.now() / 1000;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Fetch the current user session
  */
@@ -27,7 +43,26 @@ export const fetchSession = createServerFn().handler(async () => {
       body: { providerId: "omni" },
       headers,
     });
-    accessToken = tokenResult?.idToken ?? tokenResult?.accessToken;
+
+    let idToken = tokenResult?.idToken;
+
+    // Better Auth's getAccessToken only refreshes when the access_token
+    // expires, but doesn't track id_token expiry separately. If the
+    // id_token (JWT) has expired, force a full token refresh which
+    // persists the new id_token back to the account cookie.
+    if (idToken && isJwtExpired(idToken)) {
+      try {
+        const refreshResult = await auth.api.refreshToken({
+          body: { providerId: "omni" },
+          headers,
+        });
+        idToken = refreshResult?.idToken ?? undefined;
+      } catch (err) {
+        console.warn("[fetchSession] Token refresh failed:", err);
+      }
+    }
+
+    accessToken = idToken ?? tokenResult?.accessToken;
   } catch (err) {
     console.error("[fetchSession] Error getting access token:", err);
   }

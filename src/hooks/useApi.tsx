@@ -1,10 +1,4 @@
-import {
-  createContext,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-} from "react";
+import { createContext, type ReactNode, useContext, useRef } from "react";
 import { type ApiClient, createApiClient, getExtendedClient } from "@/lib/api";
 
 const ApiContext = createContext<ApiClient | null>(null);
@@ -15,15 +9,22 @@ interface ApiProviderProps {
 }
 
 export function ApiProvider({ children, accessToken }: ApiProviderProps) {
-  const client = useMemo(() => createApiClient(), []);
+  const clientRef = useRef<ApiClient | null>(null);
+  if (!clientRef.current) {
+    clientRef.current = createApiClient();
+  }
 
-  // Sync access token to gateway client for authenticated API calls
-  useEffect(() => {
-    const extendedClient = getExtendedClient();
-    extendedClient?.setAccessToken(accessToken ?? null);
-  }, [accessToken]);
+  // Set token synchronously during render so it's available before child
+  // effects fire (useEffect runs child-first, which would race with the
+  // WebSocket pre-connect in useChat)
+  const extendedClient = getExtendedClient();
+  extendedClient?.setAccessToken(accessToken ?? null);
 
-  return <ApiContext.Provider value={client}>{children}</ApiContext.Provider>;
+  return (
+    <ApiContext.Provider value={clientRef.current}>
+      {children}
+    </ApiContext.Provider>
+  );
 }
 
 export function useApi(): ApiClient {
