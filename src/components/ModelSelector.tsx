@@ -18,10 +18,12 @@ function ModelSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(() =>
-    localStorage.getItem(STORAGE_KEY),
+    typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null,
   );
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const seededRef = useRef(!!localStorage.getItem(STORAGE_KEY));
+  const seededRef = useRef(
+    typeof window !== "undefined" && !!localStorage.getItem(STORAGE_KEY),
+  );
 
   // Fetch current model from gateway status
   useEffect(() => {
