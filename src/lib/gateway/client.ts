@@ -94,6 +94,7 @@ export function createGatewayClient(
   let tokenRefresher: (() => Promise<string | null>) | null = null;
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
+  let wsAuthenticated = false;
   let streamingContent = "";
   let nodeService: NodeRegistrationService | null = null;
   const messageCallbacks: Map<
@@ -177,11 +178,15 @@ export function createGatewayClient(
       const fresh = await tokenRefresher();
       if (fresh) {
         accessToken = fresh;
+      } else {
+        // Refresher returned null — clear expired token rather than reusing it
+        accessToken = null;
       }
       return accessToken;
     } catch (err) {
       console.error("[gateway] Token refresh failed:", err);
-      return accessToken;
+      accessToken = null;
+      return null;
     }
   }
 
@@ -271,7 +276,9 @@ export function createGatewayClient(
 
     ws.onopen = () => {
       console.log("[gateway] WebSocket connected");
-      reconnectAttempts = 0;
+      // Don't reset reconnectAttempts here — wait for the "connected"
+      // message which confirms the gateway accepted our auth. Otherwise
+      // a rejected-then-closed WS resets the counter and loops forever.
     };
 
     ws.onmessage = (event) => {
@@ -289,17 +296,26 @@ export function createGatewayClient(
 
     ws.onclose = () => {
       console.log("[gateway] WebSocket disconnected");
+      const wasAuthenticated = wsAuthenticated;
       ws = null;
+      wsAuthenticated = false;
 
       // Notify any in-flight message that the connection was lost
-      failPendingCallbacks("Connection lost");
+      failPendingCallbacks(
+        wasAuthenticated ? "Connection lost" : "Authentication failed",
+      );
 
       // Attempt reconnection with a fresh token
       if (reconnectAttempts < maxReconnectAttempts && sessionId) {
         const currentSessionId = sessionId;
         reconnectAttempts++;
         setTimeout(async () => {
-          await refreshAccessToken();
+          const fresh = await refreshAccessToken();
+          // Don't reconnect if we couldn't get a valid token
+          if (!fresh) {
+            console.warn("[gateway] No valid token after refresh, stopping reconnect");
+            return;
+          }
           connectWebSocket(currentSessionId);
         }, reconnectDelay * reconnectAttempts);
       }
@@ -320,6 +336,7 @@ export function createGatewayClient(
       ws = null;
     }
     sessionId = null;
+    wsAuthenticated = false;
   }
 
   function handleWsMessage(msg: WsOutgoing): void {
@@ -327,6 +344,8 @@ export function createGatewayClient(
     switch (msg.type) {
       case "connected":
         console.log("[gateway] Session connected:", msg.session_id);
+        reconnectAttempts = 0;
+        wsAuthenticated = true;
         break;
 
       case "chat_chunk":
