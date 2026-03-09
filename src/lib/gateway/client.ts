@@ -91,6 +91,7 @@ export function createGatewayClient(
   let gateway: DiscoveredGateway | null = null;
   let sessionId: string | null = null;
   let accessToken: string | null = null;
+  let tokenRefresher: (() => Promise<string | null>) | null = null;
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
   let streamingContent = "";
@@ -169,6 +170,21 @@ export function createGatewayClient(
     return identity;
   }
 
+  /** Call the registered token refresher and update the stored token */
+  async function refreshAccessToken(): Promise<string | null> {
+    if (!tokenRefresher) return accessToken;
+    try {
+      const fresh = await tokenRefresher();
+      if (fresh) {
+        accessToken = fresh;
+      }
+      return accessToken;
+    } catch (err) {
+      console.error("[gateway] Token refresh failed:", err);
+      return accessToken;
+    }
+  }
+
   async function fetchWithAuth<T>(
     path: string,
     options: RequestInit = {},
@@ -190,10 +206,19 @@ export function createGatewayClient(
       headers.set("Authorization", `Bearer ${accessToken}`);
     }
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       ...options,
       headers,
     });
+
+    // On 401, try refreshing the token and retry once
+    if (response.status === 401 && tokenRefresher) {
+      const fresh = await refreshAccessToken();
+      if (fresh) {
+        headers.set("Authorization", `Bearer ${fresh}`);
+        response = await fetch(url, { ...options, headers });
+      }
+    }
 
     if (!response.ok) {
       const contentType = response.headers.get("content-type") || "";
@@ -269,14 +294,14 @@ export function createGatewayClient(
       // Notify any in-flight message that the connection was lost
       failPendingCallbacks("Connection lost");
 
-      // Attempt reconnection
+      // Attempt reconnection with a fresh token
       if (reconnectAttempts < maxReconnectAttempts && sessionId) {
         const currentSessionId = sessionId;
         reconnectAttempts++;
-        setTimeout(
-          () => connectWebSocket(currentSessionId),
-          reconnectDelay * reconnectAttempts,
-        );
+        setTimeout(async () => {
+          await refreshAccessToken();
+          connectWebSocket(currentSessionId);
+        }, reconnectDelay * reconnectAttempts);
       }
     };
   }
@@ -688,6 +713,10 @@ export function createGatewayClient(
     setAccessToken(token: string | null): void {
       accessToken = token;
     },
+
+    setTokenRefresher(refresher: (() => Promise<string | null>) | null): void {
+      tokenRefresher = refresher;
+    },
   };
 
   return client;
@@ -707,6 +736,8 @@ export interface GatewayClientExtensions {
   stopDiscovery(): Promise<void>;
   /** Set JWT access token for authenticated API calls (BYOK, etc) */
   setAccessToken(token: string | null): void;
+  /** Register a callback that returns a fresh token on demand */
+  setTokenRefresher(refresher: (() => Promise<string | null>) | null): void;
 }
 
 // Singleton instance
