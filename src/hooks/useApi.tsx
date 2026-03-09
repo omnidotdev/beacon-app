@@ -54,29 +54,44 @@ export function ApiProvider({ children, accessToken }: ApiProviderProps) {
     return () => extendedClient?.setTokenRefresher(null);
   }, [extendedClient]);
 
-  // Proactively refresh the token before it expires
+  // Proactively refresh the token before it expires, rescheduling after
+  // each refresh so the cycle continues for the lifetime of the session
   useEffect(() => {
     if (!accessToken || !extendedClient) return;
 
-    const expMs = getTokenExpMs(accessToken);
-    if (!expMs) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
 
-    // Refresh 60s before expiry
-    const refreshAt = expMs - Date.now() - 60_000;
-    if (refreshAt <= 0) {
-      // Already expired or about to — refresh immediately
-      refreshToken().then((fresh) => {
-        if (fresh) extendedClient.setAccessToken(fresh);
-      });
-      return;
+    function schedule(token: string) {
+      const expMs = getTokenExpMs(token);
+      if (!expMs) return;
+
+      const delay = Math.max(0, expMs - Date.now() - 60_000);
+
+      if (delay <= 0) {
+        doRefresh();
+        return;
+      }
+
+      timer = setTimeout(doRefresh, delay);
     }
 
-    const timer = setTimeout(async () => {
+    async function doRefresh() {
+      if (cancelled) return;
       const fresh = await refreshToken();
-      if (fresh) extendedClient.setAccessToken(fresh);
-    }, refreshAt);
+      if (cancelled) return;
+      if (fresh) {
+        extendedClient?.setAccessToken(fresh);
+        schedule(fresh);
+      }
+    }
 
-    return () => clearTimeout(timer);
+    schedule(accessToken);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [accessToken, extendedClient]);
 
   return (

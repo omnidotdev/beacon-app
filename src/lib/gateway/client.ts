@@ -711,7 +711,20 @@ export function createGatewayClient(
     },
 
     setAccessToken(token: string | null): void {
+      const changed = token !== accessToken;
       accessToken = token;
+
+      // Reconnect WS with fresh token so the gateway sees the new JWT
+      if (changed && token && sessionId && ws?.readyState === WebSocket.OPEN) {
+        const currentSessionId = sessionId;
+        ws.onopen = null;
+        ws.onmessage = null;
+        ws.onerror = null;
+        ws.onclose = null;
+        ws.close();
+        ws = null;
+        connectWebSocket(currentSessionId);
+      }
     },
 
     setTokenRefresher(refresher: (() => Promise<string | null>) | null): void {
