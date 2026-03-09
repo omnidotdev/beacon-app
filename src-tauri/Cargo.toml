@@ -47,3 +47,6 @@ directories = "6"
 lto = true
 codegen-units = 1
 panic = "abort"
+
+[dev-dependencies]
+cargo-husky = { version = "1", default-features = false, features = ["user-hooks"] }

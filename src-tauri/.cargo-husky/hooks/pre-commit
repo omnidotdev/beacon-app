@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+cd "src-tauri"
+echo '+cargo fmt -- --check'
+cargo fmt -- --check
+echo '+cargo clippy -- -D warnings'
+cargo clippy -- -D warnings
+echo '+cargo test'
+cargo test
