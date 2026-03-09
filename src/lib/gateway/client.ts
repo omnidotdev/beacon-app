@@ -523,52 +523,68 @@ export function createGatewayClient(
         isError: boolean,
       ) => void,
     ): Promise<void> {
-      // Ensure WebSocket is connected to the right session
-      if (sessionId !== conversationId || ws?.readyState !== WebSocket.OPEN) {
-        // Ensure we have a valid token before connecting. The proactive
-        // timer in useApi may have been throttled (background tab,
-        // sleep/wake) or may have failed, leaving the token null or expired.
-        if (tokenRefresher) {
-          let needsRefresh = !accessToken;
-          if (!needsRefresh && accessToken) {
-            try {
-              const payload = JSON.parse(atob(accessToken.split(".")[1]));
-              needsRefresh = (payload.exp as number) * 1000 < Date.now();
-            } catch {
-              needsRefresh = true;
-            }
-          }
-          if (needsRefresh) {
-            await refreshAccessToken();
-          }
-        }
-
-        connectWebSocket(conversationId);
-
-        // Wait for the gateway to confirm authentication (not just TCP open).
-        // The gateway validates the JWT after the WS upgrade and sends either
-        // a "connected" message (auth OK) or an "error" (auth failed).
-        let authOk = await new Promise<boolean>((resolve) => {
+      /** Wait for the gateway auth handshake ("connected" or "error") */
+      function waitForAuth(): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
           const timeout = setTimeout(() => resolve(false), 10_000);
           authWaiters.push((ok) => {
             clearTimeout(timeout);
             resolve(ok);
           });
         });
+      }
+
+      /** Refresh token if missing or expired */
+      async function ensureFreshToken(): Promise<void> {
+        if (!tokenRefresher) return;
+        let needsRefresh = !accessToken;
+        if (!needsRefresh && accessToken) {
+          try {
+            const payload = JSON.parse(atob(accessToken.split(".")[1]));
+            needsRefresh = (payload.exp as number) * 1000 < Date.now();
+          } catch {
+            needsRefresh = true;
+          }
+        }
+        if (needsRefresh) {
+          await refreshAccessToken();
+        }
+      }
+
+      /** Connect and wait for auth, retrying once with a fresh token on failure */
+      async function connectWithAuth(sid: string): Promise<boolean> {
+        await ensureFreshToken();
+        connectWebSocket(sid);
+        let ok = await waitForAuth();
 
         // Auth failed — refresh token and retry once
-        if (!authOk && tokenRefresher) {
+        if (!ok && tokenRefresher) {
           const fresh = await refreshAccessToken();
           if (fresh) {
-            connectWebSocket(conversationId);
-            authOk = await new Promise<boolean>((resolve) => {
-              const timeout = setTimeout(() => resolve(false), 10_000);
-              authWaiters.push((ok) => {
-                clearTimeout(timeout);
-                resolve(ok);
-              });
-            });
+            connectWebSocket(sid);
+            ok = await waitForAuth();
           }
+        }
+        return ok;
+      }
+
+      // Ensure WebSocket is connected to the right session
+      if (sessionId !== conversationId || ws?.readyState !== WebSocket.OPEN) {
+        const authOk = await connectWithAuth(conversationId);
+        if (!authOk || ws?.readyState !== WebSocket.OPEN) {
+          onError?.("Authentication failed. Please sign in again.");
+          return;
+        }
+      }
+
+      // WS is open but gateway hasn't confirmed auth yet (e.g. pre-connect
+      // or auto-reconnect raced ahead of the auth handshake)
+      if (!wsAuthenticated) {
+        let authOk = await waitForAuth();
+
+        // Auth rejected on the existing connection — reconnect with fresh token
+        if (!authOk) {
+          authOk = await connectWithAuth(conversationId);
         }
 
         if (!authOk || ws?.readyState !== WebSocket.OPEN) {
