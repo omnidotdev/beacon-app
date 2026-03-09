@@ -188,6 +188,7 @@ function ChatPage() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <ChatView
+        key={conversationId ?? "new"}
         messages={messages}
         isLoading={isLoading}
         isConnected={isConnected}

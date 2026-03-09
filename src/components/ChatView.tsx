@@ -232,6 +232,7 @@ function ChatView({
           >
             <textarea
               ref={inputRef}
+              autoFocus
               value={input}
               onChange={(e) => {
                 setInput(e.target.value);
