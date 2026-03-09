@@ -96,6 +96,8 @@ export function createGatewayClient(
   let reconnectAttempts = 0;
   let wsAuthenticated = false;
   let streamingContent = "";
+  // Resolvers for code awaiting the gateway auth handshake result
+  let authWaiters: ((ok: boolean) => void)[] = [];
   let nodeService: NodeRegistrationService | null = null;
   const messageCallbacks: Map<
     string,
@@ -323,6 +325,8 @@ export function createGatewayClient(
   }
 
   function failPendingCallbacks(reason: string): void {
+    for (const resolve of authWaiters) resolve(false);
+    authWaiters = [];
     for (const cb of messageCallbacks.values()) {
       cb.onError?.(reason);
     }
@@ -346,6 +350,8 @@ export function createGatewayClient(
         console.log("[gateway] Session connected:", msg.session_id);
         reconnectAttempts = 0;
         wsAuthenticated = true;
+        for (const resolve of authWaiters) resolve(true);
+        authWaiters = [];
         break;
 
       case "chat_chunk":
@@ -373,10 +379,17 @@ export function createGatewayClient(
         break;
 
       case "error":
-        for (const cb of messageCallbacks.values()) {
-          cb.onError?.(msg.message || "Unknown error");
+        // If auth waiters are pending, this is an auth rejection — resolve
+        // them as failed instead of propagating to message callbacks
+        if (authWaiters.length > 0) {
+          for (const resolve of authWaiters) resolve(false);
+          authWaiters = [];
+        } else {
+          for (const cb of messageCallbacks.values()) {
+            cb.onError?.(msg.message || "Unknown error");
+          }
+          messageCallbacks.clear();
         }
-        messageCallbacks.clear();
         streamingContent = "";
         break;
 
@@ -512,56 +525,56 @@ export function createGatewayClient(
     ): Promise<void> {
       // Ensure WebSocket is connected to the right session
       if (sessionId !== conversationId || ws?.readyState !== WebSocket.OPEN) {
-        // Refresh expired token before connecting so the gateway gets a valid
-        // JWT. The proactive timer in useApi may have been throttled (background
-        // tab, sleep/wake) and left us with a stale token.
-        if (accessToken && tokenRefresher) {
-          try {
-            const payload = JSON.parse(atob(accessToken.split(".")[1]));
-            if ((payload.exp as number) * 1000 < Date.now()) {
-              await refreshAccessToken();
+        // Ensure we have a valid token before connecting. The proactive
+        // timer in useApi may have been throttled (background tab,
+        // sleep/wake) or may have failed, leaving the token null or expired.
+        if (tokenRefresher) {
+          let needsRefresh = !accessToken;
+          if (!needsRefresh && accessToken) {
+            try {
+              const payload = JSON.parse(atob(accessToken.split(".")[1]));
+              needsRefresh = (payload.exp as number) * 1000 < Date.now();
+            } catch {
+              needsRefresh = true;
             }
-          } catch {
-            // Malformed token — try refreshing anyway
+          }
+          if (needsRefresh) {
             await refreshAccessToken();
           }
         }
 
         connectWebSocket(conversationId);
 
-        // Wait for WebSocket to actually open
-        await new Promise<void>((resolve, reject) => {
-          if (ws?.readyState === WebSocket.OPEN) {
-            resolve();
-            return;
-          }
-
-          const timeout = setTimeout(() => {
-            reject(new Error("WebSocket connection timeout"));
-          }, 5000);
-
-          const onOpen = () => {
+        // Wait for the gateway to confirm authentication (not just TCP open).
+        // The gateway validates the JWT after the WS upgrade and sends either
+        // a "connected" message (auth OK) or an "error" (auth failed).
+        let authOk = await new Promise<boolean>((resolve) => {
+          const timeout = setTimeout(() => resolve(false), 10_000);
+          authWaiters.push((ok) => {
             clearTimeout(timeout);
-            ws?.removeEventListener("open", onOpen);
-            ws?.removeEventListener("error", onErr);
-            resolve();
-          };
-          const onErr = () => {
-            clearTimeout(timeout);
-            ws?.removeEventListener("open", onOpen);
-            ws?.removeEventListener("error", onErr);
-            reject(new Error("WebSocket connection failed"));
-          };
-
-          ws?.addEventListener("open", onOpen);
-          ws?.addEventListener("error", onErr);
-        }).catch((err) => {
-          onError?.(err.message);
-          return;
+            resolve(ok);
+          });
         });
 
-        // If connection failed, bail out
-        if (ws?.readyState !== WebSocket.OPEN) return;
+        // Auth failed — refresh token and retry once
+        if (!authOk && tokenRefresher) {
+          const fresh = await refreshAccessToken();
+          if (fresh) {
+            connectWebSocket(conversationId);
+            authOk = await new Promise<boolean>((resolve) => {
+              const timeout = setTimeout(() => resolve(false), 10_000);
+              authWaiters.push((ok) => {
+                clearTimeout(timeout);
+                resolve(ok);
+              });
+            });
+          }
+        }
+
+        if (!authOk || ws?.readyState !== WebSocket.OPEN) {
+          onError?.("Authentication failed. Please sign in again.");
+          return;
+        }
       }
 
       // Register callbacks
