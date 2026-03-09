@@ -512,6 +512,21 @@ export function createGatewayClient(
     ): Promise<void> {
       // Ensure WebSocket is connected to the right session
       if (sessionId !== conversationId || ws?.readyState !== WebSocket.OPEN) {
+        // Refresh expired token before connecting so the gateway gets a valid
+        // JWT. The proactive timer in useApi may have been throttled (background
+        // tab, sleep/wake) and left us with a stale token.
+        if (accessToken && tokenRefresher) {
+          try {
+            const payload = JSON.parse(atob(accessToken.split(".")[1]));
+            if ((payload.exp as number) * 1000 < Date.now()) {
+              await refreshAccessToken();
+            }
+          } catch {
+            // Malformed token — try refreshing anyway
+            await refreshAccessToken();
+          }
+        }
+
         connectWebSocket(conversationId);
 
         // Wait for WebSocket to actually open
