@@ -1,4 +1,7 @@
-import { ensureFreshAccessToken } from "@omnidotdev/providers";
+import {
+  ensureFreshAccessToken,
+  isInvalidGrant,
+} from "@omnidotdev/providers";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest, getRequestHeaders } from "@tanstack/react-start/server";
 
@@ -8,22 +11,6 @@ import {
   AUTH_CLIENT_ID,
   BASE_URL,
 } from "@/lib/config/env.config";
-
-// Leeway in seconds before actual expiry to trigger refresh early
-const EXPIRY_LEEWAY_S = 60;
-
-/**
- * Check if a JWT is expired (or within leeway of expiring)
- */
-function isJwtExpired(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    if (!payload.exp) return false;
-    return payload.exp - EXPIRY_LEEWAY_S < Date.now() / 1000;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Fetch the current user session
@@ -53,40 +40,11 @@ export const fetchSession = createServerFn().handler(async () => {
         }),
     });
 
-    let idToken = tokenResult?.idToken;
-
-    // ensureFreshAccessToken only checks accessTokenExpiresAt, but beacon
-    // uses the id_token (JWT) for downstream auth. The id_token can expire
-    // independently, so check its exp claim and force refresh when needed.
-    if (idToken && isJwtExpired(idToken)) {
-      try {
-        const refreshResult = await auth.api.refreshToken({
-          body: { providerId: "omni" },
-          headers,
-        });
-        idToken = refreshResult?.idToken ?? undefined;
-      } catch (err) {
-        console.warn("[fetchSession] id_token refresh failed:", err);
-      }
-    }
-
-    accessToken = idToken ?? tokenResult?.accessToken;
+    accessToken = tokenResult?.idToken ?? tokenResult?.accessToken;
   } catch (err) {
     console.error("[fetchSession] Error getting access token:", err);
 
-    // If the refresh token is permanently invalid, clear the stale session
-    // so the UI redirects to sign-in instead of showing a broken auth state
-    const isInvalidGrant =
-      err instanceof Error &&
-      (err.message.includes("invalid_grant") ||
-        err.message.includes("invalid refresh token") ||
-        ("cause" in err &&
-          typeof err.cause === "object" &&
-          err.cause !== null &&
-          "error" in err.cause &&
-          (err.cause as { error: string }).error === "invalid_grant"));
-
-    if (isInvalidGrant) {
+    if (isInvalidGrant(err)) {
       console.warn("[fetchSession] Invalid refresh token, clearing session");
       try {
         await auth.api.signOut({ headers });
