@@ -12,6 +12,16 @@ import {
   BASE_URL,
 } from "@/lib/config/env.config";
 
+/** Check if a JWT's exp claim has passed */
+function isJwtExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return (payload.exp as number) * 1000 < Date.now();
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Fetch the current user session
  */
@@ -41,6 +51,45 @@ export const fetchSession = createServerFn().handler(async () => {
     });
 
     accessToken = tokenResult?.idToken ?? tokenResult?.accessToken;
+
+    // ensureFreshAccessToken silently swallows refresh failures and returns
+    // the original (expired) token. Detect that and force a second refresh.
+    if (accessToken && isJwtExpired(accessToken)) {
+      console.warn(
+        "[fetchSession] id_token still expired after ensureFreshAccessToken, forcing refresh",
+      );
+      try {
+        const refreshed = await auth.api.refreshToken({
+          body: { providerId: "omni" },
+          headers,
+        });
+        const freshToken = refreshed?.idToken ?? refreshed?.accessToken;
+        if (freshToken && !isJwtExpired(freshToken)) {
+          accessToken = freshToken;
+        } else {
+          console.error(
+            "[fetchSession] forced refresh did not yield a fresh id_token",
+            {
+              hasIdToken: !!refreshed?.idToken,
+              hasAccessToken: !!refreshed?.accessToken,
+              stillExpired: freshToken
+                ? isJwtExpired(freshToken)
+                : "no token",
+            },
+          );
+        }
+      } catch (refreshErr) {
+        console.error("[fetchSession] forced refresh failed:", refreshErr);
+        if (isInvalidGrant(refreshErr)) {
+          try {
+            await auth.api.signOut({ headers });
+          } catch {
+            // Sign-out may fail if session is already corrupt
+          }
+          return { session: null };
+        }
+      }
+    }
   } catch (err) {
     console.error("[fetchSession] Error getting access token:", err);
 
