@@ -11,7 +11,12 @@
   },
   "license": "MIT",
   "author": "Omni <team@omni.dev>",
-  "keywords": ["ai", "voice", "assistant", "tauri"],
+  "keywords": [
+    "ai",
+    "voice",
+    "assistant",
+    "tauri"
+  ],
   "scripts": {
     "dev": "vite",
     "dev:web": "vite dev",
@@ -28,7 +33,9 @@
     "format": "biome format --write",
     "lint": "biome lint",
     "check": "biome check --diagnostic-level=error src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky",
+    "knip": "knip-bun"
   },
   "dependencies": {
     "@noble/ed25519": "^2.0.0",
@@ -75,6 +82,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.2",
+    "husky": "^9.1.7",
+    "knip": "^5.86.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^7.3.0",
