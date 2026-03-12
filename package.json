@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/omnidotdev/beacon-app.git"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "Omni <team@omni.dev>",
   "keywords": [
     "ai",
