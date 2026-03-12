@@ -3,7 +3,7 @@ name = "beacon-app"
 version = "0.1.0"
 description = "Beacon unified app - voice-first AI assistant"
 authors = ["Omni <team@omni.dev>"]
-license = "MIT"
+license = "Apache-2.0"
 repository = "https://github.com/omnidotdev/beacon"
 edition = "2021"
 
