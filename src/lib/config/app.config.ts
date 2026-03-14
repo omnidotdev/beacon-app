@@ -4,7 +4,7 @@
 const app = {
   name: "Beacon",
   description:
-    "AI-powered voice and messaging gateway for personalized AI assistants",
+    "An always-on AI assistant runtime that connects to every channel — voice, Discord, Telegram, Slack, and more. Deploy a single binary and your assistant is everywhere.",
   links: {
     website: "https://beacon.omni.dev",
     console: "https://console.omni.dev",
