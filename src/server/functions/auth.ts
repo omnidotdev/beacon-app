@@ -1,7 +1,7 @@
 import {
   ensureFreshAccessToken,
   isInvalidGrant,
-} from "@omnidotdev/providers";
+} from "@omnidotdev/providers/auth";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest, getRequestHeaders } from "@tanstack/react-start/server";
 

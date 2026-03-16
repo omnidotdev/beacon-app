@@ -6,6 +6,8 @@ const appId = import.meta.env.VITE_AETHER_APP_ID as string | undefined;
 
 // Only instantiate when both env vars are present
 const billingProvider: BillingProvider | null =
-  baseUrl && appId ? createBillingProvider({ baseUrl, appId }) : null;
+  baseUrl && appId
+    ? createBillingProvider({ provider: "aether", baseUrl, appId })
+    : null;
 
 export default billingProvider;
