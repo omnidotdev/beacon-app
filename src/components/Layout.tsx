@@ -7,12 +7,12 @@ function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden">
+    <div className="relative flex h-dvh w-full overflow-hidden">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          className="absolute inset-0 z-40 bg-black/60 md:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-label="Close menu"
         />
