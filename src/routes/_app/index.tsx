@@ -138,7 +138,7 @@ function FeatureCard({ to, icon, title, description }: FeatureCardProps) {
   return (
     <Link
       to={to}
-      className="glass-panel group flex items-center gap-4 rounded-2xl p-4 transition-all hover:glow-soft"
+      className="glass-panel group flex items-center gap-4 overflow-hidden rounded-2xl p-4 transition-all hover:glow-soft"
     >
       <span className="text-muted/70 transition-colors group-hover:text-primary">
         {icon}
