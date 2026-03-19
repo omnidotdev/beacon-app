@@ -7,7 +7,7 @@ function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-dvh w-screen overflow-hidden">
+    <div className="flex h-dvh w-full overflow-hidden">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <button
