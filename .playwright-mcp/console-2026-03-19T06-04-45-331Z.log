@@ -1,0 +1,5 @@
+[    3933ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/persona:0
+[    3956ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/personas:0
+[    4154ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/status:0
+[    5000ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/persona:0
+[    6047ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/personas:0

@@ -2,6 +2,7 @@ import type { QueryKey } from "@tanstack/react-query";
 import { MutationCache, matchQuery, QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
+import { DefaultCatchBoundary, NotFound } from "@/components/layout";
 import { routeTree } from "@/routeTree.gen";
 
 declare module "@tanstack/react-query" {
@@ -53,6 +54,8 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultPreload: "intent",
+    defaultErrorComponent: DefaultCatchBoundary,
+    defaultNotFoundComponent: () => <NotFound />,
   });
 
   setupRouterSsrQueryIntegration({

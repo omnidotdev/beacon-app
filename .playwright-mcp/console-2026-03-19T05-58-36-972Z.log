@@ -1,0 +1,23 @@
+[     994ms] Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at li (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:31335)
+    at cm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:82946)
+    at Hm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:117291)
+    at MS (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:117263)
+    at CS (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:117116)
+    at Lm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:112588)
+    at Wm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:124810)
+    at MessagePort.Kt (https://beacon.omni.dev/assets/main-DmfErU6n.js:2:10422)
+[   81658ms] Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at li (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:31335)
+    at cm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:82946)
+    at Hm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:117291)
+    at MS (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:117263)
+    at CS (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:117116)
+    at Lm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:112588)
+    at Wm (https://beacon.omni.dev/assets/main-DmfErU6n.js:9:124810)
+    at MessagePort.Kt (https://beacon.omni.dev/assets/main-DmfErU6n.js:2:10422)
+[   82590ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/persona:0
+[   82624ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/personas:0
+[   82637ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/status:0
+[   83709ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/persona:0
+[   84778ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://beacon.omni.dev/gateway/api/personas:0

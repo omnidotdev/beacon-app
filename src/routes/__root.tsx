@@ -11,6 +11,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "sonner";
+import { DefaultCatchBoundary } from "@/components/layout";
 import { ApiProvider } from "@/hooks";
 import appCss from "@/index.css?url";
 import app from "@/lib/config/app.config";
@@ -96,6 +97,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       ],
     };
   },
+  errorComponent: DefaultCatchBoundary,
   component: RootComponent,
 });
 
