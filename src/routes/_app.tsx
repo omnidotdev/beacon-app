@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components";
 import { isCloudDeployment } from "@/lib/api";
 import signIn from "@/lib/auth/signIn";
+import signOut from "@/lib/auth/signOut";
 import { EventsProvider } from "@/providers/EventsProvider";
 
 // Noop provider for client-side (main @omnidotdev/providers entry requires Node.js)
@@ -52,9 +53,19 @@ function SignInRedirect() {
 
 function AuthLayout() {
   const { session } = useRouteContext({ from: "__root__" });
+  const isCloud = isCloudDeployment();
+
+  // Clean up zombie sessions where the OAuth cookie exists but the
+  // access token is missing (user not provisioned in the app DB)
+  useEffect(() => {
+    if (isCloud && session?.user && !session.accessToken) {
+      signOut();
+    }
+  }, [isCloud, session]);
 
   // Only enforce auth in cloud deployment mode
-  if (isCloudDeployment() && !session) {
+  // Require an access token, not just a session cookie
+  if (isCloud && (!session || !session.accessToken)) {
     return <SignInRedirect />;
   }
 

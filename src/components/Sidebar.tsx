@@ -99,7 +99,9 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   });
 
   const isCloud = isCloudDeployment();
-  const isAuthenticated = !!session?.user;
+  // Require a valid access token, not just an OAuth cookie, to avoid
+  // zombie sessions where the user object exists but DB provisioning failed
+  const isAuthenticated = !!session?.user?.id && !!session?.accessToken;
   const showUserSection = isAuthenticated;
 
   const handlePersonaSwitch = (personaId: string) => {
