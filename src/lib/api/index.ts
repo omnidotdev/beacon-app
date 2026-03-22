@@ -12,8 +12,6 @@ import { createHttpClient } from "./http";
 import { createIpcClient } from "./ipc";
 import type { ApiClient } from "./types";
 
-// Re-export gateway types for convenience
-export type { GatewayClientExtensions } from "../gateway";
 export * from "./types";
 
 let clientInstance: ApiClient | null = null;
@@ -41,24 +39,6 @@ export function getCloudGatewayUrl(): string {
 }
 
 /**
- * Configure whether to use gateway mode (local-first) or legacy mode
- */
-export function setGatewayMode(enabled: boolean): void {
-  if (clientInstance && enabled !== useGatewayMode) {
-    // Clear existing client if mode changes
-    clientInstance = null;
-  }
-  useGatewayMode = enabled;
-}
-
-/**
- * Check if gateway mode is enabled
- */
-export function isGatewayMode(): boolean {
-  return useGatewayMode;
-}
-
-/**
  * Create an API client appropriate for the current platform/mode
  * Returns a singleton instance
  */
@@ -73,19 +53,6 @@ export function createApiClient(): ApiClient {
     clientInstance = isNative() ? createIpcClient() : createHttpClient();
   }
 
-  return clientInstance;
-}
-
-/**
- * Get the current API client instance
- * Throws if not yet created
- */
-export function getApiClient(): ApiClient {
-  if (!clientInstance) {
-    throw new Error(
-      "API client not initialized. Call createApiClient() first.",
-    );
-  }
   return clientInstance;
 }
 

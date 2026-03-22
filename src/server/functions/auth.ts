@@ -115,7 +115,7 @@ export const fetchSession = createServerFn().handler(async () => {
 /**
  * Build the IDP end_session URL for federated logout
  */
-export function getIdpLogoutUrl(): string | null {
+function getIdpLogoutUrl(): string | null {
   if (!AUTH_BASE_URL || !AUTH_CLIENT_ID) return null;
 
   const endSessionUrl = new URL(`${AUTH_BASE_URL}/oauth2/endsession`);
@@ -124,16 +124,6 @@ export function getIdpLogoutUrl(): string | null {
 
   return endSessionUrl.toString();
 }
-
-/**
- * Fetch the IDP end_session URL (no auth required)
- *
- * Used by the login page to offer "Use a different account" after
- * consent denial, clearing the IDP session before retrying OAuth
- */
-export const fetchIdpLogoutUrl = createServerFn().handler(async () => {
-  return getIdpLogoutUrl();
-});
 
 /**
  * Sign out from the local session (server-side)

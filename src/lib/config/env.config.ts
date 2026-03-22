@@ -14,7 +14,6 @@ export const {
   VITE_BASE_URL: BASE_URL,
   VITE_API_BASE_URL: API_BASE_URL,
   VITE_AUTH_BASE_URL: AUTH_BASE_URL,
-  VITE_GATEWAY_URL: GATEWAY_URL,
   VITE_SYNAPSE_API_URL: SYNAPSE_API_URL,
   VITE_GATEKEEPER_URL: GATEKEEPER_URL,
   // Auth (server-side secrets)
@@ -36,8 +35,3 @@ export const API_GRAPHQL_URL = `${API_BASE}/graphql`;
 
 // Environment helpers
 export const isDevEnv = import.meta.env.DEV;
-
-/**
- * Check if OAuth is configured
- */
-export const hasOAuth = !!AUTH_CLIENT_ID && !!AUTH_CLIENT_SECRET;

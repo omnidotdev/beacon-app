@@ -1,1 +1,0 @@
-export { fetchSession } from "./auth";

@@ -35,16 +35,7 @@ export interface InstallSkillParams {
   skill_id: string;
 }
 
-// Sessions / Conversations
-
-export interface Session {
-  id: string;
-  user_id: string;
-  channel: string;
-  channel_id: string;
-  persona_id: string;
-  created_at: string;
-}
+// Conversations
 
 export interface Conversation {
   id: string;
@@ -59,19 +50,6 @@ export interface Message {
   content: string;
   timestamp: number;
   isError?: boolean;
-}
-
-// Users
-
-export interface User {
-  id: string;
-  life_json_path: string | null;
-  created_at: string;
-}
-
-export interface CreateUserParams {
-  id: string;
-  life_json_path?: string;
 }
 
 // Persona

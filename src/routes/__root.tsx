@@ -8,7 +8,6 @@ import {
   Scripts,
   useRouteContext,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "sonner";
 import { DefaultCatchBoundary } from "@/components/layout";
@@ -158,11 +157,6 @@ function RootDocument({ children }: PropsWithChildren) {
           <TanStackDevtools
             config={{ triggerHidden: true }}
             plugins={[
-              {
-                name: "TanStack Router",
-                render: <TanStackRouterDevtoolsPanel />,
-                defaultOpen: true,
-              },
               {
                 name: "TanStack Query",
                 render: <ReactQueryDevtoolsPanel />,

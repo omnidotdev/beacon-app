@@ -15,13 +15,6 @@ export function isNative(): boolean {
 }
 
 /**
- * Check if running in web mode (not Tauri)
- */
-export function isWeb(): boolean {
-  return !isNative();
-}
-
-/**
  * Get the current platform type
  */
 export function getPlatform(): "desktop" | "mobile" | "web" {
@@ -34,14 +27,4 @@ export function getPlatform(): "desktop" | "mobile" | "web" {
   }
 
   return "desktop";
-}
-
-/**
- * Check if voice features are available
- * Voice is available on all platforms via the gateway API
- */
-export function hasVoiceSupport(): boolean {
-  // Voice is now available on web via gateway API endpoints
-  // The actual availability check happens in useVoice via api.voice.getState()
-  return true;
 }

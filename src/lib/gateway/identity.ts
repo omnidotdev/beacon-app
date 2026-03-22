@@ -40,7 +40,7 @@ export interface DeviceIdentity {
 /**
  * Generate a new device identity with a random Ed25519 keypair
  */
-export async function generateIdentity(name: string): Promise<DeviceIdentity> {
+async function generateIdentity(name: string): Promise<DeviceIdentity> {
   // Generate random private key
   const privateKey = ed.utils.randomPrivateKey();
   const publicKey = await ed.getPublicKeyAsync(privateKey);
@@ -80,58 +80,6 @@ export async function loadOrCreateIdentity(
 
   console.log(`[identity] Created new device identity: ${identity.deviceId}`);
   return identity;
-}
-
-/**
- * Sign a payload with the device's private key
- */
-export async function signPayload(
-  identity: DeviceIdentity,
-  payload: Uint8Array | string,
-): Promise<string> {
-  const privateKey = base64Decode(identity.privateKey);
-  const message =
-    typeof payload === "string" ? new TextEncoder().encode(payload) : payload;
-
-  const signature = await ed.signAsync(message, privateKey);
-  return base64Encode(signature);
-}
-
-/**
- * Verify a signature from another device
- */
-export async function verifySignature(
-  publicKey: string,
-  payload: Uint8Array | string,
-  signature: string,
-): Promise<boolean> {
-  try {
-    const pubKeyBytes = base64Decode(publicKey);
-    const sigBytes = base64Decode(signature);
-    const message =
-      typeof payload === "string" ? new TextEncoder().encode(payload) : payload;
-
-    return await ed.verifyAsync(sigBytes, message, pubKeyBytes);
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Get a public-only copy of the identity (safe to share)
- */
-export function getPublicIdentity(
-  identity: DeviceIdentity,
-): Omit<DeviceIdentity, "privateKey"> {
-  const { privateKey: _, ...publicData } = identity;
-  return publicData;
-}
-
-/**
- * Get short device ID (first 8 characters)
- */
-export function getShortId(identity: DeviceIdentity): string {
-  return identity.deviceId.slice(0, 8);
 }
 
 // === Storage helpers ===
@@ -202,11 +150,6 @@ async function computeDeviceId(publicKey: Uint8Array): Promise<string> {
 function base64Encode(data: Uint8Array): string {
   // Use standard base64 encoding
   return btoa(String.fromCharCode(...data));
-}
-
-function base64Decode(data: string): Uint8Array {
-  const binary = atob(data);
-  return new Uint8Array(binary.split("").map((c) => c.charCodeAt(0)));
 }
 
 function detectPlatform(): string {

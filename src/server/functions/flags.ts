@@ -24,7 +24,7 @@ function getFlagProvider() {
   return flags;
 }
 
-export const FLAGS = {
+const FLAGS = {
   MAINTENANCE: "beacon-app-maintenance-mode",
 } as const;
 

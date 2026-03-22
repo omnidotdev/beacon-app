@@ -52,7 +52,7 @@ const LAST_GATEWAY_KEY = "beacon_last_gateway";
 /**
  * Gateway discovery manager
  */
-export class GatewayDiscovery {
+class GatewayDiscovery {
   private connectionState: ConnectionState = { status: "disconnected" };
   private listeners: Set<(state: ConnectionState) => void> = new Set();
   private discoveredGateways: Map<string, DiscoveredGateway> = new Map();

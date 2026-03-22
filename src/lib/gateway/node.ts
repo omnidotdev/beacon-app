@@ -282,8 +282,4 @@ class NodeRegistrationService {
   }
 }
 
-export { getDeviceCapabilities, getDeviceFamily, NodeRegistrationService };
-
-export type { NodeRegistrationConfig };
-
-export default NodeRegistrationService;
+export { NodeRegistrationService };

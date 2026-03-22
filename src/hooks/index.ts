@@ -38,4 +38,3 @@ export {
   useUninstallSkill,
 } from "./useSkills";
 export { useTheme } from "./useTheme";
-export { useVoice } from "./useVoice";

@@ -66,7 +66,7 @@ interface WsOutgoing {
   is_error?: boolean;
 }
 
-export interface GatewayClientConfig {
+interface GatewayClientConfig {
   // Default device name for new identities
   defaultDeviceName?: string;
 
@@ -78,7 +78,7 @@ export interface GatewayClientConfig {
 /**
  * Create a gateway client that connects to the beacon-gateway
  */
-export function createGatewayClient(
+function createGatewayClient(
   config: GatewayClientConfig = {},
 ): ApiClient & GatewayClientExtensions {
   const {

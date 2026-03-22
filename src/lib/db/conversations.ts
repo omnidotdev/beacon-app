@@ -57,25 +57,6 @@ export async function getConversations(
   return results;
 }
 
-export async function getConversation(
-  id: string,
-): Promise<Conversation | null> {
-  const conv = await db.conversations.get(id);
-  if (!conv) return null;
-
-  const lastMessage = await db.messages
-    .where("conversationId")
-    .equals(id)
-    .reverse()
-    .sortBy("timestamp")
-    .then((msgs) => msgs[0]?.content ?? null);
-
-  return {
-    ...toApiConversation(conv),
-    lastMessage,
-  };
-}
-
 export async function createConversation(
   personaId: string,
   title?: string,
@@ -160,44 +141,6 @@ export async function addMessage(
 
 export async function getMessageCount(conversationId: string): Promise<number> {
   return db.messages.where("conversationId").equals(conversationId).count();
-}
-
-export async function updateMessage(
-  id: string,
-  content: string,
-): Promise<void> {
-  await db.messages.update(id, { content });
-}
-
-export async function deleteMessage(id: string): Promise<void> {
-  await db.messages.delete(id);
-}
-
-// Bulk operations for sync
-export async function importConversation(
-  conversation: Conversation,
-  messages: Message[],
-  personaId: string,
-): Promise<void> {
-  await db.transaction("rw", [db.conversations, db.messages], async () => {
-    await db.conversations.put({
-      id: conversation.id,
-      title: conversation.title,
-      personaId,
-      createdAt: conversation.updatedAt,
-      updatedAt: conversation.updatedAt,
-    });
-
-    for (const msg of messages) {
-      await db.messages.put({
-        id: msg.id,
-        conversationId: conversation.id,
-        role: msg.role,
-        content: msg.content,
-        timestamp: msg.timestamp,
-      });
-    }
-  });
 }
 
 export async function clearAllData(): Promise<void> {
