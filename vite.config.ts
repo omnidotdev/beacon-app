@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
+import { devtools } from "@tanstack/devtools-vite";
 import { nitroV2Plugin } from "@tanstack/nitro-v2-vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
@@ -16,7 +16,7 @@ const isTauri = !!host;
  */
 export default defineConfig(({ command }) => ({
   plugins: [
-    TanStackRouterVite(),
+    devtools(),
     // Use mkcert in development for HTTPS
     command === "serve" && !isTauri && mkcert(),
     // Only use SSR plugins for web mode

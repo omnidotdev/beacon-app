@@ -1,6 +1,7 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -15,10 +16,10 @@ import { ApiProvider } from "@/hooks";
 import appCss from "@/index.css?url";
 import app from "@/lib/config/app.config";
 import { isDevEnv } from "@/lib/config/env.config";
-import { fetchMaintenanceMode } from "@/server/functions/flags";
 import { isNative } from "@/lib/platform";
 import createMetaTags from "@/lib/util/createMetaTags";
 import { fetchSession } from "@/server/functions/auth";
+import { fetchMaintenanceMode } from "@/server/functions/flags";
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -157,6 +158,10 @@ function RootDocument({ children }: PropsWithChildren) {
           <TanStackDevtools
             config={{ triggerHidden: true }}
             plugins={[
+              {
+                name: "TanStack Router",
+                render: <TanStackRouterDevtoolsPanel />,
+              },
               {
                 name: "TanStack Query",
                 render: <ReactQueryDevtoolsPanel />,
