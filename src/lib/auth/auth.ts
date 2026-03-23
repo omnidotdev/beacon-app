@@ -21,7 +21,7 @@ if (AUTH_CLIENT_ID && AUTH_CLIENT_SECRET && AUTH_BASE_URL) {
     clientId: AUTH_CLIENT_ID,
     clientSecret: AUTH_CLIENT_SECRET,
     discoveryUrl: `${AUTH_BASE_URL}/.well-known/openid-configuration`,
-    scopes: ["openid", "profile", "email", "offline_access"],
+    scopes: ["openid", "profile", "email", "offline_access", "organization"],
     accessType: "offline",
     pkce: true,
     mapProfileToUser: (profile) => ({
