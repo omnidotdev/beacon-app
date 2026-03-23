@@ -5,7 +5,12 @@ import { Layout } from "@/components";
 import { isCloudDeployment } from "@/lib/api";
 import signIn from "@/lib/auth/signIn";
 import signOut from "@/lib/auth/signOut";
+import {
+  OrganizationProvider,
+} from "@/lib/context/organization.context";
 import { EventsProvider } from "@/providers/EventsProvider";
+
+import type { Organization } from "@/lib/context/organization.context";
 
 // Noop provider for client-side (main @omnidotdev/providers entry requires Node.js)
 const eventsProvider = {
@@ -52,7 +57,10 @@ function SignInRedirect() {
 }
 
 function AuthLayout() {
-  const { session } = useRouteContext({ from: "__root__" });
+  const { session, organizations } = useRouteContext({ strict: false }) as {
+    session?: { user?: { id: string }; accessToken?: string } | null;
+    organizations?: Organization[];
+  };
   const isCloud = isCloudDeployment();
 
   // Clean up zombie sessions where the OAuth cookie exists but the
@@ -71,7 +79,9 @@ function AuthLayout() {
 
   return (
     <EventsProvider provider={eventsProvider}>
-      <Layout />
+      <OrganizationProvider organizations={organizations ?? []}>
+        <Layout />
+      </OrganizationProvider>
     </EventsProvider>
   );
 }

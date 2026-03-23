@@ -35,7 +35,7 @@
     "check": "biome check --diagnostic-level=error src",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "knip": "knip-bun"
+    "knip": "knip-bun --tags=-knipignore"
   },
   "dependencies": {
     "@noble/ed25519": "^2.0.0",
@@ -53,6 +53,7 @@
     "better-auth": "1.4.10",
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",
+    "jose": "^6.2.2",
     "lucide-react": "^0.469",
     "react": "^19",
     "react-dom": "^19",

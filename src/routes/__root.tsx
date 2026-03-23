@@ -1,7 +1,6 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -9,6 +8,7 @@ import {
   Scripts,
   useRouteContext,
 } from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "sonner";
 import { DefaultCatchBoundary } from "@/components/layout";
@@ -52,11 +52,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     // In Tauri mode, server functions are not available
     // Auth is handled differently (or not at all for local mode)
     if (isNative()) {
-      return { session: null, isMaintenanceMode: false };
+      return { session: null, organizations: [], isMaintenanceMode: false };
     }
 
     try {
-      const { session } = await fetchSession();
+      const { session, organizations } = await fetchSession();
 
       // Pass user context to Unleash for @omni.dev admin bypass
       const context = session?.user?.email
@@ -67,12 +67,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       });
 
       // Skip auth when maintenance page is shown
-      if (isMaintenanceMode) return { session: null, isMaintenanceMode };
+      if (isMaintenanceMode)
+        return { session: null, organizations: [], isMaintenanceMode };
 
-      return { session, isMaintenanceMode };
+      return { session, organizations, isMaintenanceMode };
     } catch {
       // Server function failed, likely in Tauri mode
-      return { session: null, isMaintenanceMode: false };
+      return { session: null, organizations: [], isMaintenanceMode: false };
     }
   },
   head: () => {

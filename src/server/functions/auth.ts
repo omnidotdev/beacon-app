@@ -4,6 +4,7 @@ import {
 } from "@omnidotdev/providers/auth";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest, getRequestHeaders } from "@tanstack/react-start/server";
+import { decodeJwt } from "jose";
 
 import auth from "@/lib/auth/auth";
 import {
@@ -11,6 +12,9 @@ import {
   AUTH_CLIENT_ID,
   BASE_URL,
 } from "@/lib/config/env.config";
+import { parseOrganizationClaims } from "@/lib/context/organization.context";
+
+import type { Organization } from "@/lib/context/organization.context";
 
 /** Check if a JWT's exp claim has passed */
 function isJwtExpired(token: string): boolean {
@@ -29,28 +33,49 @@ export const fetchSession = createServerFn().handler(async () => {
   const headers = getRequestHeaders();
   const session = await auth.api.getSession({ headers });
 
-  if (!session) return { session: null };
+  if (!session) return { session: null, organizations: [] as Organization[] };
 
   // Get ID token (JWT) for downstream API calls
   // The gateway validates JWTs against Gatekeeper's JWKS, so we need the
   // OIDC ID token (a signed JWT), not the opaque OAuth access token
   let accessToken: string | undefined;
+  let organizations: Organization[] = [];
 
   try {
     const tokenResult = await ensureFreshAccessToken({
-      getAccessToken: () =>
-        auth.api.getAccessToken({
-          body: { providerId: "omni" },
-          headers,
-        }),
-      refreshToken: () =>
-        auth.api.refreshToken({
-          body: { providerId: "omni" },
-          headers,
-        }),
+      getAccessToken: async () => {
+        try {
+          return await auth.api.getAccessToken({
+            body: { providerId: "omni" },
+            headers,
+          });
+        } catch {
+          return null;
+        }
+      },
+      refreshToken: async () => {
+        try {
+          return await auth.api.refreshToken({
+            body: { providerId: "omni" },
+            headers,
+          });
+        } catch {
+          return null;
+        }
+      },
     });
 
     accessToken = tokenResult?.idToken ?? tokenResult?.accessToken;
+
+    // Decode org claims from the ID token — signature was already verified
+    // during the OAuth flow; the token is retrieved from our own trusted
+    // auth storage so re-verification is unnecessary
+    if (tokenResult?.idToken) {
+      const payload = decodeJwt(tokenResult.idToken);
+      organizations = parseOrganizationClaims(
+        payload as Record<string, unknown>,
+      );
+    }
 
     // ensureFreshAccessToken silently swallows refresh failures and returns
     // the original (expired) token. Detect that and force a second refresh.
@@ -72,9 +97,7 @@ export const fetchSession = createServerFn().handler(async () => {
             {
               hasIdToken: !!refreshed?.idToken,
               hasAccessToken: !!refreshed?.accessToken,
-              stillExpired: freshToken
-                ? isJwtExpired(freshToken)
-                : "no token",
+              stillExpired: freshToken ? isJwtExpired(freshToken) : "no token",
             },
           );
         }
@@ -86,7 +109,7 @@ export const fetchSession = createServerFn().handler(async () => {
           } catch {
             // Sign-out may fail if session is already corrupt
           }
-          return { session: null };
+          return { session: null, organizations: [] as Organization[] };
         }
       }
     }
@@ -100,7 +123,7 @@ export const fetchSession = createServerFn().handler(async () => {
       } catch {
         // Sign-out may fail if session is already corrupt
       }
-      return { session: null };
+      return { session: null, organizations: [] as Organization[] };
     }
   }
 
@@ -109,6 +132,7 @@ export const fetchSession = createServerFn().handler(async () => {
       ...session,
       accessToken,
     },
+    organizations,
   };
 });
 
