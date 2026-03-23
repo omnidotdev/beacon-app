@@ -12,9 +12,8 @@ import {
   AUTH_CLIENT_ID,
   BASE_URL,
 } from "@/lib/config/env.config";
-import { parseOrganizationClaims } from "@/lib/context/organization.context";
-
 import type { Organization } from "@/lib/context/organization.context";
+import { parseOrganizationClaims } from "@/lib/context/organization.context";
 
 /** Check if a JWT's exp claim has passed */
 function isJwtExpired(token: string): boolean {
@@ -142,7 +141,7 @@ export const fetchSession = createServerFn().handler(async () => {
 function getIdpLogoutUrl(): string | null {
   if (!AUTH_BASE_URL || !AUTH_CLIENT_ID) return null;
 
-  const endSessionUrl = new URL(`${AUTH_BASE_URL}/oauth2/endsession`);
+  const endSessionUrl = new URL(`${AUTH_BASE_URL}/oauth2/end-session`);
   endSessionUrl.searchParams.set("client_id", AUTH_CLIENT_ID);
   endSessionUrl.searchParams.set("post_logout_redirect_uri", BASE_URL ?? "");
 
