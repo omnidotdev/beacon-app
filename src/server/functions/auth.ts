@@ -103,16 +103,7 @@ export const fetchSession = createServerFn().handler(async () => {
       } catch (refreshErr) {
         console.error("[fetchSession] forced refresh failed:", refreshErr);
 
-        const isBATokenError =
-          refreshErr &&
-          typeof refreshErr === "object" &&
-          "body" in refreshErr &&
-          typeof (refreshErr as { body: { code?: string } }).body?.code ===
-            "string" &&
-          (refreshErr as { body: { code: string } }).body.code ===
-            "FAILED_TO_GET_ACCESS_TOKEN";
-
-        if (isInvalidGrant(refreshErr) || isBATokenError) {
+        if (isInvalidGrant(refreshErr)) {
           try {
             await auth.api.signOut({ headers });
           } catch {
@@ -125,15 +116,7 @@ export const fetchSession = createServerFn().handler(async () => {
   } catch (err) {
     console.error("[fetchSession] Error getting access token:", err);
 
-    const isBATokenError =
-      err &&
-      typeof err === "object" &&
-      "body" in err &&
-      typeof (err as { body: { code?: string } }).body?.code === "string" &&
-      (err as { body: { code: string } }).body.code ===
-        "FAILED_TO_GET_ACCESS_TOKEN";
-
-    if (isInvalidGrant(err) || isBATokenError) {
+    if (isInvalidGrant(err)) {
       console.warn("[fetchSession] Invalid refresh token, clearing session");
       try {
         await auth.api.signOut({ headers });

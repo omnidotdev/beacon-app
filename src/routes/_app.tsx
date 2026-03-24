@@ -5,12 +5,9 @@ import { Layout } from "@/components";
 import { isCloudDeployment } from "@/lib/api";
 import signIn from "@/lib/auth/signIn";
 import signOut from "@/lib/auth/signOut";
-import {
-  OrganizationProvider,
-} from "@/lib/context/organization.context";
-import { EventsProvider } from "@/providers/EventsProvider";
-
 import type { Organization } from "@/lib/context/organization.context";
+import { OrganizationProvider } from "@/lib/context/organization.context";
+import { EventsProvider } from "@/providers/EventsProvider";
 
 // Noop provider for client-side (main @omnidotdev/providers entry requires Node.js)
 const eventsProvider = {

@@ -15,7 +15,7 @@ import type { ApiClient } from "./types";
 export * from "./types";
 
 let clientInstance: ApiClient | null = null;
-let useGatewayMode = true; // Default to gateway mode
+const useGatewayMode = true; // Default to gateway mode
 
 // Cloud gateway URL proxied same-origin through Nitro
 const CLOUD_GATEWAY_URL = "/gateway";

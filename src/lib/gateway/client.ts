@@ -315,7 +315,9 @@ function createGatewayClient(
           const fresh = await refreshAccessToken();
           // Don't reconnect if we couldn't get a valid token
           if (!fresh) {
-            console.warn("[gateway] No valid token after refresh, stopping reconnect");
+            console.warn(
+              "[gateway] No valid token after refresh, stopping reconnect",
+            );
             return;
           }
           connectWebSocket(currentSessionId);

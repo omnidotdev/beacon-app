@@ -1,9 +1,7 @@
+import type { FlagContext } from "@omnidotdev/providers/flags";
 import { createFlagProvider } from "@omnidotdev/providers/flags";
 import { createServerFn } from "@tanstack/react-start";
-
 import { FLAGS_API_HOST, FLAGS_CLIENT_KEY } from "@/lib/config/env.config";
-
-import type { FlagContext } from "@omnidotdev/providers/flags";
 
 let flags: ReturnType<typeof createFlagProvider> | undefined;
 
