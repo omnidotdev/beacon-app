@@ -21,6 +21,13 @@ export const {
   AUTH_CLIENT_SECRET,
 } = env;
 
+// Internal auth URL for server-to-server communication (Docker service name)
+// Falls back to AUTH_BASE_URL for non-Docker environments
+export const AUTH_INTERNAL_URL =
+  typeof window === "undefined"
+    ? process.env.AUTH_INTERNAL_URL || AUTH_BASE_URL
+    : AUTH_BASE_URL;
+
 // SSR-safe: try non-prefixed (process.env) then VITE_-prefixed (import.meta.env), fallback to known production URL
 export const CONSOLE_URL =
   env.CONSOLE_URL || env.VITE_CONSOLE_URL || app.links.console;

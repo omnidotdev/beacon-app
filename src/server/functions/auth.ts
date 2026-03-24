@@ -1,167 +1,90 @@
-import {
-  ensureFreshAccessToken,
-  isInvalidGrant,
-} from "@omnidotdev/providers/auth";
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest, getRequestHeaders } from "@tanstack/react-start/server";
-import { decodeJwt } from "jose";
+import { getRequest, setCookie } from "@tanstack/react-start/server";
 
 import auth from "@/lib/auth/auth";
+import { authCache } from "@/lib/auth/authCache";
+import { getAuth } from "@/lib/auth/getAuth";
 import {
   AUTH_BASE_URL,
   AUTH_CLIENT_ID,
   BASE_URL,
 } from "@/lib/config/env.config";
-import type { Organization } from "@/lib/context/organization.context";
-import { parseOrganizationClaims } from "@/lib/context/organization.context";
 
-/** Check if a JWT's exp claim has passed */
-function isJwtExpired(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return (payload.exp as number) * 1000 < Date.now();
-  } catch {
-    return false;
-  }
+import type { OrganizationClaim } from "@omnidotdev/providers/auth";
+
+interface SessionResult {
+  session: {
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      image?: string | null;
+      identityProviderId?: string | null;
+    };
+    accessToken?: string;
+    organizations: OrganizationClaim[];
+  } | null;
+  organizations: OrganizationClaim[];
 }
 
 /**
- * Fetch the current user session
+ * Fetch the current user session.
+ * Returns session with user info if authenticated, null otherwise.
  */
-export const fetchSession = createServerFn().handler(async () => {
-  const headers = getRequestHeaders();
-  const session = await auth.api.getSession({ headers });
+export const fetchSession = createServerFn().handler(
+  async (): Promise<SessionResult> => {
+    const request = getRequest();
+    const result = await getAuth(request);
 
-  if (!session) return { session: null, organizations: [] as Organization[] };
+    if (!result) {
+      return { session: null, organizations: [] };
+    }
 
-  // Get ID token (JWT) for downstream API calls
-  // The gateway validates JWTs against Gatekeeper's JWKS, so we need the
-  // OIDC ID token (a signed JWT), not the opaque OAuth access token
-  let accessToken: string | undefined;
-  let organizations: Organization[] = [];
-
-  try {
-    const tokenResult = await ensureFreshAccessToken({
-      getAccessToken: async () => {
-        try {
-          return await auth.api.getAccessToken({
-            body: { providerId: "omni" },
-            headers,
-          });
-        } catch {
-          return null;
-        }
+    return {
+      session: {
+        user: {
+          id: result.user.id,
+          name: result.user.name as string,
+          email: result.user.email as string,
+          image: result.user.image as string | null | undefined,
+          identityProviderId: result.user.identityProviderId,
+        },
+        accessToken: result.accessToken,
+        organizations: result.organizations,
       },
-      refreshToken: async () => {
-        try {
-          return await auth.api.refreshToken({
-            body: { providerId: "omni" },
-            headers,
-          });
-        } catch {
-          return null;
-        }
-      },
-    });
+      organizations: result.organizations,
+    };
+  },
+);
 
-    accessToken = tokenResult?.idToken ?? tokenResult?.accessToken;
-
-    // Decode org claims from the ID token — signature was already verified
-    // during the OAuth flow; the token is retrieved from our own trusted
-    // auth storage so re-verification is unnecessary
-    if (tokenResult?.idToken) {
-      const payload = decodeJwt(tokenResult.idToken);
-      organizations = parseOrganizationClaims(
-        payload as Record<string, unknown>,
-      );
-    }
-
-    // ensureFreshAccessToken silently swallows refresh failures and returns
-    // the original (expired) token. Detect that and force a second refresh.
-    if (accessToken && isJwtExpired(accessToken)) {
-      console.warn(
-        "[fetchSession] id_token still expired after ensureFreshAccessToken, forcing refresh",
-      );
-      try {
-        const refreshed = await auth.api.refreshToken({
-          body: { providerId: "omni" },
-          headers,
-        });
-        const freshToken = refreshed?.idToken ?? refreshed?.accessToken;
-        if (freshToken && !isJwtExpired(freshToken)) {
-          accessToken = freshToken;
-        } else {
-          console.error(
-            "[fetchSession] forced refresh did not yield a fresh id_token",
-            {
-              hasIdToken: !!refreshed?.idToken,
-              hasAccessToken: !!refreshed?.accessToken,
-              stillExpired: freshToken ? isJwtExpired(freshToken) : "no token",
-            },
-          );
-        }
-      } catch (refreshErr) {
-        console.error("[fetchSession] forced refresh failed:", refreshErr);
-
-        if (isInvalidGrant(refreshErr)) {
-          try {
-            await auth.api.signOut({ headers });
-          } catch {
-            // Sign-out may fail if session is already corrupt
-          }
-          return { session: null, organizations: [] as Organization[] };
-        }
-      }
-    }
-  } catch (err) {
-    console.error("[fetchSession] Error getting access token:", err);
-
-    if (isInvalidGrant(err)) {
-      console.warn("[fetchSession] Invalid refresh token, clearing session");
-      try {
-        await auth.api.signOut({ headers });
-      } catch {
-        // Sign-out may fail if session is already corrupt
-      }
-      return { session: null, organizations: [] as Organization[] };
-    }
-  }
-
-  return {
-    session: {
-      ...session,
-      accessToken,
-    },
-    organizations,
-  };
-});
+const clearAuthCacheCookie = () => {
+  setCookie(authCache.cookieName, "", { maxAge: 0, path: "/" });
+};
 
 /**
- * Build the IDP end_session URL for federated logout
+ * Build the IDP end_session URL for federated logout.
  */
 function getIdpLogoutUrl(idTokenHint?: string): string | null {
-  if (!AUTH_BASE_URL || !AUTH_CLIENT_ID) return null;
+  if (!AUTH_BASE_URL || !AUTH_CLIENT_ID || !BASE_URL || !idTokenHint) {
+    return null;
+  }
 
   const endSessionUrl = new URL(`${AUTH_BASE_URL}/oauth2/end-session`);
   endSessionUrl.searchParams.set("client_id", AUTH_CLIENT_ID);
-  endSessionUrl.searchParams.set("post_logout_redirect_uri", BASE_URL ?? "");
-  if (idTokenHint) {
-    endSessionUrl.searchParams.set("id_token_hint", idTokenHint);
-  }
+  endSessionUrl.searchParams.set("post_logout_redirect_uri", BASE_URL);
+  endSessionUrl.searchParams.set("id_token_hint", idTokenHint);
 
   return endSessionUrl.toString();
 }
 
 /**
- * Sign out from the local session (server-side)
- * Returns the IDP logout URL for federated logout redirect
+ * Sign out from the local session (server-side).
  */
 export const signOutLocal = createServerFn({ method: "POST" }).handler(
   async () => {
     const request = getRequest();
     const headers = request.headers;
 
-    // Grab the ID token before we destroy the local session
     let idToken: string | undefined;
     try {
       const tokenResult = await auth.api.getAccessToken({
@@ -170,13 +93,12 @@ export const signOutLocal = createServerFn({ method: "POST" }).handler(
       });
       idToken = tokenResult?.idToken;
     } catch {
-      // Token may already be expired — proceed with logout anyway
+      // Token may already be expired
     }
 
-    // Clear local session
     await auth.api.signOut({ headers });
+    clearAuthCacheCookie();
 
-    // Return IDP logout URL for client-side redirect
     return { idpLogoutUrl: getIdpLogoutUrl(idToken) };
   },
 );

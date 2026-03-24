@@ -97,26 +97,3 @@ export function useOrganization() {
   }
   return context;
 }
-
-/**
- * Parse organization claims from IDP ID token.
- * Claims are namespaced under https://manifold.omni.dev/@omni/claims/organizations
- */
-export function parseOrganizationClaims(
-  idToken: Record<string, unknown>,
-): Organization[] {
-  const claimsKey = "https://manifold.omni.dev/@omni/claims/organizations";
-  const claims = idToken[claimsKey];
-
-  if (!Array.isArray(claims)) {
-    return [];
-  }
-
-  return claims.map((org) => ({
-    id: org.id,
-    slug: org.slug,
-    type: org.type ?? "team",
-    roles: org.roles ?? [],
-    teams: org.teams ?? [],
-  }));
-}
