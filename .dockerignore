@@ -1,5 +1,13 @@
 node_modules
-.output
+.git
+.env*
+!.env.production
+!.env.local.template
 dist
-src-tauri/target
-*.tsbuildinfo
+build
+.output
+target
+*.log
+.turbo
+coverage
+.nyc_output
