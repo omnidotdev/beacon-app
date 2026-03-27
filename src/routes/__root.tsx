@@ -1,3 +1,4 @@
+import { useSessionRefresh } from "@omnidotdev/providers/react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
@@ -119,6 +120,9 @@ function MaintenancePage() {
 }
 
 function RootComponent() {
+  // Keep the OAuth access token fresh while the user is idle
+  useSessionRefresh(fetchSession);
+
   const { isMaintenanceMode, session } = useRouteContext({ from: "__root__" });
 
   if (isMaintenanceMode) {

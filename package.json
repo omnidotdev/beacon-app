@@ -40,7 +40,7 @@
   "dependencies": {
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^2.0.0",
-    "@omnidotdev/providers": "github:omnidotdev/providers#f1e7db9",
+    "@omnidotdev/providers": "github:omnidotdev/providers#85be7f5",
     "@tanstack/nitro-v2-vite-plugin": "^1.141.0",
     "@tanstack/react-query": "^5.90.16",
     "@tanstack/react-router": "1.145.7",
@@ -61,6 +61,7 @@
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
+    "srvx": "^0.11.13",
     "unified": "^11.0.5",
     "unleash-client": "^6.9.6",
     "vite-tsconfig-paths": "^6.0.5"
