@@ -9,11 +9,11 @@ let flags: ReturnType<typeof createFlagProvider> | undefined;
 function getFlagProvider() {
   if (!flags) {
     flags = createFlagProvider(
-      FLAGS_API_HOST
+      FLAGS_API_HOST && FLAGS_CLIENT_KEY
         ? {
             provider: "unleash",
             url: FLAGS_API_HOST,
-            apiKey: FLAGS_CLIENT_KEY!,
+            apiKey: FLAGS_CLIENT_KEY,
             appName: "beacon",
           }
         : {},

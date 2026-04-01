@@ -42,3 +42,10 @@ export const API_GRAPHQL_URL = `${API_BASE}/graphql`;
 
 // Environment helpers
 export const isDevEnv = import.meta.env.DEV;
+
+// Startup warnings for optional integrations
+if (!FLAGS_API_HOST) console.warn("FLAGS_API_HOST not set, feature flags disabled");
+if (FLAGS_API_HOST && !FLAGS_CLIENT_KEY)
+  console.warn("FLAGS_CLIENT_KEY not set, feature flags disabled");
+if (!SYNAPSE_API_URL) console.warn("SYNAPSE_API_URL not set, notifications disabled");
+if (!GATEKEEPER_URL) console.warn("GATEKEEPER_URL not set, identity integration disabled");
