@@ -16,6 +16,8 @@ const isTauri = !!host;
  */
 export default defineConfig(({ command }) => ({
   plugins: [
+    // TanStack Start must be first to ensure SSR utils are bundled correctly
+    !isTauri && tanstackStart(),
     devtools(),
     // Use mkcert in development for HTTPS
     command === "serve" && !isTauri && mkcert(),
@@ -62,8 +64,6 @@ export default defineConfig(({ command }) => ({
       projects: ["./tsconfig.json"],
     }),
     tailwindcss(),
-    // TanStack Start for SSR (web mode only)
-    !isTauri && tanstackStart(),
     viteReact(),
   ].filter(Boolean),
   resolve: {
