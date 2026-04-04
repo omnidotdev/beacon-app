@@ -149,7 +149,7 @@ export function useCheckout() {
       if (!billingProvider) throw new Error("Billing is not configured");
 
       return billingProvider.createCheckoutWithWorkspace({
-        appId: import.meta.env.VITE_AETHER_APP_ID as string,
+        appId: import.meta.env.VITE_BILLING_APP_ID as string,
         priceId,
         successUrl,
         cancelUrl,

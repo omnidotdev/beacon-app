@@ -15,7 +15,7 @@ export const {
   VITE_API_BASE_URL: API_BASE_URL,
   VITE_AUTH_BASE_URL: AUTH_BASE_URL,
   VITE_SYNAPSE_API_URL: SYNAPSE_API_URL,
-  VITE_GATEKEEPER_URL: GATEKEEPER_URL,
+  VITE_AUTH_URL: AUTH_URL,
   // Auth (server-side secrets)
   AUTH_CLIENT_ID,
   AUTH_CLIENT_SECRET,
@@ -44,8 +44,11 @@ export const API_GRAPHQL_URL = `${API_BASE}/graphql`;
 export const isDevEnv = import.meta.env.DEV;
 
 // Startup warnings for optional integrations
-if (!FLAGS_API_HOST) console.warn("FLAGS_API_HOST not set, feature flags disabled");
+if (!FLAGS_API_HOST)
+  console.warn("FLAGS_API_HOST not set, feature flags disabled");
 if (FLAGS_API_HOST && !FLAGS_CLIENT_KEY)
   console.warn("FLAGS_CLIENT_KEY not set, feature flags disabled");
-if (!SYNAPSE_API_URL) console.warn("SYNAPSE_API_URL not set, notifications disabled");
-if (!GATEKEEPER_URL) console.warn("GATEKEEPER_URL not set, identity integration disabled");
+if (!SYNAPSE_API_URL)
+  console.warn("SYNAPSE_API_URL not set, notifications disabled");
+if (!AUTH_URL)
+  console.warn("AUTH_URL not set, identity integration disabled");

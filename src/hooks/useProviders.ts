@@ -7,7 +7,7 @@ import type {
   ProvidersResponse,
   ProviderType,
 } from "@/lib/api";
-import { GATEKEEPER_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
+import { AUTH_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
 import { getGatewayDiscovery } from "@/lib/gateway";
 
 // Synapse GraphQL endpoint
@@ -16,8 +16,8 @@ const SYNAPSE_GRAPHQL_URL = `${SYNAPSE_API_URL ?? ""}/graphql`;
 // Whether this deployment uses Synapse for provider management
 const USE_SYNAPSE = !!SYNAPSE_API_URL;
 
-// Whether Gatekeeper vault is available for direct key management
-const USE_GATEKEEPER = !!GATEKEEPER_URL;
+// Whether Auth vault is available for direct key management
+const USE_GATEKEEPER = !!AUTH_URL;
 
 // GraphQL operations for provider key management
 
@@ -130,7 +130,7 @@ type VaultKey = {
 };
 
 async function fetchVaultKeys(accessToken: string): Promise<VaultKey[]> {
-  const res = await fetch(`${GATEKEEPER_URL}/api/vault/keys`, {
+  const res = await fetch(`${AUTH_URL}/api/vault/keys`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
@@ -147,7 +147,7 @@ async function storeVaultKey(
   apiKey: string,
   model?: string,
 ): Promise<boolean> {
-  const res = await fetch(`${GATEKEEPER_URL}/api/vault/keys`, {
+  const res = await fetch(`${AUTH_URL}/api/vault/keys`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -164,7 +164,7 @@ async function deleteVaultKey(
   provider: string,
 ): Promise<boolean> {
   const res = await fetch(
-    `${GATEKEEPER_URL}/api/vault/keys/${encodeURIComponent(provider)}`,
+    `${AUTH_URL}/api/vault/keys/${encodeURIComponent(provider)}`,
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${accessToken}` },
