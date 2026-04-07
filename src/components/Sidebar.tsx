@@ -58,7 +58,7 @@ function getInitials(name: string): string {
 }
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+  { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
   { to: "/chat", label: "Chat", icon: <MessageSquare size={18} /> },
   { to: "/memories", label: "Memories", icon: <Brain size={18} /> },
   { to: "/skills", label: "Skills", icon: <Zap size={18} /> },

@@ -11,13 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicSetupRouteImport } from './routes/_public/setup'
 import { Route as PublicPairRouteImport } from './routes/_public/pair'
 import { Route as AppSkillsRouteImport } from './routes/_app/skills'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppPersonasRouteImport } from './routes/_app/personas'
 import { Route as AppMemoriesRouteImport } from './routes/_app/memories'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppChatRouteImport } from './routes/_app/chat'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -29,10 +30,10 @@ const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
+const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => PublicRoute,
 } as any)
 const PublicSetupRoute = PublicSetupRouteImport.update({
   id: '/setup',
@@ -64,6 +65,11 @@ const AppMemoriesRoute = AppMemoriesRouteImport.update({
   path: '/memories',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppChatRoute = AppChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -77,24 +83,26 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/chat': typeof AppChatRoute
+  '/dashboard': typeof AppDashboardRoute
   '/memories': typeof AppMemoriesRoute
   '/personas': typeof AppPersonasRoute
   '/settings': typeof AppSettingsRoute
   '/skills': typeof AppSkillsRoute
   '/pair': typeof PublicPairRoute
   '/setup': typeof PublicSetupRoute
-  '/': typeof AppIndexRoute
+  '/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/chat': typeof AppChatRoute
+  '/dashboard': typeof AppDashboardRoute
   '/memories': typeof AppMemoriesRoute
   '/personas': typeof AppPersonasRoute
   '/settings': typeof AppSettingsRoute
   '/skills': typeof AppSkillsRoute
   '/pair': typeof PublicPairRoute
   '/setup': typeof PublicSetupRoute
-  '/': typeof AppIndexRoute
+  '/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -102,19 +110,21 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_app/chat': typeof AppChatRoute
+  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/memories': typeof AppMemoriesRoute
   '/_app/personas': typeof AppPersonasRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/skills': typeof AppSkillsRoute
   '/_public/pair': typeof PublicPairRoute
   '/_public/setup': typeof PublicSetupRoute
-  '/_app/': typeof AppIndexRoute
+  '/_public/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/chat'
+    | '/dashboard'
     | '/memories'
     | '/personas'
     | '/settings'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/chat'
+    | '/dashboard'
     | '/memories'
     | '/personas'
     | '/settings'
@@ -139,13 +150,14 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_public'
     | '/_app/chat'
+    | '/_app/dashboard'
     | '/_app/memories'
     | '/_app/personas'
     | '/_app/settings'
     | '/_app/skills'
     | '/_public/pair'
     | '/_public/setup'
-    | '/_app/'
+    | '/_public/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -171,12 +183,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
+    '/_public/': {
+      id: '/_public/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_public/setup': {
       id: '/_public/setup'
@@ -220,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMemoriesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/chat': {
       id: '/_app/chat'
       path: '/chat'
@@ -239,20 +258,20 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppChatRoute: typeof AppChatRoute
+  AppDashboardRoute: typeof AppDashboardRoute
   AppMemoriesRoute: typeof AppMemoriesRoute
   AppPersonasRoute: typeof AppPersonasRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSkillsRoute: typeof AppSkillsRoute
-  AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppChatRoute: AppChatRoute,
+  AppDashboardRoute: AppDashboardRoute,
   AppMemoriesRoute: AppMemoriesRoute,
   AppPersonasRoute: AppPersonasRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSkillsRoute: AppSkillsRoute,
-  AppIndexRoute: AppIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -260,11 +279,13 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface PublicRouteChildren {
   PublicPairRoute: typeof PublicPairRoute
   PublicSetupRoute: typeof PublicSetupRoute
+  PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicPairRoute: PublicPairRoute,
   PublicSetupRoute: PublicSetupRoute,
+  PublicIndexRoute: PublicIndexRoute,
 }
 
 const PublicRouteWithChildren =

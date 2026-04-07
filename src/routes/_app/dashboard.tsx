@@ -13,7 +13,7 @@ import { useApi, useConversations } from "@/hooks";
 import type { SystemStatus } from "@/lib/api";
 import createMetaTags from "@/lib/util/createMetaTags";
 
-export const Route = createFileRoute("/_app/")({
+export const Route = createFileRoute("/_app/dashboard")({
   head: () => createMetaTags({ title: "Dashboard" }),
   component: DashboardHome,
 });
