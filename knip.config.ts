@@ -6,6 +6,10 @@ import type { KnipConfig } from "knip";
  */
 const knipConfig: KnipConfig = {
   project: ["src/**/*.ts", "src/**/*.tsx"],
+  ignoreDependencies: [
+    // Nitro runtime dependency
+    "srvx",
+  ],
 };
 
 export default knipConfig;

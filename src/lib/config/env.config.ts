@@ -50,5 +50,4 @@ if (FLAGS_API_HOST && !FLAGS_CLIENT_KEY)
   console.warn("FLAGS_CLIENT_KEY not set, feature flags disabled");
 if (!SYNAPSE_API_URL)
   console.warn("SYNAPSE_API_URL not set, notifications disabled");
-if (!AUTH_URL)
-  console.warn("AUTH_URL not set, identity integration disabled");
+if (!AUTH_URL) console.warn("AUTH_URL not set, identity integration disabled");

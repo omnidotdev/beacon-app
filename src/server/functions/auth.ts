@@ -1,6 +1,6 @@
+import type { OrganizationClaim } from "@omnidotdev/providers/auth";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest, setCookie } from "@tanstack/react-start/server";
-
 import auth from "@/lib/auth/auth";
 import { authCache } from "@/lib/auth/authCache";
 import { getAuth } from "@/lib/auth/getAuth";
@@ -9,8 +9,6 @@ import {
   AUTH_CLIENT_ID,
   BASE_URL,
 } from "@/lib/config/env.config";
-
-import type { OrganizationClaim } from "@omnidotdev/providers/auth";
 
 interface SessionResult {
   session: {
