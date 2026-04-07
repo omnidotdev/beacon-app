@@ -34,6 +34,7 @@ export default defineConfig(({ command }) => ({
             "@omnidotdev/providers",
             // Prevent Rollup cross-chunk reference bug for SSR utils
             "@tanstack/router-core",
+            "@tanstack/start-server-core",
           ],
         },
         hooks: {
