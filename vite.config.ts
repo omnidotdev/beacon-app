@@ -32,6 +32,8 @@ export default defineConfig(({ command }) => ({
             "dexie",
             "dexie-react-hooks",
             "@omnidotdev/providers",
+            // Prevent Rollup cross-chunk reference bug for SSR utils
+            "@tanstack/router-core",
           ],
         },
         hooks: {
