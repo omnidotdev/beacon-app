@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 
 import { Layout } from "@/components";
-import { isCloudDeployment } from "@/lib/api";
+import { AUTH_URL } from "@/lib/config/env.config";
 import type { Organization } from "@/lib/context/organization.context";
 import { OrganizationProvider } from "@/lib/context/organization.context";
 import { EventsProvider } from "@/providers/EventsProvider";
@@ -23,8 +23,8 @@ const eventsProvider = {
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ context: { session } }) => {
-    const isCloud = isCloudDeployment();
-    if (!isCloud) return;
+    // Skip auth enforcement when no auth provider is configured (local/native mode)
+    if (!AUTH_URL) return;
 
     // Clean up zombie sessions (OAuth cookie without proper provisioning)
     if (session?.user && !session.accessToken) {
