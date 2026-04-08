@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_app")({
     }
 
     // Redirect unauthenticated users to the landing page
-    if (!session || !session.accessToken) {
+    if (!session?.accessToken) {
       throw redirect({ to: "/" });
     }
   },
