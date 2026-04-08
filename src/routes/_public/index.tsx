@@ -45,26 +45,22 @@ const features = [
   },
   {
     title: "Multi-Channel",
-    description:
-      "One assistant across Discord, Telegram, Slack, and more",
+    description: "One assistant across Discord, Telegram, Slack, and more",
     icon: <MessageSquareIcon size={28} />,
   },
   {
     title: "Persistent Memory",
-    description:
-      "Beacon remembers context across conversations and channels",
+    description: "Beacon remembers context across conversations and channels",
     icon: <BrainIcon size={28} />,
   },
   {
     title: "Extensible Skills",
-    description:
-      "Install tools that give Beacon new abilities on demand",
+    description: "Install tools that give Beacon new abilities on demand",
     icon: <ZapIcon size={28} />,
   },
   {
     title: "Custom Personas",
-    description:
-      "Shape personality, tone, and expertise to fit your workflow",
+    description: "Shape personality, tone, and expertise to fit your workflow",
     icon: <VenetianMaskIcon size={28} />,
   },
 ];
@@ -214,9 +210,7 @@ function HomePage() {
             <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
               Online in minutes
             </h2>
-            <p className="text-lg text-muted">
-              No friction. Just signal.
-            </p>
+            <p className="text-lg text-muted">No friction. Just signal.</p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -286,8 +280,8 @@ function HomePage() {
             <span className="text-shimmer">signal?</span>
           </h2>
           <p className="mx-auto mb-10 max-w-xl text-lg text-muted">
-            One assistant, every channel, always listening. Free and open source,
-            forever.
+            One assistant, every channel, always listening. Free and open
+            source, forever.
           </p>
 
           <button

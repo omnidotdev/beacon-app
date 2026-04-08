@@ -1,6 +1,6 @@
 import {
-  Outlet,
   createFileRoute,
+  Outlet,
   useRouteContext,
 } from "@tanstack/react-router";
 import { MenuIcon, XIcon } from "lucide-react";
@@ -72,7 +72,10 @@ function PublicLayout() {
 
         <header
           className="w-full border-b border-border backdrop-blur-lg"
-          style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)" }}
+          style={{
+            background:
+              "color-mix(in srgb, var(--background) 80%, transparent)",
+          }}
         >
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <a href="/" className="flex items-center gap-2">
@@ -142,7 +145,10 @@ function PublicLayout() {
 
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="border-t border-border md:hidden" style={{ background: "var(--background)" }}>
+            <div
+              className="border-t border-border md:hidden"
+              style={{ background: "var(--background)" }}
+            >
               <div className="space-y-1 px-4 py-3">
                 <a
                   href={app.links.docs}
@@ -193,7 +199,9 @@ function PublicLayout() {
       {/* Footer */}
       <footer
         className="relative z-10 border-t border-border backdrop-blur-sm"
-        style={{ background: "color-mix(in srgb, var(--muted) 10%, transparent)" }}
+        style={{
+          background: "color-mix(in srgb, var(--muted) 10%, transparent)",
+        }}
       >
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">

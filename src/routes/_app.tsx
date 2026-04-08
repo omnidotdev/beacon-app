@@ -1,13 +1,15 @@
-import { createFileRoute, useRouteContext } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import {
+  createFileRoute,
+  redirect,
+  useRouteContext,
+} from "@tanstack/react-router";
 
 import { Layout } from "@/components";
 import { isCloudDeployment } from "@/lib/api";
-import signIn from "@/lib/auth/signIn";
-import signOut from "@/lib/auth/signOut";
 import type { Organization } from "@/lib/context/organization.context";
 import { OrganizationProvider } from "@/lib/context/organization.context";
 import { EventsProvider } from "@/providers/EventsProvider";
+import { signOutLocal } from "@/server/functions/auth";
 
 // Noop provider for client-side (main @omnidotdev/providers entry requires Node.js)
 const eventsProvider = {
@@ -20,59 +22,28 @@ const eventsProvider = {
 };
 
 export const Route = createFileRoute("/_app")({
+  beforeLoad: async ({ context: { session } }) => {
+    const isCloud = isCloudDeployment();
+    if (!isCloud) return;
+
+    // Clean up zombie sessions (OAuth cookie without proper provisioning)
+    if (session?.user && !session.accessToken) {
+      await signOutLocal();
+      throw redirect({ to: "/" });
+    }
+
+    // Redirect unauthenticated users to the landing page
+    if (!session || !session.accessToken) {
+      throw redirect({ to: "/" });
+    }
+  },
   component: AuthLayout,
 });
 
-function SignInRedirect() {
-  const [showFallback, setShowFallback] = useState(false);
-
-  useEffect(() => {
-    signIn({ redirectUrl: window.location.href });
-
-    const timer = setTimeout(() => setShowFallback(true), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-      {showFallback ? (
-        <>
-          <p className="text-muted">Redirect didn't happen automatically.</p>
-          <button
-            type="button"
-            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-[#0a0a0f] transition-all hover:glow-primary"
-            onClick={() => signIn({ redirectUrl: window.location.href })}
-          >
-            Sign in with Omni
-          </button>
-        </>
-      ) : (
-        <p className="text-muted">Signing in...</p>
-      )}
-    </div>
-  );
-}
-
 function AuthLayout() {
-  const { session, organizations } = useRouteContext({ strict: false }) as {
-    session?: { user?: { id: string }; accessToken?: string } | null;
+  const { organizations } = useRouteContext({ strict: false }) as {
     organizations?: Organization[];
   };
-  const isCloud = isCloudDeployment();
-
-  // Clean up zombie sessions where the OAuth cookie exists but the
-  // access token is missing (user not provisioned in the app DB)
-  useEffect(() => {
-    if (isCloud && session?.user && !session.accessToken) {
-      signOut();
-    }
-  }, [isCloud, session]);
-
-  // Only enforce auth in cloud deployment mode
-  // Require an access token, not just a session cookie
-  if (isCloud && (!session || !session.accessToken)) {
-    return <SignInRedirect />;
-  }
 
   return (
     <EventsProvider provider={eventsProvider}>
