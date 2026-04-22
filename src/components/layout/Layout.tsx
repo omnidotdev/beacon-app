@@ -1,7 +1,7 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import Sidebar, { BeaconLogo } from "./Sidebar";
+import Sidebar, { BeaconLogo } from "../Sidebar";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
