@@ -77,14 +77,14 @@ export default defineConfig(({ command }) => ({
   // Vite options for Tauri development
   clearScreen: false,
   server: {
-    port: isTauri ? 1420 : 3000,
+    port: Number(process.env.PORT) || 3000,
     strictPort: true,
     host: isTauri ? host : "0.0.0.0",
     hmr: isTauri
       ? {
           protocol: "wss",
           host,
-          port: 1421,
+          port: 3001,
         }
       : undefined,
     watch: {
