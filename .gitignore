@@ -10,3 +10,4 @@ src-tauri/gen/android
 
 # Environment
 .env.local
+.playwright-mcp/
