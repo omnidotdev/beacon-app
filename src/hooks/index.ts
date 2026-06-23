@@ -5,6 +5,7 @@ export {
   useCheckout,
   useCreditBalance,
   useCreditCheckout,
+  usePrices,
   useRenewSubscription,
   useSubscription,
 } from "./useBilling";

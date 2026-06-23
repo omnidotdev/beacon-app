@@ -8,6 +8,7 @@ import {
   useCheckout,
   useCreditBalance,
   useCreditCheckout,
+  usePrices,
   useRenewSubscription,
   useSubscription,
 } from "@/hooks";
@@ -76,6 +77,7 @@ function SubscriptionSkeleton() {
 // Inner component that always calls hooks (avoids Rules of Hooks violation)
 function SubscriptionSettingsInner() {
   const { data: subscription, isLoading } = useSubscription();
+  const { data: prices } = usePrices();
   const { data: creditData, isLoading: isCreditLoading } = useCreditBalance();
   const { mutateAsync: openPortal, isPending: isPortalLoading } =
     useBillingPortal();
@@ -91,6 +93,12 @@ function SubscriptionSettingsInner() {
   const hasSubscription = !!subscription;
   const isActive = subscription?.status === "active";
   const isCancelingScheduled = !!subscription?.cancelAt;
+
+  // Target the entry paid tier ("pro"), falling back to the cheapest paid price.
+  // Prices arrive sorted by unit amount ascending.
+  const upgradePrice =
+    prices?.find((price) => price.metadata?.tier === "pro") ??
+    prices?.find((price) => (price.unit_amount ?? 0) > 0);
 
   const handleManageBilling = async () => {
     if (!subscription?.product?.id) return;
@@ -108,9 +116,14 @@ function SubscriptionSettingsInner() {
   };
 
   const handleUpgrade = async () => {
+    if (!upgradePrice) {
+      toast.error("No upgrade plans are available right now");
+      return;
+    }
+
     try {
       await checkout({
-        priceId: "",
+        priceId: upgradePrice.id,
         successUrl: `${window.location.origin}/settings?upgraded=true`,
         cancelUrl: window.location.href,
         createWorkspace: { name: "Default" },
@@ -232,7 +245,7 @@ function SubscriptionSettingsInner() {
               <button
                 type="button"
                 onClick={handleUpgrade}
-                disabled={isCheckoutLoading}
+                disabled={isCheckoutLoading || !upgradePrice}
                 className="btn-primary flex items-center gap-2 rounded-lg px-4 py-2 text-sm disabled:opacity-50"
               >
                 {isCheckoutLoading ? (

@@ -3,6 +3,7 @@ import { useRouteContext } from "@tanstack/react-router";
 
 import { isCloudDeployment } from "@/lib/api";
 import billingProvider from "@/lib/billing";
+import app from "@/lib/config/app.config";
 
 const STALE_TIME_MS = 300_000; // 5 minutes
 const CREDIT_STALE_TIME_MS = 60_000; // 1 minute
@@ -30,6 +31,25 @@ export function useSubscription() {
       );
     },
     enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
+    staleTime: STALE_TIME_MS,
+  });
+}
+
+/**
+ * Fetch available prices for this app, sorted by unit amount (ascending).
+ * Prices carry a `metadata.tier` (e.g. "free", "pro", "team") used to target checkout.
+ */
+export function usePrices() {
+  return useQuery({
+    queryKey: ["prices", app.name.toLowerCase()],
+    queryFn: async () => {
+      if (!billingProvider) throw new Error("Billing is not configured");
+
+      const prices = await billingProvider.getPrices(app.name.toLowerCase());
+
+      return prices.sort((a, b) => (a.unit_amount ?? 0) - (b.unit_amount ?? 0));
+    },
+    enabled: isCloudDeployment() && !!billingProvider,
     staleTime: STALE_TIME_MS,
   });
 }
