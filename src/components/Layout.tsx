@@ -1,3 +1,4 @@
+import { LogoLockup } from "@omnidotdev/thornberry/logo-lockup";
 import { Link, Outlet } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -28,7 +29,10 @@ function Layout() {
             to="/"
             className="flex items-center gap-2 transition-all hover:drop-shadow-[0_0_8px_var(--color-primary)] active:scale-95"
           >
-            <BeaconLogo className="h-7 w-7 text-primary" />
+            <LogoLockup
+              logo={<BeaconLogo className="h-7 w-7 text-primary" />}
+              name="Beacon"
+            />
             <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-shimmer">
               Early Access
             </span>
