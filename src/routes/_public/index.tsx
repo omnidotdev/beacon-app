@@ -24,7 +24,10 @@ import { signOutLocal } from "@/server/functions/auth";
 
 export const Route = createFileRoute("/_public/")({
   head: () => createMetaTags({ title: "AI assistant, everywhere" }),
-  beforeLoad: async ({ context: { session } }) => {
+  beforeLoad: async ({ context: { session }, preload }) => {
+    // skip data-driven work during hover-preload so the landing link does not navigate or sign out on hover
+    if (preload) return;
+
     // Redirect fully provisioned users to the app
     if (session?.user?.identityProviderId) throw redirect({ to: "/chat" });
 
