@@ -344,7 +344,7 @@ export function useConfigureProvider() {
         );
 
         if (!ok) {
-          throw new Error("Failed to store key in Gatekeeper vault");
+          throw new Error("Failed to save provider key. Please try again.");
         }
 
         const meta = PROVIDER_METADATA.find((p) => p.id === params.provider);
@@ -438,7 +438,7 @@ export function useRemoveProvider() {
         const ok = await deleteVaultKey(token, provider);
 
         if (!ok) {
-          throw new Error("Failed to delete key from Gatekeeper vault");
+          throw new Error("Failed to remove provider key. Please try again.");
         }
 
         return;
