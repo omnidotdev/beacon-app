@@ -13,6 +13,7 @@ const app = {
     github: "https://github.com/omnidotdev",
     feedback: "https://backfeed.omni.dev/workspaces/omni/projects/beacon",
     x: "https://x.com/omnidotdev",
+    threads: "https://www.threads.com/@omnidotdev",
   },
 };
 
