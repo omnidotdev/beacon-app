@@ -96,5 +96,5 @@ function getAvailableModels(
   return grouped;
 }
 
-export { getAvailableModels, getModelName, getProviderDisplayName };
 export type { ModelOption };
+export { getAvailableModels, getModelName, getProviderDisplayName };
