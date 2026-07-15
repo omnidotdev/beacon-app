@@ -51,7 +51,7 @@ function PublicLayout() {
         }}
       >
         <div
-          className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-primary/[0.08] blur-[120px]"
+          className="absolute top-[-140px] left-1/2 h-[560px] w-[720px] -translate-x-1/2 rounded-full bg-primary/[0.09] blur-[130px]"
           style={{ animation: "beacon-pulse 8s ease-in-out infinite" }}
         />
       </div>

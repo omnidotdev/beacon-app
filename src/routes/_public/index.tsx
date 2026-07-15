@@ -100,12 +100,7 @@ function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-x-clip px-4 pt-20 pb-32 sm:px-6 md:pt-32 md:pb-40 lg:px-8">
-        {/* Decorative glow behind headline */}
-        <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="h-[400px] w-[600px] rounded-full bg-primary/5 blur-[100px]" />
-        </div>
-
+      <section className="relative px-4 pt-20 pb-32 sm:px-6 md:pt-32 md:pb-40 lg:px-8">
         <div className="relative mx-auto max-w-4xl text-center">
           <h1 className="mb-6 font-extrabold text-4xl tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             <span className="block text-text">Your AI assistant,</span>
