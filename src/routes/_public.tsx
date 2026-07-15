@@ -36,8 +36,10 @@ function PublicLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      {/* Ambient glow orbs */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      {/* Ambient glow orbs. Absolute (not fixed) so they scroll with the page;
+          a fixed layer stays anchored to the viewport and reads as a hard seam
+          on mobile as content scrolls past it (worsened by the iOS address bar). */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div
           className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px]"
           style={{ animation: "beacon-pulse 8s ease-in-out infinite" }}

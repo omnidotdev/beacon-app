@@ -107,12 +107,6 @@ function HomePage() {
         </div>
 
         <div className="relative mx-auto max-w-4xl text-center">
-          <div className="mb-8 flex justify-center">
-            <span className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-muted">
-              {app.description.split(".")[0]}
-            </span>
-          </div>
-
           <h1 className="mb-6 font-extrabold text-4xl tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             <span className="block text-text">Your AI assistant,</span>
             <span className="mt-2 block text-shimmer">always within reach</span>
