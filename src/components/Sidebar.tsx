@@ -40,6 +40,7 @@ import {
 } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
+import app from "@/lib/config/app.config";
 import { CONSOLE_URL } from "@/lib/config/env.config";
 import { NO_PERSONA, NO_PERSONA_ID } from "@/lib/persona";
 import ConversationList from "./ConversationList";
@@ -620,7 +621,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           <RiGithubLine size={18} />
         </a>
         <a
-          href="https://docs.omni.dev/armory/beacon"
+          href={app.links.docs}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"

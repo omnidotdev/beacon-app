@@ -9,7 +9,7 @@ const app = {
     website: "https://beacon.omni.dev",
     console: "https://console.omni.dev",
     discord: "https://discord.gg/omnidotdev",
-    docs: "https://docs.omni.dev/armory/beacon",
+    docs: "https://docs.omni.dev/grid/beacon",
     github: "https://github.com/omnidotdev",
     feedback: "https://backfeed.omni.dev/workspaces/omni/projects/beacon",
     x: "https://x.com/omnidotdev",
