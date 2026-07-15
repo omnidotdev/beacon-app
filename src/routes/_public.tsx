@@ -36,21 +36,23 @@ function PublicLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      {/* Ambient glow orbs. Absolute (not fixed) so they scroll with the page;
-          a fixed layer stays anchored to the viewport and reads as a hard seam
-          on mobile as content scrolls past it (worsened by the iOS address bar). */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      {/* Ambient glow: a single soft orb behind the hero that fades to clean
+          dark below (mask), so the long page reads as one cohesive background
+          rather than scattered orbs clashing with the dark sections. Absolute
+          (not fixed) so it scrolls with the page instead of pinning to the
+          viewport and reading as a hard seam on mobile. */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, #000 0%, #000 22%, transparent 42%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, #000 0%, #000 22%, transparent 42%)",
+        }}
+      >
         <div
-          className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px]"
+          className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-primary/[0.08] blur-[120px]"
           style={{ animation: "beacon-pulse 8s ease-in-out infinite" }}
-        />
-        <div
-          className="absolute -bottom-24 -left-24 h-[400px] w-[400px] rounded-full bg-accent/5 blur-[100px]"
-          style={{ animation: "beacon-pulse 10s ease-in-out infinite 2s" }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[150px]"
-          style={{ animation: "beacon-pulse 12s ease-in-out infinite 4s" }}
         />
       </div>
 
@@ -59,7 +61,7 @@ function PublicLayout() {
         <div className="flex w-full items-center justify-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2 text-sm backdrop-blur-sm sm:gap-3">
           <span className="text-text-secondary">
             <strong className="font-semibold">Beacon is in early access</strong>{" "}
-            -- help shape it!
+            — help shape it!
           </span>
           <a
             href={app.links.discord}
