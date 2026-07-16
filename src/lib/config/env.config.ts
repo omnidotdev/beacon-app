@@ -32,11 +32,6 @@ export const AUTH_INTERNAL_URL =
 export const CONSOLE_URL =
   env.CONSOLE_URL || env.VITE_CONSOLE_URL || app.links.console;
 
-// Feature flags
-export const FLAGS_API_HOST = env.FLAGS_API_HOST || env.VITE_FLAGS_API_HOST;
-export const FLAGS_CLIENT_KEY =
-  env.FLAGS_CLIENT_KEY || env.VITE_FLAGS_CLIENT_KEY;
-
 const API_BASE = API_BASE_URL ?? "/api";
 export const API_GRAPHQL_URL = `${API_BASE}/graphql`;
 
@@ -44,10 +39,6 @@ export const API_GRAPHQL_URL = `${API_BASE}/graphql`;
 export const isDevEnv = import.meta.env.DEV;
 
 // Startup warnings for optional integrations
-if (!FLAGS_API_HOST)
-  console.warn("FLAGS_API_HOST not set, feature flags disabled");
-if (FLAGS_API_HOST && !FLAGS_CLIENT_KEY)
-  console.warn("FLAGS_CLIENT_KEY not set, feature flags disabled");
 if (!SYNAPSE_API_URL)
   console.warn("SYNAPSE_API_URL not set, notifications disabled");
 if (!AUTH_URL) console.warn("AUTH_URL not set, identity integration disabled");
