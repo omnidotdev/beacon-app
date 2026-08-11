@@ -12,6 +12,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { PropsWithChildren } from "react";
 import { Toaster } from "sonner";
+import CommandPalette from "@/components/CommandPalette";
 import { DefaultCatchBoundary } from "@/components/layout";
 import { ApiProvider } from "@/hooks";
 import appCss from "@/index.css?url";
@@ -178,6 +179,7 @@ function RootDocument({ children }: PropsWithChildren) {
       </head>
 
       <body>
+        <CommandPalette />
         {children}
         <Toaster position="bottom-center" richColors />
 
