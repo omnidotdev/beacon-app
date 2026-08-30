@@ -29,8 +29,8 @@ export const AUTH_INTERNAL_URL =
     : AUTH_BASE_URL;
 
 // SSR-safe: try non-prefixed (process.env) then VITE_-prefixed (import.meta.env), fallback to known production URL
-export const CONSOLE_URL =
-  env.CONSOLE_URL || env.VITE_CONSOLE_URL || app.links.console;
+export const ACCOUNT_URL =
+  env.ACCOUNT_URL || env.VITE_ACCOUNT_URL || app.links.console;
 
 // Feature flags
 export const FLAGS_API_HOST = env.FLAGS_API_HOST || env.VITE_FLAGS_API_HOST;

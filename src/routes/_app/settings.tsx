@@ -1,3 +1,4 @@
+import { accountUrl } from "@omnidotdev/providers/react";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import {
   Check,
@@ -27,7 +28,7 @@ import {
 } from "@/hooks";
 import type { ProviderInfo, ProviderType } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
-import { CONSOLE_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
+import { ACCOUNT_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
 import { db } from "@/lib/db";
 import * as localDb from "@/lib/db/conversations";
 import { NO_PERSONA_ID } from "@/lib/persona";
@@ -145,9 +146,9 @@ function SettingsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {CONSOLE_URL && (
+                  {ACCOUNT_URL && (
                     <a
-                      href={CONSOLE_URL}
+                      href={accountUrl(ACCOUNT_URL)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-elevated"
