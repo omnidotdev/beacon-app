@@ -1,3 +1,4 @@
+import { accountUrl } from "@omnidotdev/providers/react";
 import {
   Link,
   useNavigate,
@@ -41,7 +42,7 @@ import {
 import { isCloudDeployment } from "@/lib/api";
 import signOut from "@/lib/auth/signOut";
 import app from "@/lib/config/app.config";
-import { CONSOLE_URL } from "@/lib/config/env.config";
+import { ACCOUNT_URL } from "@/lib/config/env.config";
 import { NO_PERSONA, NO_PERSONA_ID } from "@/lib/persona";
 import ConversationList from "./ConversationList";
 
@@ -541,9 +542,9 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                     isolation: "isolate",
                   }}
                 >
-                  {CONSOLE_URL && (
+                  {ACCOUNT_URL && (
                     <a
-                      href={CONSOLE_URL}
+                      href={accountUrl(ACCOUNT_URL)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex w-full items-center gap-3 rounded-lg p-2 text-sm text-text transition-colors hover:bg-surface-elevated"
