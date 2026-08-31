@@ -15,9 +15,12 @@ import {
 import { isCloudDeployment } from "@/lib/api";
 import billingProvider from "@/lib/billing";
 
-/** Format a Unix timestamp to a readable date */
-function formatDate(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleDateString(undefined, {
+/** Format a Unix timestamp to a readable date, or a dash when missing/invalid */
+function formatDate(timestamp?: number | null): string {
+  if (timestamp == null) return "—";
+  const date = new Date(timestamp * 1000);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -189,7 +192,7 @@ function SubscriptionSettingsInner() {
 
             {isCancelingScheduled && (
               <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-medium text-amber-400">
-                Cancels {formatDate(subscription?.cancelAt ?? 0)}
+                Cancels {formatDate(subscription?.cancelAt)}
               </span>
             )}
           </div>
