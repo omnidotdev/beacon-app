@@ -8,12 +8,14 @@ import {
   useCheckout,
   useCreditBalance,
   useCreditCheckout,
+  useEntitlements,
   usePrices,
   useRenewSubscription,
   useSubscription,
 } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
 import billingProvider from "@/lib/billing";
+import getTierFromEntitlements from "@/lib/util/getTierFromEntitlements";
 
 /** Format a Unix timestamp to a readable date, or a dash when missing/invalid */
 function formatDate(timestamp?: number | null): string {
@@ -80,6 +82,7 @@ function SubscriptionSkeleton() {
 // Inner component that always calls hooks (avoids Rules of Hooks violation)
 function SubscriptionSettingsInner() {
   const { data: subscription, isLoading } = useSubscription();
+  const { data: entitlements } = useEntitlements();
   const { data: prices } = usePrices();
   const { data: creditData, isLoading: isCreditLoading } = useCreditBalance();
   const { mutateAsync: openPortal, isPending: isPortalLoading } =
@@ -96,6 +99,12 @@ function SubscriptionSettingsInner() {
   const hasSubscription = !!subscription;
   const isActive = subscription?.status === "active";
   const isCancelingScheduled = !!subscription?.cancelAt;
+
+  // A comped or manually-granted tier has no Stripe subscription, so fall back to
+  // the entitlement tier. Prefer the live subscription's plan name when present.
+  const entitlementTier = getTierFromEntitlements(entitlements);
+  const hasEntitlement = !!entitlementTier;
+  const planName = subscription?.product?.name ?? entitlementTier ?? "Free";
 
   // Target the entry paid tier ("pro"), falling back to the cheapest paid price.
   // Prices arrive sorted by unit amount ascending.
@@ -178,7 +187,7 @@ function SubscriptionSettingsInner() {
             <div className="flex items-center gap-2">
               <Shield size={18} className="text-primary" />
               <span className="text-lg font-semibold text-text">
-                {subscription?.product?.name ?? "Free"}
+                {planName}
               </span>
             </div>
 
@@ -204,7 +213,7 @@ function SubscriptionSettingsInner() {
             </p>
           )}
 
-          {!hasSubscription && (
+          {!hasSubscription && !hasEntitlement && (
             <p className="text-sm text-muted">
               Upgrade to unlock additional features and higher usage limits
             </p>

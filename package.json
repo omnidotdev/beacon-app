@@ -34,6 +34,7 @@
     "lint": "biome lint",
     "check": "biome check --diagnostic-level=error src",
     "typecheck": "tsc --noEmit",
+    "test": "bun test src",
     "prepare": "husky",
     "knip": "knip-bun --tags=-knipignore"
   },

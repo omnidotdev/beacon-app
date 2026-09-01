@@ -36,6 +36,34 @@ export function useSubscription() {
 }
 
 /**
+ * Fetch entitlements for the current user.
+ * Distinguishes a comped/manually-granted tier (which has no Stripe subscription)
+ * from a genuinely free account. A `not_found` or `unavailable` result resolves to
+ * `null` so callers treat both as "no entitlement to show".
+ */
+export function useEntitlements() {
+  const { session } = useRouteContext({ from: "__root__" });
+
+  return useQuery({
+    queryKey: ["entitlements", session?.user?.id],
+    queryFn: async () => {
+      if (!billingProvider) throw new Error("Billing is not configured");
+
+      const result = await billingProvider.getEntitlementsResult(
+        ENTITY_TYPE,
+        session?.user.id ?? "",
+        undefined,
+        session?.accessToken ?? "",
+      );
+
+      return result.status === "success" ? result.data : null;
+    },
+    enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
+    staleTime: STALE_TIME_MS,
+  });
+}
+
+/**
  * Fetch available prices for this app, sorted by unit amount (ascending).
  * Prices carry a `metadata.tier` (e.g. "free", "pro", "team") used to target checkout.
  */
