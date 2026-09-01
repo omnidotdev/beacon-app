@@ -21,7 +21,6 @@ import { isDevEnv } from "@/lib/config/env.config";
 import { isNative } from "@/lib/platform";
 import createMetaTags from "@/lib/util/createMetaTags";
 import { fetchSession } from "@/server/functions/auth";
-import { fetchMaintenanceMode } from "@/server/functions/flags";
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -46,7 +45,6 @@ const organizationSchema = {
 interface RouterContext {
   queryClient: QueryClient;
   session?: Awaited<ReturnType<typeof fetchSession>>["session"] | null;
-  isMaintenanceMode: boolean;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -54,28 +52,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     // In Tauri mode, server functions are not available
     // Auth is handled differently (or not at all for local mode)
     if (isNative()) {
-      return { session: null, organizations: [], isMaintenanceMode: false };
+      return { session: null, organizations: [] };
     }
 
     try {
       const { session, organizations } = await fetchSession();
 
-      // Pass user context to Unleash for @omni.dev admin bypass
-      const context = session?.user?.email
-        ? { userId: session.user.id, properties: { email: session.user.email } }
-        : undefined;
-      const { isMaintenanceMode } = await fetchMaintenanceMode({
-        data: context,
-      });
-
-      // Skip auth when maintenance page is shown
-      if (isMaintenanceMode)
-        return { session: null, organizations: [], isMaintenanceMode };
-
-      return { session, organizations, isMaintenanceMode };
+      return { session, organizations };
     } catch {
       // Server function failed, likely in Tauri mode
-      return { session: null, organizations: [], isMaintenanceMode: false };
+      return { session: null, organizations: [] };
     }
   },
   head: () => {
@@ -130,35 +116,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
 });
 
-function MaintenancePage() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8">
-      <div className="text-center">
-        <div className="mb-6 text-9xl">🗼</div>
-        <h1 className="mb-4 font-bold text-4xl text-text">
-          Signal Maintenance
-        </h1>
-        <p className="max-w-md text-lg text-muted">
-          Beacon is recalibrating. We'll be back online shortly.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function RootComponent() {
   // Keep the OAuth access token fresh while the user is idle
   useSessionRefresh(fetchSession);
 
-  const { isMaintenanceMode, session } = useRouteContext({ from: "__root__" });
-
-  if (isMaintenanceMode) {
-    return (
-      <RootDocument>
-        <MaintenancePage />
-      </RootDocument>
-    );
-  }
+  const { session } = useRouteContext({ from: "__root__" });
 
   return (
     <RootDocument>
