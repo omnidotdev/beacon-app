@@ -20,17 +20,20 @@ export function useSubscription() {
   const { session } = useRouteContext({ from: "__root__" });
 
   return useQuery({
-    queryKey: ["subscription", session?.user?.id],
+    queryKey: ["subscription", session?.user?.identityProviderId],
     queryFn: () => {
       if (!billingProvider) throw new Error("Billing is not configured");
 
       return billingProvider.getSubscription(
         ENTITY_TYPE,
-        session?.user.id ?? "",
+        session?.user.identityProviderId ?? "",
         session?.accessToken ?? "",
       );
     },
-    enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
+    enabled:
+      isCloudDeployment() &&
+      !!billingProvider &&
+      !!session?.user?.identityProviderId,
     staleTime: STALE_TIME_MS,
   });
 }
@@ -45,20 +48,23 @@ export function useEntitlements() {
   const { session } = useRouteContext({ from: "__root__" });
 
   return useQuery({
-    queryKey: ["entitlements", session?.user?.id],
+    queryKey: ["entitlements", session?.user?.identityProviderId],
     queryFn: async () => {
       if (!billingProvider) throw new Error("Billing is not configured");
 
       const result = await billingProvider.getEntitlementsResult(
         ENTITY_TYPE,
-        session?.user.id ?? "",
+        session?.user.identityProviderId ?? "",
         undefined,
         session?.accessToken ?? "",
       );
 
       return result.status === "success" ? result.data : null;
     },
-    enabled: isCloudDeployment() && !!billingProvider && !!session?.user?.id,
+    enabled:
+      isCloudDeployment() &&
+      !!billingProvider &&
+      !!session?.user?.identityProviderId,
     staleTime: STALE_TIME_MS,
   });
 }
@@ -162,7 +168,7 @@ export function useBillingPortal() {
 
       return billingProvider.getBillingPortalUrl(
         ENTITY_TYPE,
-        session?.user.id ?? "",
+        session?.user.identityProviderId ?? "",
         productId,
         returnUrl,
         session?.accessToken ?? "",
@@ -225,7 +231,7 @@ export function useCancelSubscription() {
 
       return billingProvider.cancelSubscription(
         ENTITY_TYPE,
-        session?.user.id ?? "",
+        session?.user.identityProviderId ?? "",
         session?.accessToken ?? "",
       );
     },
@@ -248,7 +254,7 @@ export function useRenewSubscription() {
 
       return billingProvider.renewSubscription(
         ENTITY_TYPE,
-        session?.user.id ?? "",
+        session?.user.identityProviderId ?? "",
         session?.accessToken ?? "",
       );
     },
