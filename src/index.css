@@ -697,3 +697,40 @@
     background-position: -200% center;
   }
 }
+
+/* Portrait-first guard. The layout assumes a tall portrait column, so a phone
+   turned sideways (short, landscape, touch viewport) gets a rotate prompt instead
+   of a broken, clipped layout. Gated to phones: pointer:coarse excludes desktop,
+   max-height:500px excludes tablets. */
+.landscape-gate {
+  display: none;
+}
+.landscape-gate__icon {
+  width: 2rem;
+  height: 2rem;
+}
+.landscape-gate__title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.landscape-gate__body {
+  max-width: 20rem;
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  .landscape-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    background: hsl(var(--background, 240 10% 6%));
+    color: hsl(var(--foreground, 0 0% 98%));
+  }
+}
