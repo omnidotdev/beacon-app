@@ -14,41 +14,31 @@ import {
 
 const { AUTH_SECRET } = process.env;
 
-// Build genericOAuth config array based on available credentials
-const oauthConfigs: Parameters<typeof genericOAuth>[0]["config"] = [];
-
-// Omni/Gatekeeper OAuth
-if (AUTH_CLIENT_ID && AUTH_CLIENT_SECRET && AUTH_BASE_URL) {
-  oauthConfigs.push({
-    providerId: "omni",
-    clientId: AUTH_CLIENT_ID,
-    clientSecret: AUTH_CLIENT_SECRET,
-    discoveryUrl: `${AUTH_BASE_URL}/.well-known/openid-configuration`,
-    scopes: ["openid", "profile", "email", "offline_access", "organization"],
-    accessType: "offline",
-    pkce: true,
-    mapProfileToUser: (profile) => ({
-      name: profile.name,
-      email: profile.email,
-      emailVerified: profile.email_verified,
-      image: profile.picture,
-    }),
-  });
-}
+// Register the Omni OIDC provider only when it is actually configured.
+// Without client credentials (e.g. local dev), skip it so a failed
+// discovery fetch does not crash auth init and take down the whole app
+const isOmniOAuthConfigured = Boolean(
+  AUTH_CLIENT_ID && AUTH_CLIENT_SECRET && AUTH_BASE_URL,
+);
 
 // Build plugins array
 const plugins = [];
 
-if (oauthConfigs.length > 0) {
+if (isOmniOAuthConfigured) {
   plugins.push(
     genericOAuth({
       config: [
-        createOmniOAuthConfig({
-          clientId: AUTH_CLIENT_ID as string,
-          clientSecret: AUTH_CLIENT_SECRET as string,
-          authBaseUrl: AUTH_BASE_URL as string,
-          authInternalUrl: AUTH_INTERNAL_URL as string,
-        }),
+        {
+          ...createOmniOAuthConfig({
+            clientId: AUTH_CLIENT_ID as string,
+            clientSecret: AUTH_CLIENT_SECRET as string,
+            authBaseUrl: AUTH_BASE_URL as string,
+            authInternalUrl: AUTH_INTERNAL_URL as string,
+          }),
+          // better-auth 1.7 rejects a function-valued authorizationUrlParams
+          // from the shared config; disable it to preserve the sign-in flow
+          authorizationUrlParams: undefined,
+        },
       ],
     }),
   );

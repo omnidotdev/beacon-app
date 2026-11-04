@@ -10,8 +10,8 @@ interface Params {
  * Sign in with Omni OAuth
  */
 const signIn = async ({ redirectUrl = BASE_URL }: Params = {}) => {
-  await authClient.signIn.oauth2({
-    providerId: "omni",
+  await authClient.signIn.social({
+    provider: "omni",
     callbackURL: redirectUrl ?? "/",
   });
 };
