@@ -33,7 +33,7 @@ const FLAGS = {
  * @param context - User context (email) for Unleash constraint evaluation.
  *                  @omni.dev users bypass maintenance mode via Unleash strategy.
  */
-export const fetchMaintenanceMode = createServerFn({ method: "GET" })
+export const fetchMaintenanceMode = createServerFn({ method: "POST" })
   .inputValidator((data: FlagContext | undefined) => data)
   .handler(async ({ data: context }) => {
     const isMaintenanceMode = await getFlagProvider().isEnabled(

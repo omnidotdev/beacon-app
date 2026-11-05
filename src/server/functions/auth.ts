@@ -29,7 +29,7 @@ interface SessionResult {
  * Fetch the current user session.
  * Returns session with user info if authenticated, null otherwise.
  */
-export const fetchSession = createServerFn().handler(
+export const fetchSession = createServerFn({ method: "POST" }).handler(
   async (): Promise<SessionResult> => {
     const request = getRequest();
     const result = await getAuth(request);
