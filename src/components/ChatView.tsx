@@ -1,13 +1,17 @@
+import type {
+  ChatPart,
+  ChatMessage as ThreadMessage,
+} from "@omnidotdev/thornberry/ai-chat-thread";
+import { AiChatThread } from "@omnidotdev/thornberry/ai-chat-thread";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUp, Mic, Settings, User } from "lucide-react";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, Mic, Settings, User } from "lucide-react";
+import { useState } from "react";
 import type { ToolCallState } from "@/hooks/useChat";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import Markdown from "./Markdown";
 import ModelSelector from "./ModelSelector";
 import { BeaconLogo } from "./Sidebar";
-import ToolCallBlock from "./ToolCallBlock";
 
 interface UserInfo {
   name?: string | null;
@@ -29,6 +33,46 @@ interface ChatViewProps {
   toolCalls?: Map<string, ToolCallState>;
 }
 
+/**
+ * Map Beacon's chat messages onto the shared thread's typed-parts model. Each
+ * message's text becomes a text part; the live tool calls (tracked separately
+ * while streaming) attach as tool-call parts on the latest assistant message,
+ * the same place Beacon rendered them. An empty streaming placeholder is
+ * dropped so only the thread's typing indicator shows.
+ */
+function toThreadMessages(
+  messages: ChatMessage[],
+  toolCalls?: Map<string, ToolCallState>,
+): ThreadMessage[] {
+  const lastIndex = messages.length - 1;
+  return messages
+    .filter((m, i) => {
+      const toolsHere =
+        i === lastIndex &&
+        m.role === "assistant" &&
+        !!toolCalls &&
+        toolCalls.size > 0;
+      // Keep a message if it has content or carries the live tool calls
+      return Boolean(m.content) || toolsHere;
+    })
+    .map((m, i, kept) => {
+      const parts: ChatPart[] = [];
+      if (m.content) parts.push({ type: "text", text: m.content });
+      const isLastKept = i === kept.length - 1;
+      if (isLastKept && m.role === "assistant" && toolCalls) {
+        for (const tc of toolCalls.values()) {
+          parts.push({
+            type: "tool-call",
+            name: tc.name,
+            status: tc.status,
+            detail: tc.invocation,
+          });
+        }
+      }
+      return { id: m.id, role: m.role, parts };
+    });
+}
+
 function ChatView({
   messages,
   isLoading,
@@ -42,244 +86,67 @@ function ChatView({
   toolCalls,
 }: ChatViewProps) {
   const [input, setInput] = useState("");
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const userScrolledRef = useRef(false);
-  const prevMessageCountRef = useRef(messages.length);
-
-  // Autofocus input on new chat
-  useEffect(() => {
-    if (messages.length === 0) {
-      inputRef.current?.focus();
-    }
-  }, [messages.length]);
-
-  // Track user scroll intent (distinguish user scrolls from programmatic)
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    let isUserGesture = false;
-    let gestureTimer: ReturnType<typeof setTimeout>;
-
-    const markGesture = () => {
-      isUserGesture = true;
-      clearTimeout(gestureTimer);
-      gestureTimer = setTimeout(() => {
-        isUserGesture = false;
-      }, 200);
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      markGesture();
-      if (e.deltaY < 0) userScrolledRef.current = true;
-    };
-
-    const handleScroll = () => {
-      if (!isUserGesture) return;
-
-      const threshold = 80;
-      const distanceFromBottom =
-        container.scrollHeight - container.scrollTop - container.clientHeight;
-      userScrolledRef.current = distanceFromBottom > threshold;
-    };
-
-    container.addEventListener("wheel", handleWheel, { passive: true });
-    container.addEventListener("touchstart", markGesture, { passive: true });
-    container.addEventListener("touchmove", markGesture, { passive: true });
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      container.removeEventListener("wheel", handleWheel);
-      container.removeEventListener("touchstart", markGesture);
-      container.removeEventListener("touchmove", markGesture);
-      container.removeEventListener("scroll", handleScroll);
-      clearTimeout(gestureTimer);
-    };
-  }, []);
-
-  // Auto-scroll when new messages appear (user sends, assistant finishes)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional scroll on message count
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const isNewConversation =
-      prevMessageCountRef.current === 0 && messages.length > 0;
-    prevMessageCountRef.current = messages.length;
-
-    if (isNewConversation) return;
-
-    const isUserMessage =
-      messages.length > 0 && messages[messages.length - 1]?.role === "user";
-
-    // Sending a message re-enables auto-scroll
-    if (isUserMessage) userScrolledRef.current = false;
-    if (userScrolledRef.current) return;
-
-    requestAnimationFrame(() => {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: "smooth",
-      });
-    });
-  }, [messages.length]);
-
-  // Interval-based scroll during streaming (avoids per-token firing)
-  useEffect(() => {
-    if (!isLoading) return;
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const id = setInterval(() => {
-      if (userScrolledRef.current) return;
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: "smooth",
-      });
-    }, 100);
-
-    return () => clearInterval(id);
-  }, [isLoading]);
 
   const canSend = isConnected && modelLoaded !== false;
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!input.trim() || isLoading || !canSend) return;
+  const handleSend = () => {
+    if (!input.trim() || isLoading || !canSend) return;
+    onSendMessage(input);
+    setInput("");
+  };
 
-      onSendMessage(input);
-      setInput("");
-      if (inputRef.current) inputRef.current.style.height = "auto";
-    },
-    [input, isLoading, canSend, onSendMessage],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSubmit(e);
-      }
-    },
-    [handleSubmit],
-  );
-
-  // Auto-resize textarea to fit content
-  const adjustHeight = useCallback(() => {
-    const textarea = inputRef.current;
-    if (!textarea) return;
-    textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
-  }, []);
+  const placeholder = !isConnected
+    ? "Connecting..."
+    : modelLoaded === false
+      ? "No model loaded, add an API key in Settings"
+      : "Message...";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {/* Messages area with fade effect */}
-      <div
-        ref={messagesContainerRef}
-        className="scroll-fade-top min-h-0 flex-1 overflow-auto"
-      >
-        <div className="px-6 pb-6 pt-14">
-          {messages.length === 0 ? (
-            <EmptyState
-              persona={persona}
-              personaLoading={personaLoading}
-              user={user}
-              modelLoaded={modelLoaded}
-            />
+      <AiChatThread
+        messages={toThreadMessages(messages, toolCalls)}
+        status={isLoading ? "streaming" : "idle"}
+        input={input}
+        onInputChange={setInput}
+        onSend={handleSend}
+        placeholder={placeholder}
+        disabled={!canSend}
+        renderText={(text) => <Markdown content={text} />}
+        emptyState={
+          <EmptyState
+            persona={persona}
+            personaLoading={personaLoading}
+            user={user}
+            modelLoaded={modelLoaded}
+          />
+        }
+        notice={error ? <ErrorNotice error={error} /> : undefined}
+        renderAvatar={(message) =>
+          message.role === "user" ? (
+            <UserAvatar image={user?.image} name={user?.name} />
           ) : (
-            <div className="mx-auto max-w-2xl space-y-4">
-              {messages.map((msg) =>
-                msg.isStreaming && !msg.content ? null : msg.isError ? (
-                  <ErrorMessage key={msg.id} error={msg.content} />
-                ) : (
-                  <MessageBubble
-                    key={msg.id}
-                    message={msg}
-                    persona={persona}
-                    user={user}
-                  />
-                ),
-              )}
-              {isLoading && toolCalls && toolCalls.size > 0 && (
-                <div className="mx-auto max-w-2xl">
-                  <div className="bubble-assistant rounded-2xl rounded-bl-md px-4 py-2">
-                    {Array.from(toolCalls.values()).map((tc) => (
-                      <ToolCallBlock key={tc.toolId} toolCall={tc} />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {isLoading &&
-                (!toolCalls || toolCalls.size === 0) &&
-                messages[messages.length - 1]?.content === "" && (
-                  <ThinkingIndicator persona={persona} />
-                )}
-              {error && <ErrorMessage error={error} />}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Floating input area */}
-      <div className="relative z-10 shrink-0 p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto max-w-2xl">
-          <ModelSelector />
-          <form
-            onSubmit={handleSubmit}
-            className="group glass-panel flex flex-col rounded-2xl p-2"
-          >
-            <textarea
-              ref={inputRef}
-              autoFocus
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                adjustHeight();
-              }}
-              onKeyDown={handleKeyDown}
-              rows={1}
-              placeholder={
-                !isConnected
-                  ? "Connecting..."
-                  : modelLoaded === false
-                    ? "No model loaded, add an API key in Settings"
-                    : "Message..."
-              }
-              disabled={isLoading || !canSend}
-              className="max-h-[200px] w-full resize-none bg-transparent px-3 py-2 text-text outline-none placeholder:text-muted/60 disabled:opacity-50"
+            <Avatar
+              name={persona?.name ?? "Assistant"}
+              avatar={persona?.avatar}
+              size="sm"
+              personaId={persona?.id}
             />
-
-            <div className="flex items-center justify-between px-1">
-              <span className="select-none text-[11px] text-transparent transition-opacity group-focus-within:text-muted/30">
-                Shift+Enter for new line
-              </span>
-
-              <div className="flex items-center gap-2">
-                {/* Voice button (coming soon) */}
-                <button
-                  type="button"
-                  disabled
-                  className="btn-icon opacity-40 cursor-not-allowed text-muted"
-                  data-tooltip="Coming soon"
-                >
-                  <Mic size={20} />
-                </button>
-
-                {/* Send button */}
-                <button
-                  type="submit"
-                  disabled={!input.trim() || isLoading || !canSend}
-                  className="send-button"
-                >
-                  <ArrowUp size={18} strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
+          )
+        }
+        composerAccessory={<ModelSelector />}
+        composerActions={
+          <button
+            type="button"
+            disabled
+            className="btn-icon cursor-not-allowed text-muted opacity-40"
+            data-tooltip="Coming soon"
+            aria-label="Voice input (coming soon)"
+          >
+            <Mic size={20} />
+          </button>
+        }
+        footerHint="Shift+Enter for a new line"
+      />
     </div>
   );
 }
@@ -359,105 +226,26 @@ function EmptyState({
   );
 }
 
-const MessageBubble = memo(function MessageBubble({
-  message,
-  persona,
-  user,
-}: {
-  message: ChatMessage;
-  persona?: PersonaInfo;
-  user?: UserInfo | null;
-}) {
-  const isUser = message.role === "user";
-
-  return (
-    <div
-      className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}
-    >
-      <div className="flex-shrink-0">
-        {isUser ? (
-          <UserAvatar image={user?.image} name={user?.name} />
-        ) : (
-          <Avatar
-            name={persona?.name ?? "Assistant"}
-            avatar={persona?.avatar}
-            size="sm"
-            personaId={persona?.id}
-          />
-        )}
-      </div>
-      <div
-        className={`max-w-[80%] rounded-2xl px-4 ${
-          isUser
-            ? "bubble-user rounded-br-md py-1.5"
-            : "bubble-assistant rounded-bl-md py-3"
-        }`}
-      >
-        <div
-          className={`text-text ${isUser ? "leading-normal" : "leading-relaxed"}`}
-        >
-          <Markdown content={message.content} />
-        </div>
-        {message.isStreaming && <StreamingIndicator />}
-      </div>
-    </div>
-  );
-});
-
-function StreamingIndicator() {
-  return (
-    <span className="ml-1 inline-flex gap-1">
-      <span className="streaming-dot" />
-      <span className="streaming-dot" />
-      <span className="streaming-dot" />
-    </span>
-  );
-}
-
-function ThinkingIndicator({ persona }: { persona?: PersonaInfo }) {
-  return (
-    <div className="flex items-end gap-2">
-      <div className="flex-shrink-0">
-        <Avatar
-          name={persona?.name ?? "Assistant"}
-          avatar={persona?.avatar}
-          size="sm"
-          personaId={persona?.id}
-        />
-      </div>
-      <div className="bubble-assistant flex items-center rounded-2xl rounded-bl-md px-4 py-3">
-        <span className="inline-flex gap-1">
-          <span className="streaming-dot" />
-          <span className="streaming-dot" />
-          <span className="streaming-dot" />
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function ErrorMessage({ error }: { error: string }) {
+function ErrorNotice({ error }: { error: string }) {
   const isProviderError = error.includes("No AI provider configured");
 
   return (
-    <div className="glass-panel rounded-xl border-red-500/30 bg-red-500/10 px-4 py-3">
-      <p className="text-sm text-red-400">
-        {isProviderError ? (
-          <span className="flex items-center gap-2">
-            No AI provider configured.{" "}
-            <Link
-              to="/settings"
-              className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-            >
-              <Settings size={14} />
-              Add an API key
-            </Link>
-          </span>
-        ) : (
-          `Error: ${error}`
-        )}
-      </p>
-    </div>
+    <p className="text-red-400 text-sm">
+      {isProviderError ? (
+        <span className="flex items-center gap-2">
+          No AI provider configured.{" "}
+          <Link
+            to="/settings"
+            className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+          >
+            <Settings size={14} />
+            Add an API key
+          </Link>
+        </span>
+      ) : (
+        `Error: ${error}`
+      )}
+    </p>
   );
 }
 
