@@ -11,6 +11,21 @@ const MODELS: ModelOption[] = [
   // Omni Synapse — routed through Synapse gateway
   { id: "auto", name: "Auto (Smart Routing)", provider: "omni_credits" },
   {
+    id: "anthropic/claude-opus-5-5",
+    name: "Claude Opus 5.5",
+    provider: "omni_credits",
+  },
+  {
+    id: "anthropic/claude-sonnet-5-5",
+    name: "Claude Sonnet 5.5",
+    provider: "omni_credits",
+  },
+  {
+    id: "anthropic/claude-haiku-5-5",
+    name: "Claude Haiku 5.5",
+    provider: "omni_credits",
+  },
+  {
     id: "anthropic/claude-opus-4-6",
     name: "Claude Opus 4.6",
     provider: "omni_credits",
@@ -18,11 +33,6 @@ const MODELS: ModelOption[] = [
   {
     id: "anthropic/claude-sonnet-4-5-20250929",
     name: "Claude Sonnet 4.5",
-    provider: "omni_credits",
-  },
-  {
-    id: "anthropic/claude-sonnet-4-20250514",
-    name: "Claude Sonnet 4",
     provider: "omni_credits",
   },
   {
@@ -39,6 +49,9 @@ const MODELS: ModelOption[] = [
     provider: "omni_credits",
   },
   // Anthropic (BYOK)
+  { id: "claude-opus-5-5", name: "Opus 5.5", provider: "anthropic" },
+  { id: "claude-sonnet-5-5", name: "Sonnet 5.5", provider: "anthropic" },
+  { id: "claude-haiku-5-5", name: "Haiku 5.5", provider: "anthropic" },
   {
     id: "claude-sonnet-4-5-20250929",
     name: "Sonnet 4.5",
@@ -48,11 +61,6 @@ const MODELS: ModelOption[] = [
   {
     id: "claude-haiku-4-5-20251001",
     name: "Haiku 4.5",
-    provider: "anthropic",
-  },
-  {
-    id: "claude-sonnet-4-20250514",
-    name: "Sonnet 4",
     provider: "anthropic",
   },
   // OpenAI (BYOK)
@@ -96,5 +104,5 @@ function getAvailableModels(
   return grouped;
 }
 
-export { getAvailableModels, getModelName, getProviderDisplayName };
 export type { ModelOption };
+export { getAvailableModels, getModelName, getProviderDisplayName };
