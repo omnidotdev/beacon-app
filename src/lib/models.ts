@@ -1,4 +1,4 @@
-import type { ProviderType } from "@/lib/api";
+import type { ManagedModelsResponse, ProviderType } from "@/lib/api";
 
 interface ModelOption {
   id: string;
@@ -6,48 +6,12 @@ interface ModelOption {
   provider: ProviderType;
 }
 
-/** Curated models per provider */
-const MODELS: ModelOption[] = [
-  // Omni Synapse — routed through Synapse gateway
-  { id: "auto", name: "Auto (Smart Routing)", provider: "omni_credits" },
-  {
-    id: "anthropic/claude-opus-5-5",
-    name: "Claude Opus 5.5",
-    provider: "omni_credits",
-  },
-  {
-    id: "anthropic/claude-sonnet-5-5",
-    name: "Claude Sonnet 5.5",
-    provider: "omni_credits",
-  },
-  {
-    id: "anthropic/claude-haiku-5-5",
-    name: "Claude Haiku 5.5",
-    provider: "omni_credits",
-  },
-  {
-    id: "anthropic/claude-opus-4-6",
-    name: "Claude Opus 4.6",
-    provider: "omni_credits",
-  },
-  {
-    id: "anthropic/claude-sonnet-4-5-20250929",
-    name: "Claude Sonnet 4.5",
-    provider: "omni_credits",
-  },
-  {
-    id: "anthropic/claude-haiku-4-5-20251001",
-    name: "Claude Haiku 4.5",
-    provider: "omni_credits",
-  },
-  { id: "openai/gpt-4o", name: "GPT-4o", provider: "omni_credits" },
-  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini", provider: "omni_credits" },
-  { id: "openai/o3-mini", name: "o3-mini", provider: "omni_credits" },
-  {
-    id: "nvidia/moonshotai/kimi-k2.5",
-    name: "Kimi K2.5",
-    provider: "omni_credits",
-  },
+/**
+ * Curated models for the user's own provider keys (BYOK). Managed (Omni
+ * credits) models are not listed here: the Synapse gateway serves Beacon's
+ * managed model list, its order, and the default
+ */
+const BYOK_MODELS: ModelOption[] = [
   // Anthropic (BYOK)
   { id: "claude-opus-5-5", name: "Opus 5.5", provider: "anthropic" },
   { id: "claude-sonnet-5-5", name: "Sonnet 5.5", provider: "anthropic" },
@@ -76,33 +40,99 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   openrouter: "OpenRouter",
 };
 
-/** Get display name for a model ID, falls back to raw ID */
-function getModelName(modelId: string): string {
-  return MODELS.find((m) => m.id === modelId)?.name ?? modelId;
-}
+type GroupedModels = Record<string, ModelOption[]>;
 
 /** Get display name for a provider ID */
 function getProviderDisplayName(providerId: string): string {
   return PROVIDER_DISPLAY_NAMES[providerId] ?? providerId;
 }
 
-/** Group models by provider, filtering to only configured providers */
+/**
+ * Group the models the user can pick by provider: managed models from the
+ * gateway's list (when Omni credits are configured and the list has loaded),
+ * then BYOK models for each configured provider
+ */
 function getAvailableModels(
   configuredProviderIds: string[],
-): Record<string, ModelOption[]> {
-  const available = MODELS.filter((m) =>
-    configuredProviderIds.includes(m.provider),
-  );
+  managed: ManagedModelsResponse | undefined,
+): GroupedModels {
+  const grouped: GroupedModels = {};
 
-  const grouped: Record<string, ModelOption[]> = {};
-  for (const model of available) {
-    const key = model.provider;
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(model);
+  if (
+    configuredProviderIds.includes("omni_credits") &&
+    managed?.models.length
+  ) {
+    grouped.omni_credits = managed.models.map((m) => ({
+      id: m.id,
+      name: m.name,
+      provider: "omni_credits" as const,
+    }));
+  }
+
+  for (const model of BYOK_MODELS) {
+    if (!configuredProviderIds.includes(model.provider)) continue;
+    grouped[model.provider] ??= [];
+    grouped[model.provider]?.push(model);
   }
 
   return grouped;
 }
 
+/** Every model id the user can currently pick */
+const offeredIds = (grouped: GroupedModels): Set<string> =>
+  new Set(
+    Object.values(grouped)
+      .flat()
+      .map((m) => m.id),
+  );
+
+/**
+ * The model turns run on when nothing is picked: the gateway's default for
+ * the user's plan, else the first available model
+ */
+function getDefaultModelId(
+  grouped: GroupedModels,
+  managed: ManagedModelsResponse | undefined,
+): string | null {
+  const managedDefault = managed?.default_model;
+  if (managedDefault && offeredIds(grouped).has(managedDefault)) {
+    return managedDefault;
+  }
+
+  return Object.values(grouped)[0]?.[0]?.id ?? null;
+}
+
+/**
+ * Keep a stored selection only while it is still offered, so a model the
+ * gateway stopped listing (which it would refuse) is never sent. A managed
+ * (provider-prefixed) id is kept while the gateway list is still loading
+ */
+function resolveSelection(
+  stored: string | null,
+  grouped: GroupedModels,
+  managedLoaded: boolean,
+): string | null {
+  if (!stored) return null;
+  if (offeredIds(grouped).has(stored)) return stored;
+  if (!managedLoaded && stored.includes("/")) return stored;
+
+  return null;
+}
+
+/** Get display name for a model ID, falls back to raw ID */
+function getModelName(modelId: string, grouped: GroupedModels): string {
+  return (
+    Object.values(grouped)
+      .flat()
+      .find((m) => m.id === modelId)?.name ?? modelId
+  );
+}
+
 export type { ModelOption };
-export { getAvailableModels, getModelName, getProviderDisplayName };
+export {
+  getAvailableModels,
+  getDefaultModelId,
+  getModelName,
+  getProviderDisplayName,
+  resolveSelection,
+};

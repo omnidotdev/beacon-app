@@ -27,6 +27,7 @@ export {
 } from "./usePersonas";
 export {
   useConfigureProvider,
+  useManagedModels,
   useProviders,
   useRemoveProvider,
   useSetActiveProvider,

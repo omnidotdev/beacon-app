@@ -1,77 +1,96 @@
 import { Check, ChevronDown, ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useApi, useProviders } from "@/hooks";
-import type { SystemStatus } from "@/lib/api";
+import { useManagedModels, useProviders } from "@/hooks";
 import type { ModelOption } from "@/lib/models";
 import {
   getAvailableModels,
+  getDefaultModelId,
   getModelName,
   getProviderDisplayName,
+  resolveSelection,
 } from "@/lib/models";
 
 const STORAGE_KEY = "beacon-selected-model";
 
+const readStored = (): string | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const writeStored = (modelId: string | null) => {
+  try {
+    if (modelId) localStorage.setItem(STORAGE_KEY, modelId);
+    else localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // storage unavailable (private window); the selection lives in state only
+  }
+};
+
 function ModelSelector() {
-  const api = useApi();
   const { data: providersData } = useProviders();
   const [isOpen, setIsOpen] = useState(false);
-  const [status, setStatus] = useState<SystemStatus | null>(null);
-  const [selectedModelId, setSelectedModelId] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null,
+  // An explicit pick; null means "the default", which sends no override so the
+  // gateway picks the model for the user's plan
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(
+    readStored,
   );
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const seededRef = useRef(
-    typeof window !== "undefined" && !!localStorage.getItem(STORAGE_KEY),
-  );
 
-  // Fetch current model from gateway status
-  useEffect(() => {
-    api
-      .getStatus()
-      .then((s) => {
-        setStatus(s);
-        // Seed from server if no local selection
-        if (!seededRef.current && s.model?.id) {
-          seededRef.current = true;
-          setSelectedModelId(s.model.id);
-        }
-      })
-      .catch(() => {});
-  }, [api]);
-
-  // Determine current model display name
-  const currentModelId = selectedModelId ?? status?.model?.id;
-  const displayName = currentModelId ? getModelName(currentModelId) : null;
-
-  // Build available models grouped by configured providers
   const configuredProviderIds =
     providersData?.providers
       .filter((p) => p.status === "configured")
       .map((p) => p.id) ?? [];
 
-  const grouped = getAvailableModels(configuredProviderIds);
+  const managedEnabled = configuredProviderIds.includes("omni_credits");
+  const { data: managed, isFetched: managedFetched } =
+    useManagedModels(managedEnabled);
+
+  const grouped = getAvailableModels(configuredProviderIds, managed);
   const groupEntries = Object.entries(grouped);
+  const defaultModelId = getDefaultModelId(grouped, managed);
+
+  // Drop a stored pick that is no longer offered (the gateway refuses a model
+  // outside Beacon's policy), once the lists it is checked against have loaded
+  const listsLoaded = !!providersData && (!managedEnabled || managedFetched);
+  useEffect(() => {
+    if (!listsLoaded || !selectedModelId) return;
+    const resolved = resolveSelection(selectedModelId, grouped, !!managed);
+    if (resolved !== selectedModelId) {
+      setSelectedModelId(resolved);
+      writeStored(resolved);
+    }
+  }, [listsLoaded, selectedModelId, grouped, managed]);
+
+  // Without a managed list (BYOK only) there is no gateway default to defer
+  // to, so the first BYOK model is pinned as before
+  const firstModelId = groupEntries[0]?.[1]?.[0]?.id;
+  const hasManaged = !!grouped.omni_credits;
+  useEffect(() => {
+    if (listsLoaded && !hasManaged && !selectedModelId && firstModelId) {
+      setSelectedModelId(firstModelId);
+      writeStored(firstModelId);
+    }
+  }, [listsLoaded, hasManaged, selectedModelId, firstModelId]);
+
+  const currentModelId = selectedModelId ?? defaultModelId;
+  const displayName = currentModelId
+    ? getModelName(currentModelId, grouped)
+    : null;
 
   const handleSelect = (model: ModelOption) => {
-    if (model.id === currentModelId) {
-      setIsOpen(false);
-      return;
-    }
-
-    setSelectedModelId(model.id);
-    localStorage.setItem(STORAGE_KEY, model.id);
+    // Picking the managed default clears the override so plan changes keep
+    // applying
+    const next =
+      hasManaged && model.id === managed?.default_model ? null : model.id;
+    setSelectedModelId(next);
+    writeStored(next);
     setIsOpen(false);
   };
-
-  // Auto-select first available model when none is selected (local only, no API call)
-  const firstModel = groupEntries[0]?.[1]?.[0];
-  useEffect(() => {
-    if (!currentModelId && firstModel) {
-      setSelectedModelId(firstModel.id);
-      localStorage.setItem(STORAGE_KEY, firstModel.id);
-    }
-  }, [currentModelId, firstModel]);
 
   // No models available if no providers configured
   if (groupEntries.length === 0 || !displayName) return null;
@@ -88,6 +107,7 @@ function ModelSelector() {
         <ModelDropdown
           groups={groupEntries}
           currentModelId={currentModelId}
+          defaultModelId={defaultModelId}
           onSelect={handleSelect}
           onClose={() => setIsOpen(false)}
           containerRef={dropdownRef}
@@ -126,12 +146,14 @@ function ModelPill({
 function ModelDropdown({
   groups,
   currentModelId,
+  defaultModelId,
   onSelect,
   onClose,
   containerRef,
 }: {
   groups: [string, ModelOption[]][];
   currentModelId?: string | null;
+  defaultModelId?: string | null;
   onSelect: (model: ModelOption) => void;
   onClose: () => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -198,7 +220,12 @@ function ModelDropdown({
                     : "text-text hover:bg-surface-elevated"
                 }`}
               >
-                {model.name}
+                <span>
+                  {model.name}
+                  {model.id === defaultModelId && (
+                    <span className="ml-1.5 text-xs text-muted">Default</span>
+                  )}
+                </span>
                 {isSelected && <Check size={14} className="text-primary" />}
               </button>
             );
