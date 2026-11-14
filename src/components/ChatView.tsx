@@ -8,11 +8,16 @@ import { ArrowRight, Coins, Mic, Settings, User } from "lucide-react";
 import { useState } from "react";
 import type { ToolCallState } from "@/hooks/useChat";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
+import { ACCOUNT_URL } from "@/lib/config/env.config";
 import type { BillingNoticeKind } from "@/lib/gateway/chatErrorCode";
 import { NO_PERSONA_ID } from "@/lib/persona";
+import buyCreditsUrl from "@/lib/util/buyCreditsUrl";
 import Markdown from "./Markdown";
 import ModelSelector from "./ModelSelector";
 import { BeaconLogo } from "./Sidebar";
+
+// Credits are sold on the Omni account hub; empty when no hub is configured
+const BUY_CREDITS_URL = buyCreditsUrl(ACCOUNT_URL);
 
 interface UserInfo {
   name?: string | null;
@@ -252,12 +257,20 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
   return (
     <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
       You are out of Omni credits (shared across Omni).
+      {BUY_CREDITS_URL && (
+        <a
+          href={BUY_CREDITS_URL}
+          className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+        >
+          <Coins size={14} />
+          Buy credits
+        </a>
+      )}
       <Link
         to="/settings"
-        className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+        className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
       >
-        <Coins size={14} />
-        Buy credits or upgrade
+        Upgrade
       </Link>
     </p>
   );

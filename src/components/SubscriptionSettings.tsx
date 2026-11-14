@@ -7,7 +7,6 @@ import {
   useCancelSubscription,
   useCheckout,
   useCreditBalance,
-  useCreditCheckout,
   useEntitlements,
   usePrices,
   useRenewSubscription,
@@ -15,6 +14,8 @@ import {
 } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
 import billingProvider from "@/lib/billing";
+import { ACCOUNT_URL } from "@/lib/config/env.config";
+import buyCreditsUrl from "@/lib/util/buyCreditsUrl";
 import getCreditBalanceDisplay from "@/lib/util/creditBalance";
 import getTierFromEntitlements from "@/lib/util/getTierFromEntitlements";
 
@@ -89,8 +90,6 @@ function SubscriptionSettingsInner() {
   const { mutateAsync: openPortal, isPending: isPortalLoading } =
     useBillingPortal();
   const { mutateAsync: checkout, isPending: isCheckoutLoading } = useCheckout();
-  const { mutateAsync: creditCheckout, isPending: isCreditCheckoutLoading } =
-    useCreditCheckout();
   const { mutateAsync: cancel, isPending: isCancelling } =
     useCancelSubscription();
   const { mutateAsync: renew, isPending: isRenewing } = useRenewSubscription();
@@ -151,12 +150,8 @@ function SubscriptionSettingsInner() {
     }
   };
 
-  const handleBuyCredits = () =>
-    creditCheckout({
-      amount: 10,
-      successUrl: `${window.location.origin}/settings?credits=purchased`,
-      cancelUrl: window.location.href,
-    });
+  // Credits are sold on the Omni account hub (catalog packs), never here
+  const buyUrl = buyCreditsUrl(ACCOUNT_URL);
 
   const handleCancel = async () => {
     try {
@@ -252,23 +247,19 @@ function SubscriptionSettingsInner() {
                     : "Shared across Omni"}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleBuyCredits}
-                disabled={isCreditCheckoutLoading}
-                className={
-                  balance.isOutOfCredits
-                    ? "btn-primary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs disabled:opacity-50"
-                    : "flex items-center gap-1.5 rounded-lg bg-amber-500/15 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25 disabled:opacity-50"
-                }
-              >
-                {isCreditCheckoutLoading ? (
-                  <Loader2 size={12} className="animate-spin" />
-                ) : (
+              {buyUrl && (
+                <a
+                  href={buyUrl}
+                  className={
+                    balance.isOutOfCredits
+                      ? "btn-primary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs"
+                      : "flex items-center gap-1.5 rounded-lg bg-amber-500/15 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25"
+                  }
+                >
                   <Coins size={12} />
-                )}
-                Buy Credits
-              </button>
+                  Buy credits
+                </a>
+              )}
             </div>
           )}
 
