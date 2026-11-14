@@ -104,7 +104,7 @@ function createGatewayClient(
     {
       onToken?: (token: string) => void;
       onComplete?: (message: Message) => void;
-      onError?: (error: string) => void;
+      onError?: (error: string, code?: string) => void;
       onToolStart?: (toolId: string, name: string) => void;
       onToolResult?: (
         toolId: string,
@@ -388,7 +388,7 @@ function createGatewayClient(
           authWaiters = [];
         } else {
           for (const cb of messageCallbacks.values()) {
-            cb.onError?.(msg.message || "Unknown error");
+            cb.onError?.(msg.message || "Unknown error", msg.code);
           }
           messageCallbacks.clear();
         }
@@ -514,7 +514,7 @@ function createGatewayClient(
       content: string,
       onToken?: (token: string) => void,
       onComplete?: (message: Message) => void,
-      onError?: (error: string) => void,
+      onError?: (error: string, code?: string) => void,
       personaId?: string,
       onToolStart?: (toolId: string, name: string) => void,
       onToolResult?: (

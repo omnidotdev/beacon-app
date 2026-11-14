@@ -17,6 +17,7 @@ Beacon App is the unified client for Beacon, supporting web, desktop, and mobile
 - **Cross-Platform** - Web, desktop (Windows, macOS, Linux), and mobile (iOS, Android) via Tauri
 - **Voice & Text** - Real-time chat with streaming and voice input
 - **Persona Switching** - Switch between AI personas on the fly
+- **Omni Credits** - Managed AI billed against your Omni credit balance, one pool shared across Omni products
 - **BYOK** - Bring your own API keys for LLM providers
 - **Offline Support** - Local-first with IndexedDB via Dexie
 
@@ -39,6 +40,10 @@ bun tauri dev
 bun android:dev
 bun ios:dev
 ```
+
+## Billing
+
+On the cloud deployment, managed AI usage is metered by the Synapse gateway and charged against the user's Omni credit balance (one pool shared across Omni, held in Aether, 1 credit = $0.01). Settings shows that pooled balance and a Buy Credits action; when the balance is empty, chat shows an out-of-credits notice linking to Settings. Plans, entitlements, and prices use Beacon's own Aether app (`beacon`), which is fixed in code. Set `VITE_BILLING_URL` and `VITE_SYNAPSE_API_URL` to enable billing in the UI.
 
 ## Building
 

@@ -256,7 +256,7 @@ export function createHttpClient(): ApiClient {
   let currentSessionId: string | null = null;
   let tokenCallback: ((token: string) => void) | null = null;
   let completeCallback: ((message: Message) => void) | null = null;
-  let errorCallback: ((error: string) => void) | null = null;
+  let errorCallback: ((error: string, code?: string) => void) | null = null;
   let toolStartCallback: ((toolId: string, name: string) => void) | null = null;
   let toolResultCallback:
     | ((
@@ -304,7 +304,7 @@ export function createHttpClient(): ApiClient {
             break;
 
           case "error":
-            errorCallback?.(msg.message ?? "Unknown error");
+            errorCallback?.(msg.message ?? "Unknown error", msg.code);
             streamingContent = "";
             break;
 
@@ -466,7 +466,7 @@ export function createHttpClient(): ApiClient {
       content: string,
       onToken?: (token: string) => void,
       onComplete?: (message: Message) => void,
-      onError?: (error: string) => void,
+      onError?: (error: string, code?: string) => void,
       personaId?: string,
       onToolStart?: (toolId: string, name: string) => void,
       onToolResult?: (

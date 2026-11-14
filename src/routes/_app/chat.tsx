@@ -78,6 +78,7 @@ function ChatPage() {
     isConnected,
     isLoading,
     toolCalls,
+    billingNotice,
     sendMessage,
     clearMessages,
   } = useChat({
@@ -193,6 +194,7 @@ function ChatPage() {
         isLoading={isLoading}
         isConnected={isConnected}
         toolCalls={toolCalls}
+        billingNotice={billingNotice}
         onSendMessage={handleSendMessage}
         error={error}
         voiceAvailable={status?.voice_available}

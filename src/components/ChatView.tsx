@@ -4,10 +4,11 @@ import type {
 } from "@omnidotdev/thornberry/ai-chat-thread";
 import { AiChatThread } from "@omnidotdev/thornberry/ai-chat-thread";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Mic, Settings, User } from "lucide-react";
+import { ArrowRight, Coins, Mic, Settings, User } from "lucide-react";
 import { useState } from "react";
 import type { ToolCallState } from "@/hooks/useChat";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
+import type { BillingNoticeKind } from "@/lib/gateway/chatErrorCode";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import Markdown from "./Markdown";
 import ModelSelector from "./ModelSelector";
@@ -31,6 +32,8 @@ interface ChatViewProps {
   user?: UserInfo | null;
   modelLoaded?: boolean;
   toolCalls?: Map<string, ToolCallState>;
+  /** Billing-related gateway failure from the last send */
+  billingNotice?: BillingNoticeKind | null;
 }
 
 /**
@@ -84,6 +87,7 @@ function ChatView({
   user,
   modelLoaded,
   toolCalls,
+  billingNotice,
 }: ChatViewProps) {
   const [input, setInput] = useState("");
 
@@ -120,7 +124,13 @@ function ChatView({
             modelLoaded={modelLoaded}
           />
         }
-        notice={error ? <ErrorNotice error={error} /> : undefined}
+        notice={
+          billingNotice ? (
+            <BillingNotice kind={billingNotice} />
+          ) : error ? (
+            <ErrorNotice error={error} />
+          ) : undefined
+        }
         renderAvatar={(message) =>
           message.role === "user" ? (
             <UserAvatar image={user?.image} name={user?.name} />
@@ -223,6 +233,33 @@ function EmptyState({
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * Out-of-credits or temporarily-unavailable notice for a failed send. Credits
+ * are one balance shared across Omni, so the copy says so
+ */
+function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
+  if (kind === "ai_unavailable") {
+    return (
+      <p className="text-amber-400 text-sm">
+        The assistant is temporarily unavailable. Please try again in a moment.
+      </p>
+    );
+  }
+
+  return (
+    <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
+      You are out of Omni credits (shared across Omni).
+      <Link
+        to="/settings"
+        className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+      >
+        <Coins size={14} />
+        Buy credits or upgrade
+      </Link>
+    </p>
   );
 }
 
