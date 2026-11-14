@@ -519,8 +519,9 @@ export function createHttpClient(): ApiClient {
       toolResultCallback = onToolResult ?? null;
       streamingContent = "";
 
-      // Send message with explicit persona and model to prevent server-side drift.
-      // "auto" means use Synapse's default threshold routing — don't send an override.
+      // Send the persona and any explicit model pick. No pick (or the legacy
+      // "auto") sends no override, so the server runs the default for the
+      // user's plan from the gateway's Beacon policy
       const storedModel = localStorage.getItem("beacon-selected-model");
       const modelOverride =
         storedModel && storedModel !== "auto" ? storedModel : undefined;

@@ -142,6 +142,24 @@ export interface ProvidersResponse {
   active_provider: ProviderType | null;
 }
 
+// Managed models (served by the Synapse gateway's Beacon policy)
+
+export interface ManagedModel {
+  /** Provider-prefixed gateway id, sent as the model override */
+  id: string;
+  name: string;
+  /** Whether turns run on this model when nothing is picked */
+  default: boolean;
+  context_window: number | null;
+  /** Retail Omni credits per million tokens; null when not billed */
+  credits_per_mtok: { input: number; output: number } | null;
+}
+
+export interface ManagedModelsResponse {
+  models: ManagedModel[];
+  default_model: string | null;
+}
+
 export interface ConfigureProviderParams {
   provider: ProviderType;
   api_key?: string;

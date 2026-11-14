@@ -233,8 +233,8 @@ function SettingsPage() {
                             Omni Synapse
                           </h4>
                           <p className="mt-1 text-sm text-muted">
-                            Sign in with Omni for smart routing, credits, and
-                            cross-device sync
+                            Sign in with Omni for current Claude models,
+                            credits, and cross-device sync
                           </p>
                         </div>
                         <a
@@ -477,8 +477,8 @@ function OmniCreditsCard({ provider, isActive }: OmniCreditsCardProps) {
       </div>
       <div className="mt-2 flex items-center justify-between">
         <p className="text-sm text-muted">
-          Smart routing across Claude, GPT-4o, and Kimi — included with your
-          account.
+          Current Claude models, billed to your Omni credits. No API keys
+          needed.
         </p>
         <a
           href="https://synapse.omni.dev/dashboard"

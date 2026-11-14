@@ -4,6 +4,7 @@ import { useRouteContext } from "@tanstack/react-router";
 import type {
   ConfigureProviderParams,
   ConfigureProviderResponse,
+  ManagedModelsResponse,
   ProvidersResponse,
   ProviderType,
 } from "@/lib/api";
@@ -185,7 +186,7 @@ const PROVIDER_METADATA: Omit<
     description: "Omni's AI router with smart model selection",
     api_key_url: null,
     coming_soon: false,
-    features: ["smart routing", "cost optimization", "tool discovery"],
+    features: ["current Claude models", "tool discovery"],
   },
   {
     id: "anthropic",
@@ -267,6 +268,30 @@ function buildProvidersResponse(
   });
 
   return { providers, active_provider: activeProvider };
+}
+
+/**
+ * Managed models the signed-in user may pick, served by the gateway from the
+ * Synapse gateway's Beacon policy, with the default for the user's plan
+ * marked. Only fetched when Omni credits are configured
+ */
+export function useManagedModels(enabled: boolean) {
+  const { session } = useRouteContext({ from: "__root__" });
+  const token = session?.accessToken ?? "";
+
+  return useQuery({
+    queryKey: ["managedModels"],
+    queryFn: () =>
+      gatewayFetch<ManagedModelsResponse>("/api/providers/models", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    enabled: enabled && !!token,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
 }
 
 export function useProviders() {
