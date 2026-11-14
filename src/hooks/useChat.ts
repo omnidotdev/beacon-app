@@ -3,6 +3,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ChatMessage, Message } from "@/lib/api";
 import * as localDb from "@/lib/db/conversations";
+import getChatErrorKind, {
+  type BillingNoticeKind,
+} from "@/lib/gateway/chatErrorCode";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import { isNative } from "@/lib/platform";
 import { useApi } from "./useApi";
@@ -49,6 +52,11 @@ export function useChat({
     new Map(),
   );
   const activeConversationRef = useRef<string | null>(conversationId);
+  // Billing-related gateway failure from the last send (out of credits or
+  // temporarily unavailable), cleared once a reply completes
+  const [billingNotice, setBillingNotice] = useState<BillingNoticeKind | null>(
+    null,
+  );
 
   // Track active conversation for event filtering
   useEffect(() => {
@@ -180,6 +188,7 @@ export function useChat({
           setIsLoading(false);
           setStreamingMessage(null);
           setToolCalls(new Map());
+          setBillingNotice(null);
 
           // Save assistant message to local DB
           const finalContent = message.content || streamingContentRef.current;
@@ -194,7 +203,10 @@ export function useChat({
           streamingContentRef.current = "";
         },
         // onError
-        async (error) => {
+        async (error, code) => {
+          const kind = getChatErrorKind(code);
+          if (kind !== "other") setBillingNotice(kind);
+
           if (rafIdRef.current !== null) {
             cancelAnimationFrame(rafIdRef.current);
             rafIdRef.current = null;
@@ -254,6 +266,7 @@ export function useChat({
     isConnected,
     isLoading,
     toolCalls,
+    billingNotice,
     sendMessage,
     clearMessages,
   };

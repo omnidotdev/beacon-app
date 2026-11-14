@@ -163,7 +163,7 @@ export function createIpcClient(): ApiClient {
     conversationId: string,
     onToken?: (token: string) => void,
     onComplete?: (message: Message) => void,
-    onError?: (error: string) => void,
+    onError?: (error: string, code?: string) => void,
   ) {
     // Clean up previous listeners
     await cleanupEventListeners();
@@ -286,7 +286,7 @@ export function createIpcClient(): ApiClient {
       content: string,
       onToken?: (token: string) => void,
       onComplete?: (message: Message) => void,
-      onError?: (error: string) => void,
+      onError?: (error: string, code?: string) => void,
       personaId?: string,
     ): Promise<void> {
       await setupEventListeners(conversationId, onToken, onComplete, onError);

@@ -2,8 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
 
 import { isCloudDeployment } from "@/lib/api";
-import billingProvider from "@/lib/billing";
-import app from "@/lib/config/app.config";
+import billingProvider, { BILLING_APP_ID } from "@/lib/billing";
 
 const STALE_TIME_MS = 300_000; // 5 minutes
 const CREDIT_STALE_TIME_MS = 60_000; // 1 minute
@@ -75,11 +74,11 @@ export function useEntitlements() {
  */
 export function usePrices() {
   return useQuery({
-    queryKey: ["prices", app.name.toLowerCase()],
+    queryKey: ["prices", BILLING_APP_ID],
     queryFn: async () => {
       if (!billingProvider) throw new Error("Billing is not configured");
 
-      const prices = await billingProvider.getPrices(app.name.toLowerCase());
+      const prices = await billingProvider.getPrices(BILLING_APP_ID);
 
       return prices.sort((a, b) => (a.unit_amount ?? 0) - (b.unit_amount ?? 0));
     },
@@ -89,7 +88,8 @@ export function usePrices() {
 }
 
 /**
- * Fetch credit balance for the current user.
+ * Fetch the current user's Omni credit balance: one pool shared across Omni
+ * products, in retail USD (convert with `getCreditBalanceDisplay`).
  * Proxied through synapse-api which handles Aether service auth
  */
 export function useCreditBalance() {
@@ -106,7 +106,7 @@ export function useCreditBalance() {
 
       if (!res.ok) throw new Error("Failed to fetch credit balance");
 
-      return res.json() as Promise<{ balance: number }>;
+      return res.json() as Promise<{ balance: number | string }>;
     },
     enabled: isCloudDeployment() && !!SYNAPSE_API_URL && !!session?.user?.id,
     staleTime: CREDIT_STALE_TIME_MS,
@@ -203,7 +203,7 @@ export function useCheckout() {
       if (!billingProvider) throw new Error("Billing is not configured");
 
       return billingProvider.createCheckoutWithWorkspace({
-        appId: import.meta.env.VITE_BILLING_APP_ID as string,
+        appId: BILLING_APP_ID,
         priceId,
         successUrl,
         cancelUrl,

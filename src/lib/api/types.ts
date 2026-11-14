@@ -209,7 +209,8 @@ export interface ApiClient {
     content: string,
     onToken?: (token: string) => void,
     onComplete?: (message: Message) => void,
-    onError?: (error: string) => void,
+    /** `code` is the gateway error code (e.g. `out_of_credits`), when sent */
+    onError?: (error: string, code?: string) => void,
     personaId?: string,
     onToolStart?: (toolId: string, name: string) => void,
     onToolResult?: (

@@ -15,6 +15,7 @@ import {
 } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
 import billingProvider from "@/lib/billing";
+import getCreditBalanceDisplay from "@/lib/util/creditBalance";
 import getTierFromEntitlements from "@/lib/util/getTierFromEntitlements";
 
 /** Format a Unix timestamp to a readable date, or a dash when missing/invalid */
@@ -106,6 +107,9 @@ function SubscriptionSettingsInner() {
   const hasEntitlement = !!entitlementTier;
   const planName = subscription?.product?.name ?? entitlementTier ?? "Free";
 
+  // Pooled Omni balance (retail USD) shown as whole credits
+  const balance = getCreditBalanceDisplay(creditData?.balance);
+
   // Target the entry paid tier ("pro"), falling back to the cheapest paid price.
   // Prices arrive sorted by unit amount ascending.
   const upgradePrice =
@@ -146,6 +150,13 @@ function SubscriptionSettingsInner() {
       );
     }
   };
+
+  const handleBuyCredits = () =>
+    creditCheckout({
+      amount: 10,
+      successUrl: `${window.location.origin}/settings?credits=purchased`,
+      cancelUrl: window.location.href,
+    });
 
   const handleCancel = async () => {
     try {
@@ -215,31 +226,41 @@ function SubscriptionSettingsInner() {
 
           {!hasSubscription && !hasEntitlement && (
             <p className="text-sm text-muted">
-              Upgrade to unlock additional features and higher usage limits
+              Upgrade for more included credits each month and voice
             </p>
           )}
 
-          {/* Credit balance */}
-          {creditData && !isCreditLoading && (
-            <div className="flex items-center gap-3 rounded-xl bg-surface-elevated/50 px-4 py-3">
+          {/* Credit balance (one pool shared across Omni) */}
+          {balance && !isCreditLoading && (
+            <div
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 ${
+                balance.isOutOfCredits
+                  ? "border border-amber-500/30 bg-amber-500/10"
+                  : "bg-surface-elevated/50"
+              }`}
+            >
               <Coins size={16} className="text-amber-400" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-text">
-                  {creditData.balance.toLocaleString()} credits
+                  {balance.isOutOfCredits
+                    ? "You are out of credits"
+                    : `${balance.formatted} credits`}
                 </p>
-                <p className="text-xs text-muted">Available balance</p>
+                <p className="text-xs text-muted">
+                  {balance.isOutOfCredits
+                    ? "Chat is paused until you buy credits or upgrade. Credits are shared across Omni"
+                    : "Shared across Omni"}
+                </p>
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  creditCheckout({
-                    amount: 10,
-                    successUrl: `${window.location.origin}/settings?credits=purchased`,
-                    cancelUrl: window.location.href,
-                  })
-                }
+                onClick={handleBuyCredits}
                 disabled={isCreditCheckoutLoading}
-                className="flex items-center gap-1.5 rounded-lg bg-amber-500/15 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25 disabled:opacity-50"
+                className={
+                  balance.isOutOfCredits
+                    ? "btn-primary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs disabled:opacity-50"
+                    : "flex items-center gap-1.5 rounded-lg bg-amber-500/15 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25 disabled:opacity-50"
+                }
               >
                 {isCreditCheckoutLoading ? (
                   <Loader2 size={12} className="animate-spin" />
