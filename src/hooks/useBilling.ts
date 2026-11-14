@@ -114,43 +114,6 @@ export function useCreditBalance() {
 }
 
 /**
- * Create a credit purchase checkout session via synapse-api
- */
-export function useCreditCheckout() {
-  const { session } = useRouteContext({ from: "__root__" });
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      amount,
-      successUrl,
-      cancelUrl,
-    }: {
-      amount: number;
-      successUrl: string;
-      cancelUrl: string;
-    }) => {
-      const res = await fetch(`${SYNAPSE_API_URL}/credits/me/checkout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.accessToken ?? ""}`,
-        },
-        body: JSON.stringify({ amount, successUrl, cancelUrl }),
-      });
-
-      if (!res.ok) throw new Error("Failed to create credit checkout");
-
-      return res.json() as Promise<{ checkoutUrl: string }>;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["creditBalance"] });
-      window.location.href = data.checkoutUrl;
-    },
-  });
-}
-
-/**
  * Open the Stripe billing portal for managing the current subscription
  */
 export function useBillingPortal() {

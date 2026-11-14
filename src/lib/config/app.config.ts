@@ -8,6 +8,7 @@ const app = {
   links: {
     website: "https://beacon.omni.dev",
     console: "https://console.omni.dev",
+    account: "https://account.omni.dev",
     discord: "https://discord.gg/omnidotdev",
     docs: "https://docs.omni.dev/products/beacon",
     github: "https://github.com/omnidotdev",

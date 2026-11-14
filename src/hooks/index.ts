@@ -4,7 +4,6 @@ export {
   useCancelSubscription,
   useCheckout,
   useCreditBalance,
-  useCreditCheckout,
   useEntitlements,
   usePrices,
   useRenewSubscription,
