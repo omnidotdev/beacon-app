@@ -2,4 +2,4 @@
 "@omnidotdev/beacon-app": minor
 ---
 
-Take the Omni Synapse model picker from the gateway: the managed models, their names, and the default for your plan come from Beacon's model policy instead of a list built into the app. A saved pick the gateway no longer offers resets to the default, and choosing the default follows your plan from then on. Your own-key (Anthropic, OpenAI) models are unchanged
+The model picker now always shows the current Omni models and the right default for your plan. If a model you picked is retired, Beacon switches you to the default. Models from your own Anthropic or OpenAI key are unchanged.

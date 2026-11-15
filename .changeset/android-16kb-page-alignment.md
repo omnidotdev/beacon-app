@@ -2,4 +2,4 @@
 "@omnidotdev/beacon-app": patch
 ---
 
-Align the Android native library to a 16 KiB page size for Android 15+ (16 KiB device) compatibility.
+Beacon now runs on Android 15 and later devices that use 16 KB memory pages.
