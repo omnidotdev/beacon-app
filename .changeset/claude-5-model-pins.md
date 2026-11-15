@@ -2,4 +2,4 @@
 "@omnidotdev/beacon-app": patch
 ---
 
-Offer Claude Opus 5.5, Sonnet 5.5, and Haiku 5.5 under Omni Synapse and with your own Anthropic key, and drop the retired Claude Sonnet 4 (`claude-sonnet-4-20250514`), which now fails upstream
+Claude Opus 5.5, Sonnet 5.5, and Haiku 5.5 are now available with Omni credits or your own Anthropic key. The retired Claude Sonnet 4 is removed.

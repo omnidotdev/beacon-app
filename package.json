@@ -18,6 +18,7 @@
     "tauri"
   ],
   "scripts": {
+    "release": "changeset publish",
     "dev": "vite",
     "dev:web": "vite dev",
     "build": "vite build",
@@ -72,6 +73,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.12",
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.31.0",
     "@tailwindcss/vite": "^4",
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/react-devtools": "^0.9.2",
