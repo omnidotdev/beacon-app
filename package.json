@@ -42,7 +42,7 @@
   "dependencies": {
     "@noble/ed25519": "^2.0.0",
     "@noble/hashes": "^2.0.0",
-    "@omnidotdev/providers": "github:omnidotdev/providers#25a67e59c191999133808fc0c2f0bfbb3b7c4519",
+    "@omnidotdev/providers": "github:omnidotdev/providers#9cbd6396c1ff78e6db6f3d2d51efbb8c20e1ae1d",
     "@omnidotdev/thornberry": "github:omnidotdev/thornberry#36059d99b29b798506f94ca3f9d94067e1b8c588",
     "@tanstack/nitro-v2-vite-plugin": "^1.141.0",
     "@tanstack/react-query": "^5.90.16",
