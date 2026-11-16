@@ -1,68 +1,18 @@
+import { useRouteContext } from "@tanstack/react-router";
 import { Coins, CreditCard, Shield } from "lucide-react";
 
-import {
-  useCreditBalance,
-  useEntitlements,
-  usePrices,
-  useSubscription,
-} from "@/hooks";
+import { usePlan, usePrices } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
-import billingProvider from "@/lib/billing";
 import {
   hubInterval,
   manageSubscriptionUrl,
   upgradePlanUrl,
 } from "@/lib/billing/hubLinks";
+import { personalWorkspace } from "@/lib/billing/personalWorkspace";
+import { isPaidTier, planName } from "@/lib/billing/plan";
 import { ACCOUNT_URL, BASE_URL } from "@/lib/config/env.config";
 import buyCreditsUrl from "@/lib/util/buyCreditsUrl";
 import getCreditBalanceDisplay from "@/lib/util/creditBalance";
-import getTierFromEntitlements from "@/lib/util/getTierFromEntitlements";
-
-/** Format a Unix timestamp to a readable date, or a dash when missing/invalid */
-function formatDate(timestamp?: number | null): string {
-  if (timestamp == null) return "—";
-  const date = new Date(timestamp * 1000);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-/** Map subscription status to display config */
-function getStatusDisplay(status: string): {
-  label: string;
-  className: string;
-} {
-  switch (status) {
-    case "active":
-      return {
-        label: "Active",
-        className: "bg-emerald-500/15 text-emerald-400",
-      };
-    case "canceled":
-      return {
-        label: "Canceled",
-        className: "bg-red-500/15 text-red-400",
-      };
-    case "past_due":
-      return {
-        label: "Past Due",
-        className: "bg-amber-500/15 text-amber-400",
-      };
-    case "trialing":
-      return {
-        label: "Trial",
-        className: "bg-primary/15 text-primary",
-      };
-    default:
-      return {
-        label: status,
-        className: "bg-muted/15 text-muted",
-      };
-  }
-}
 
 function SubscriptionSkeleton() {
   return (
@@ -82,22 +32,19 @@ function SubscriptionSkeleton() {
 
 // Inner component that always calls hooks (avoids Rules of Hooks violation)
 function SubscriptionSettingsInner() {
-  const { data: subscription, isLoading } = useSubscription();
-  const { data: entitlements } = useEntitlements();
+  const { session } = useRouteContext({ from: "__root__" });
+  const { data: plan, isLoading } = usePlan();
   const { data: prices } = usePrices();
-  const { data: creditData, isLoading: isCreditLoading } = useCreditBalance();
 
-  const hasSubscription = !!subscription;
-  const isCancelingScheduled = !!subscription?.cancelAt;
+  // Beacon bills the user's personal workspace: its plan and credits apply,
+  // and plan actions on the hub target it
+  const workspace = personalWorkspace(session?.organizations)?.slug;
 
-  // A comped or manually-granted tier has no Stripe subscription, so fall back to
-  // the entitlement tier. Prefer the live subscription's plan name when present.
-  const entitlementTier = getTierFromEntitlements(entitlements);
-  const hasEntitlement = !!entitlementTier;
-  const planName = subscription?.product?.name ?? entitlementTier ?? "Free";
+  const isPaid = isPaidTier(plan?.tier);
+  const name = planName(plan?.tier);
 
-  // Pooled Omni balance (retail USD) shown as whole credits
-  const balance = getCreditBalanceDisplay(creditData?.balance);
+  // The personal workspace's balance (retail USD) shown as whole credits
+  const balance = getCreditBalanceDisplay(plan?.creditBalance);
 
   // Target the entry paid tier ("pro"), falling back to the cheapest paid price.
   // Prices arrive sorted by unit amount ascending.
@@ -112,12 +59,13 @@ function SubscriptionSettingsInner() {
       ? upgradePlanUrl(ACCOUNT_URL, BASE_URL, {
           plan: upgradePrice.metadata.tier,
           interval: upgradeInterval,
+          workspace,
         })
       : "";
-  const manageUrl = manageSubscriptionUrl(ACCOUNT_URL);
+  const manageUrl = manageSubscriptionUrl(ACCOUNT_URL, BASE_URL, workspace);
 
   // Credits are sold on the Omni account hub (catalog packs), never here
-  const buyUrl = buyCreditsUrl(ACCOUNT_URL);
+  const buyUrl = buyCreditsUrl(ACCOUNT_URL, workspace);
 
   return (
     <div className="glass-panel rounded-2xl p-5">
@@ -129,45 +77,20 @@ function SubscriptionSettingsInner() {
         <SubscriptionSkeleton />
       ) : (
         <div className="space-y-4">
-          {/* Tier and status */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Shield size={18} className="text-primary" />
-              <span className="text-lg font-semibold text-text">
-                {planName}
-              </span>
-            </div>
-
-            {hasSubscription && (
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusDisplay(subscription.status).className}`}
-              >
-                {getStatusDisplay(subscription.status).label}
-              </span>
-            )}
-
-            {isCancelingScheduled && (
-              <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-medium text-amber-400">
-                Cancels {formatDate(subscription?.cancelAt)}
-              </span>
-            )}
+          {/* Plan of the personal workspace Beacon bills */}
+          <div className="flex items-center gap-2">
+            <Shield size={18} className="text-primary" />
+            <span className="text-lg font-semibold text-text">{name}</span>
           </div>
 
-          {/* Period info */}
-          {hasSubscription && (
-            <p className="text-sm text-muted">
-              Current period ends {formatDate(subscription.currentPeriodEnd)}
-            </p>
-          )}
+          <p className="text-sm text-muted">
+            {isPaid
+              ? "Your personal workspace's plan"
+              : "Upgrade your personal workspace for more included credits each month and voice"}
+          </p>
 
-          {!hasSubscription && !hasEntitlement && (
-            <p className="text-sm text-muted">
-              Upgrade for more included credits each month and voice
-            </p>
-          )}
-
-          {/* Credit balance (one pool shared across Omni) */}
-          {balance && !isCreditLoading && (
+          {/* Credit balance of the personal workspace */}
+          {balance && (
             <div
               className={`flex items-center gap-3 rounded-xl px-4 py-3 ${
                 balance.isOutOfCredits
@@ -184,8 +107,8 @@ function SubscriptionSettingsInner() {
                 </p>
                 <p className="text-xs text-muted">
                   {balance.isOutOfCredits
-                    ? "Chat is paused until you buy credits or upgrade. Credits are shared across Omni"
-                    : "Shared across Omni"}
+                    ? "Chat is paused until you buy credits or upgrade. Credits belong to your personal workspace"
+                    : "Your personal workspace's credits"}
                 </p>
               </div>
               {buyUrl && (
@@ -206,7 +129,7 @@ function SubscriptionSettingsInner() {
 
           {/* Actions (open on the account hub, in the system browser on desktop) */}
           <div className="flex flex-wrap gap-3">
-            {!hasSubscription && upgradeUrl && (
+            {!isPaid && upgradeUrl && (
               <a
                 href={upgradeUrl}
                 target="_blank"
@@ -218,7 +141,7 @@ function SubscriptionSettingsInner() {
               </a>
             )}
 
-            {hasSubscription && manageUrl && (
+            {isPaid && manageUrl && (
               <a
                 href={manageUrl}
                 target="_blank"
@@ -236,9 +159,11 @@ function SubscriptionSettingsInner() {
   );
 }
 
-// Guard component that skips rendering on non-cloud deployments or without billing
+// Guard component that skips rendering on non-cloud deployments. The plan
+// comes from the gateway, so it shows even when the client has no billing URL
+// (only the Upgrade target, which needs Aether's prices, is then hidden)
 function SubscriptionSettings() {
-  if (!isCloudDeployment() || !billingProvider) return null;
+  if (!isCloudDeployment()) return null;
   return <SubscriptionSettingsInner />;
 }
 

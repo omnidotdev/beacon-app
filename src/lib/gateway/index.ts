@@ -8,3 +8,4 @@ export {
   type DiscoveredGateway,
   getGatewayDiscovery,
 } from "./discovery";
+export { gatewayFetch } from "./gatewayFetch";
