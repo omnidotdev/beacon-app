@@ -43,7 +43,7 @@ bun ios:dev
 
 ## Billing
 
-On the cloud deployment, managed AI usage is metered by the Synapse gateway and charged against the user's Omni credit balance (one pool shared across Omni, held in Aether, 1 credit = $0.01). Settings shows that pooled balance and a Buy Credits action; when the balance is empty, chat shows an out-of-credits notice linking to Settings. Plans, entitlements, and prices use Beacon's own Aether app (`beacon`), which is fixed in code. Set `VITE_BILLING_URL` and `VITE_SYNAPSE_API_URL` to enable billing in the UI.
+On the cloud deployment, managed AI usage is metered by the Synapse gateway and charged against the user's Omni credit balance (one pool shared across Omni, held in Aether, 1 credit = $0.01). Settings shows that pooled balance and a Buy Credits action; when the balance is empty, chat shows an out-of-credits notice linking to Settings. Plans, entitlements, and prices use Beacon's own Aether app (`beacon`), which is fixed in code. Plans are bought and managed on the Omni account hub (`VITE_ACCOUNT_URL`): Settings shows the current plan, and its Upgrade and Manage subscription actions open the hub, which runs checkout or the billing portal and returns to Settings. Set `VITE_BILLING_URL` and `VITE_SYNAPSE_API_URL` to enable billing in the UI.
 
 ## Building
 

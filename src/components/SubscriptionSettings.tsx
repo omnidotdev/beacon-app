@@ -1,20 +1,19 @@
-import { Coins, CreditCard, Loader2, RefreshCw, Shield, X } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Coins, CreditCard, Shield } from "lucide-react";
 
 import {
-  useBillingPortal,
-  useCancelSubscription,
-  useCheckout,
   useCreditBalance,
   useEntitlements,
   usePrices,
-  useRenewSubscription,
   useSubscription,
 } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
 import billingProvider from "@/lib/billing";
-import { ACCOUNT_URL } from "@/lib/config/env.config";
+import {
+  hubInterval,
+  manageSubscriptionUrl,
+  upgradePlanUrl,
+} from "@/lib/billing/hubLinks";
+import { ACCOUNT_URL, BASE_URL } from "@/lib/config/env.config";
 import buyCreditsUrl from "@/lib/util/buyCreditsUrl";
 import getCreditBalanceDisplay from "@/lib/util/creditBalance";
 import getTierFromEntitlements from "@/lib/util/getTierFromEntitlements";
@@ -87,17 +86,8 @@ function SubscriptionSettingsInner() {
   const { data: entitlements } = useEntitlements();
   const { data: prices } = usePrices();
   const { data: creditData, isLoading: isCreditLoading } = useCreditBalance();
-  const { mutateAsync: openPortal, isPending: isPortalLoading } =
-    useBillingPortal();
-  const { mutateAsync: checkout, isPending: isCheckoutLoading } = useCheckout();
-  const { mutateAsync: cancel, isPending: isCancelling } =
-    useCancelSubscription();
-  const { mutateAsync: renew, isPending: isRenewing } = useRenewSubscription();
-
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const hasSubscription = !!subscription;
-  const isActive = subscription?.status === "active";
   const isCancelingScheduled = !!subscription?.cancelAt;
 
   // A comped or manually-granted tier has no Stripe subscription, so fall back to
@@ -115,68 +105,19 @@ function SubscriptionSettingsInner() {
     prices?.find((price) => price.metadata?.tier === "pro") ??
     prices?.find((price) => (price.unit_amount ?? 0) > 0);
 
-  const handleManageBilling = async () => {
-    if (!subscription?.product?.id) return;
-
-    try {
-      await openPortal({
-        productId: subscription.product.id,
-        returnUrl: window.location.href,
-      });
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to open billing portal",
-      );
-    }
-  };
-
-  const handleUpgrade = async () => {
-    if (!upgradePrice) {
-      toast.error("No upgrade plans are available right now");
-      return;
-    }
-
-    try {
-      await checkout({
-        priceId: upgradePrice.id,
-        successUrl: `${window.location.origin}/settings?upgraded=true`,
-        cancelUrl: window.location.href,
-        createWorkspace: { name: "Default" },
-      });
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to start checkout",
-      );
-    }
-  };
+  // Plans are bought and managed on the Omni account hub, never here
+  const upgradeInterval = hubInterval(upgradePrice?.recurring?.interval);
+  const upgradeUrl =
+    upgradePrice?.metadata?.tier && upgradeInterval
+      ? upgradePlanUrl(ACCOUNT_URL, BASE_URL, {
+          plan: upgradePrice.metadata.tier,
+          interval: upgradeInterval,
+        })
+      : "";
+  const manageUrl = manageSubscriptionUrl(ACCOUNT_URL);
 
   // Credits are sold on the Omni account hub (catalog packs), never here
   const buyUrl = buyCreditsUrl(ACCOUNT_URL);
-
-  const handleCancel = async () => {
-    try {
-      await cancel();
-      setShowCancelConfirm(false);
-      toast.success(
-        "Subscription will cancel at the end of the billing period",
-      );
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to cancel subscription",
-      );
-    }
-  };
-
-  const handleRenew = async () => {
-    try {
-      await renew();
-      toast.success("Subscription renewed successfully");
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to renew subscription",
-      );
-    }
-  };
 
   return (
     <div className="glass-panel rounded-2xl p-5">
@@ -263,90 +204,30 @@ function SubscriptionSettingsInner() {
             </div>
           )}
 
-          {/* Actions */}
+          {/* Actions (open on the account hub, in the system browser on desktop) */}
           <div className="flex flex-wrap gap-3">
-            {!hasSubscription && (
-              <button
-                type="button"
-                onClick={handleUpgrade}
-                disabled={isCheckoutLoading || !upgradePrice}
-                className="btn-primary flex items-center gap-2 rounded-lg px-4 py-2 text-sm disabled:opacity-50"
+            {!hasSubscription && upgradeUrl && (
+              <a
+                href={upgradeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary flex items-center gap-2 rounded-lg px-4 py-2 text-sm"
               >
-                {isCheckoutLoading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <CreditCard size={14} />
-                )}
+                <CreditCard size={14} />
                 Upgrade
-              </button>
+              </a>
             )}
 
-            {hasSubscription && (
-              <button
-                type="button"
-                onClick={handleManageBilling}
-                disabled={isPortalLoading}
-                className="btn-glass flex items-center gap-2 text-sm disabled:opacity-50"
+            {hasSubscription && manageUrl && (
+              <a
+                href={manageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-glass flex items-center gap-2 text-sm"
               >
-                {isPortalLoading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <CreditCard size={14} />
-                )}
-                Manage Billing
-              </button>
-            )}
-
-            {isActive &&
-              !isCancelingScheduled &&
-              (showCancelConfirm ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    disabled={isCancelling}
-                    className="flex items-center gap-2 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
-                  >
-                    {isCancelling ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <X size={14} />
-                    )}
-                    Confirm Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCancelConfirm(false)}
-                    className="btn-glass px-4 py-2 text-sm"
-                  >
-                    Keep
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowCancelConfirm(true)}
-                  className="flex items-center gap-2 rounded-lg border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
-                >
-                  <X size={14} />
-                  Cancel Subscription
-                </button>
-              ))}
-
-            {isCancelingScheduled && (
-              <button
-                type="button"
-                onClick={handleRenew}
-                disabled={isRenewing}
-                className="btn-glass flex items-center gap-2 text-sm disabled:opacity-50"
-              >
-                {isRenewing ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <RefreshCw size={14} />
-                )}
-                Renew Subscription
-              </button>
+                <CreditCard size={14} />
+                Manage subscription
+              </a>
             )}
           </div>
         </div>
