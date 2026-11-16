@@ -3,68 +3,34 @@ import { useRouteContext } from "@tanstack/react-router";
 
 import { isCloudDeployment } from "@/lib/api";
 import billingProvider, { BILLING_APP_ID } from "@/lib/billing";
+import type { BeaconPlan } from "@/lib/billing/plan";
+import { gatewayFetch } from "@/lib/gateway";
 
 const STALE_TIME_MS = 300_000; // 5 minutes
-const CREDIT_STALE_TIME_MS = 60_000; // 1 minute
-const ENTITY_TYPE = "user";
-const SYNAPSE_API_URL = import.meta.env.VITE_SYNAPSE_API_URL as
-  | string
-  | undefined;
+const PLAN_STALE_TIME_MS = 60_000; // 1 minute
 
 /**
- * Fetch subscription details for the current user.
- * Only enabled on cloud deployments with a valid billing provider.
+ * Fetch the plan and credit balance of the workspace Beacon bills (the user's
+ * personal workspace). Read from beacon-gateway, which resolves the workspace
+ * and reads Aether with its service key, so the app shows exactly what the
+ * gateway enforces. Only enabled on cloud deployments
  */
-export function useSubscription() {
+export function usePlan() {
   const { session } = useRouteContext({ from: "__root__" });
+  const token = session?.accessToken ?? "";
 
   return useQuery({
-    queryKey: ["subscription", session?.user?.identityProviderId],
-    queryFn: () => {
-      if (!billingProvider) throw new Error("Billing is not configured");
-
-      return billingProvider.getSubscription(
-        ENTITY_TYPE,
-        session?.user.identityProviderId ?? "",
-        session?.accessToken ?? "",
-      );
-    },
-    enabled:
-      isCloudDeployment() &&
-      !!billingProvider &&
-      !!session?.user?.identityProviderId,
-    staleTime: STALE_TIME_MS,
-  });
-}
-
-/**
- * Fetch entitlements for the current user.
- * Distinguishes a comped/manually-granted tier (which has no Stripe subscription)
- * from a genuinely free account. A `not_found` or `unavailable` result resolves to
- * `null` so callers treat both as "no entitlement to show".
- */
-export function useEntitlements() {
-  const { session } = useRouteContext({ from: "__root__" });
-
-  return useQuery({
-    queryKey: ["entitlements", session?.user?.identityProviderId],
-    queryFn: async () => {
-      if (!billingProvider) throw new Error("Billing is not configured");
-
-      const result = await billingProvider.getEntitlementsResult(
-        ENTITY_TYPE,
-        session?.user.identityProviderId ?? "",
-        undefined,
-        session?.accessToken ?? "",
-      );
-
-      return result.status === "success" ? result.data : null;
-    },
-    enabled:
-      isCloudDeployment() &&
-      !!billingProvider &&
-      !!session?.user?.identityProviderId,
-    staleTime: STALE_TIME_MS,
+    queryKey: ["plan", session?.user?.identityProviderId],
+    queryFn: () =>
+      gatewayFetch<BeaconPlan>("/api/billing/plan", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    enabled: isCloudDeployment() && !!token,
+    staleTime: PLAN_STALE_TIME_MS,
+    retry: false,
   });
 }
 
@@ -84,31 +50,5 @@ export function usePrices() {
     },
     enabled: isCloudDeployment() && !!billingProvider,
     staleTime: STALE_TIME_MS,
-  });
-}
-
-/**
- * Fetch the current user's Omni credit balance: one pool shared across Omni
- * products, in retail USD (convert with `getCreditBalanceDisplay`).
- * Proxied through synapse-api which handles Aether service auth
- */
-export function useCreditBalance() {
-  const { session } = useRouteContext({ from: "__root__" });
-
-  return useQuery({
-    queryKey: ["creditBalance", session?.user?.id],
-    queryFn: async () => {
-      const res = await fetch(`${SYNAPSE_API_URL}/credits/me/balance`, {
-        headers: {
-          Authorization: `Bearer ${session?.accessToken ?? ""}`,
-        },
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch credit balance");
-
-      return res.json() as Promise<{ balance: number | string }>;
-    },
-    enabled: isCloudDeployment() && !!SYNAPSE_API_URL && !!session?.user?.id,
-    staleTime: CREDIT_STALE_TIME_MS,
   });
 }

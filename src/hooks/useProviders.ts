@@ -9,7 +9,7 @@ import type {
   ProviderType,
 } from "@/lib/api";
 import { AUTH_URL, SYNAPSE_API_URL } from "@/lib/config/env.config";
-import { getGatewayDiscovery } from "@/lib/gateway";
+import { gatewayFetch } from "@/lib/gateway";
 
 // Synapse GraphQL endpoint
 const SYNAPSE_GRAPHQL_URL = `${SYNAPSE_API_URL ?? ""}/graphql`;
@@ -102,25 +102,6 @@ async function synapseGraphql<T>(
   }
 
   return result.data;
-}
-
-async function gatewayFetch<T>(
-  path: string,
-  options?: RequestInit,
-): Promise<T> {
-  const state = getGatewayDiscovery().getState();
-  const gatewayUrl = state.status === "connected" ? state.gateway.url : null;
-  if (!gatewayUrl) {
-    throw new Error("Not connected to a gateway");
-  }
-  const res = await fetch(`${gatewayUrl}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  if (!res.ok) {
-    throw new Error(`Gateway request failed (${res.status})`);
-  }
-  return res.json() as Promise<T>;
 }
 
 // Gatekeeper vault API helpers

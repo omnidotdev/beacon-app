@@ -1,7 +1,6 @@
+import type { ErrorComponentProps } from "@tanstack/react-router";
 import { rootRouteId, useMatch, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
-
-import type { ErrorComponentProps } from "@tanstack/react-router";
 
 /**
  * Default error boundary for caught route errors.

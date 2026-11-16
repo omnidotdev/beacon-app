@@ -8,8 +8,14 @@ describe("buyCreditsUrl", () => {
     );
   });
 
+  test("buys for the personal workspace Beacon bills", () => {
+    expect(buyCreditsUrl("https://account.omni.dev", "Claude")).toBe(
+      "https://account.omni.dev/billing?product=beacon&workspace=claude",
+    );
+  });
+
   test("is empty without an account hub, so the link is hidden", () => {
     expect(buyCreditsUrl(undefined)).toBe("");
-    expect(buyCreditsUrl("")).toBe("");
+    expect(buyCreditsUrl("", "claude")).toBe("");
   });
 });
