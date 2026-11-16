@@ -3,7 +3,6 @@ import { Coins, CreditCard, Shield } from "lucide-react";
 
 import { usePlan, usePrices } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
-import billingProvider from "@/lib/billing";
 import {
   hubInterval,
   manageSubscriptionUrl,
@@ -160,9 +159,11 @@ function SubscriptionSettingsInner() {
   );
 }
 
-// Guard component that skips rendering on non-cloud deployments or without billing
+// Guard component that skips rendering on non-cloud deployments. The plan
+// comes from the gateway, so it shows even when the client has no billing URL
+// (only the Upgrade target, which needs Aether's prices, is then hidden)
 function SubscriptionSettings() {
-  if (!isCloudDeployment() || !billingProvider) return null;
+  if (!isCloudDeployment()) return null;
   return <SubscriptionSettingsInner />;
 }
 
