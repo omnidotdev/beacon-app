@@ -4,12 +4,21 @@ import type {
 } from "@omnidotdev/thornberry/ai-chat-thread";
 import { AiChatThread } from "@omnidotdev/thornberry/ai-chat-thread";
 import { Link, useRouteContext } from "@tanstack/react-router";
-import { ArrowRight, Coins, Mic, Settings, User } from "lucide-react";
+import {
+  ArrowRight,
+  Coins,
+  CreditCard,
+  KeyRound,
+  Mic,
+  Settings,
+  User,
+} from "lucide-react";
 import { useState } from "react";
 import type { ToolCallState } from "@/hooks/useChat";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
+import { upgradePlanUrl } from "@/lib/billing/hubLinks";
 import { personalWorkspace } from "@/lib/billing/personalWorkspace";
-import { ACCOUNT_URL } from "@/lib/config/env.config";
+import { ACCOUNT_URL, BASE_URL } from "@/lib/config/env.config";
 import type { BillingNoticeKind } from "@/lib/gateway/chatErrorCode";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import buyCreditsUrl from "@/lib/util/buyCreditsUrl";
@@ -240,22 +249,61 @@ function EmptyState({
 }
 
 /**
- * Out-of-credits or temporarily-unavailable notice for a failed send. Beacon
- * spends the personal workspace's credits, so Buy credits targets it
+ * Out-of-credits, paid-access, or temporarily-unavailable notice for a failed
+ * send. Beacon spends the personal workspace's credits, so Buy credits and
+ * Upgrade target it
  */
 function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
   const { session } = useRouteContext({ from: "__root__" });
+  const workspace = personalWorkspace(session?.organizations)?.slug;
 
   // Credits are sold on the Omni account hub; empty when no hub is configured
-  const buyUrl = buyCreditsUrl(
-    ACCOUNT_URL,
-    personalWorkspace(session?.organizations)?.slug,
-  );
+  const buyUrl = buyCreditsUrl(ACCOUNT_URL, workspace);
 
   if (kind === "ai_unavailable") {
     return (
       <p className="text-amber-400 text-sm">
         The assistant is temporarily unavailable. Please try again in a moment.
+      </p>
+    );
+  }
+
+  // Managed AI is for paying accounts: buy credits, upgrade, or bring a key
+  if (kind === "payment_required") {
+    const upgradeUrl = upgradePlanUrl(ACCOUNT_URL, BASE_URL, {
+      plan: "pro",
+      interval: "month",
+      workspace,
+    });
+
+    return (
+      <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
+        AI uses Omni credits.
+        {buyUrl && (
+          <a
+            href={buyUrl}
+            className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+          >
+            <Coins size={14} />
+            Buy credits
+          </a>
+        )}
+        {upgradeUrl && (
+          <a
+            href={upgradeUrl}
+            className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+          >
+            <CreditCard size={14} />
+            Upgrade
+          </a>
+        )}
+        <Link
+          to="/settings"
+          className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+        >
+          <KeyRound size={14} />
+          Use your own key
+        </Link>
       </p>
     );
   }

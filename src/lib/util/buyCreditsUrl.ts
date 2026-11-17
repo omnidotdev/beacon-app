@@ -2,7 +2,7 @@ import { accountUrl } from "@omnidotdev/providers/react";
 
 /**
  * Where to buy credits: Buy credits on the Omni account hub, the one place
- * credits are sold. `?product=beacon` lands on the AI usage tab, and
+ * credits are sold. `?product=beacon&tab=ai` lands on Omni credits, and
  * `?workspace=` selects the personal workspace Beacon bills, so the credits
  * land where Beacon spends them. Empty when no account hub is configured, so
  * the link is hidden rather than dead
@@ -16,7 +16,7 @@ const buyCreditsUrl = (
   const base = accountUrl(accountBaseUrl);
   if (!base) return "";
 
-  const search = new URLSearchParams({ product: "beacon" });
+  const search = new URLSearchParams({ product: "beacon", tab: "ai" });
   if (workspace) search.set("workspace", workspace.toLowerCase());
 
   return `${base}/billing?${search.toString()}`;

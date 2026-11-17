@@ -52,8 +52,9 @@ export function useChat({
     new Map(),
   );
   const activeConversationRef = useRef<string | null>(conversationId);
-  // Billing-related gateway failure from the last send (out of credits or
-  // temporarily unavailable), cleared once a reply completes
+  // Billing-related gateway failure from the last send (out of credits, paid
+  // access required, or temporarily unavailable), cleared once a reply
+  // completes
   const [billingNotice, setBillingNotice] = useState<BillingNoticeKind | null>(
     null,
   );
