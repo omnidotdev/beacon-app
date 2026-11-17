@@ -6,6 +6,10 @@ describe("getChatErrorKind", () => {
     expect(getChatErrorKind("out_of_credits")).toBe("out_of_credits");
   });
 
+  it("maps the gateway paid-access code apart from out of credits", () => {
+    expect(getChatErrorKind("payment_required")).toBe("payment_required");
+  });
+
   it("maps the gateway unavailable code", () => {
     expect(getChatErrorKind("ai_unavailable")).toBe("ai_unavailable");
   });

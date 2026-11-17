@@ -4,13 +4,13 @@ import buyCreditsUrl from "./buyCreditsUrl";
 describe("buyCreditsUrl", () => {
   test("opens Buy credits on the account hub for Beacon", () => {
     expect(buyCreditsUrl("https://account.omni.dev/")).toBe(
-      "https://account.omni.dev/billing?product=beacon",
+      "https://account.omni.dev/billing?product=beacon&tab=ai",
     );
   });
 
   test("buys for the personal workspace Beacon bills", () => {
     expect(buyCreditsUrl("https://account.omni.dev", "Claude")).toBe(
-      "https://account.omni.dev/billing?product=beacon&workspace=claude",
+      "https://account.omni.dev/billing?product=beacon&tab=ai&workspace=claude",
     );
   });
 

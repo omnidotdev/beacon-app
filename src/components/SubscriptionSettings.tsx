@@ -86,7 +86,7 @@ function SubscriptionSettingsInner() {
           <p className="text-sm text-muted">
             {isPaid
               ? "Your personal workspace's plan"
-              : "Upgrade your personal workspace for more included credits each month and voice"}
+              : "Upgrade your personal workspace for included credits each month and voice"}
           </p>
 
           {/* Credit balance of the personal workspace */}
