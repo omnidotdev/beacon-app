@@ -262,7 +262,7 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
 
   return (
     <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
-      Your personal workspace is out of Omni credits.
+      Your personal workspace is out of AI credits.
       {buyUrl && (
         <a
           href={buyUrl}

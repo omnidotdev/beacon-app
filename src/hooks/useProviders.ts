@@ -254,7 +254,7 @@ function buildProvidersResponse(
 /**
  * Managed models the signed-in user may pick, served by the gateway from the
  * Synapse gateway's Beacon policy, with the default for the user's plan
- * marked. Only fetched when Omni credits are configured
+ * marked. Only fetched when AI credits are configured
  */
 export function useManagedModels(enabled: boolean) {
   const { session } = useRouteContext({ from: "__root__" });

@@ -13,7 +13,7 @@ interface CreditBalanceDisplay {
 }
 
 /**
- * Convert the pooled Omni credit balance (retail USD, as Aether stores it)
+ * Convert the pooled AI credit balance (retail USD, as Aether stores it)
  * into display credits.
  * @param balanceUsd - Balance in retail USD, as a numeric string or number
  * @param locale - Optional BCP 47 locale for grouping

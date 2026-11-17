@@ -49,7 +49,7 @@ function getProviderDisplayName(providerId: string): string {
 
 /**
  * Group the models the user can pick by provider: managed models from the
- * gateway's list (when Omni credits are configured and the list has loaded),
+ * gateway's list (when AI credits are configured and the list has loaded),
  * then BYOK models for each configured provider
  */
 function getAvailableModels(

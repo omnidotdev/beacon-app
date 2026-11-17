@@ -212,7 +212,7 @@ function SettingsPage() {
                 </>
               ) : (
                 <>
-                  {/* Omni Credits — primary, always first */}
+                  {/* AI credits, primary, always first */}
                   {USE_SYNAPSE ? (
                     (() => {
                       const omniCredits = providers.find(
@@ -477,8 +477,7 @@ function OmniCreditsCard({ provider, isActive }: OmniCreditsCardProps) {
       </div>
       <div className="mt-2 flex items-center justify-between">
         <p className="text-sm text-muted">
-          Current Claude models, billed to your Omni credits. No API keys
-          needed.
+          Current Claude models, billed to your AI credits. No API keys needed.
         </p>
         <a
           href="https://synapse.omni.dev/dashboard"

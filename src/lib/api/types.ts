@@ -151,7 +151,7 @@ export interface ManagedModel {
   /** Whether turns run on this model when nothing is picked */
   default: boolean;
   context_window: number | null;
-  /** Retail Omni credits per million tokens; null when not billed */
+  /** Retail AI credits per million tokens; null when not billed */
   credits_per_mtok: { input: number; output: number } | null;
 }
 
