@@ -8,7 +8,12 @@ import { createBillingProvider } from "@omnidotdev/providers/billing";
  */
 export const BILLING_APP_ID = "beacon";
 
-const baseUrl = import.meta.env.VITE_BILLING_URL as string | undefined;
+/** Aether base URL, unset when billing is not configured */
+export const BILLING_BASE_URL = import.meta.env.VITE_BILLING_URL as
+  | string
+  | undefined;
+
+const baseUrl = BILLING_BASE_URL;
 
 // Only instantiate when the billing service is configured
 const billingProvider: BillingProvider | null = baseUrl

@@ -5,6 +5,7 @@ import { isCloudDeployment } from "@/lib/api";
 import billingProvider, { BILLING_APP_ID } from "@/lib/billing";
 import type { BeaconPlan } from "@/lib/billing/plan";
 import { gatewayFetch } from "@/lib/gateway";
+import { getCardOffer } from "@/server/functions/cardOffer";
 import { getPrices } from "@/server/functions/prices";
 
 const STALE_TIME_MS = 300_000; // 5 minutes
@@ -45,6 +46,20 @@ export function usePrices() {
     queryKey: ["prices", BILLING_APP_ID],
     queryFn: () => getPrices(),
     enabled: isCloudDeployment() && !!billingProvider,
+    staleTime: STALE_TIME_MS,
+  });
+}
+
+/**
+ * Whether Aether offers card-verified free AI credits, so "Add a card" shows
+ * only while the offer is live. Read through a server function (see
+ * `getCardOffer`); any failure is no offer
+ */
+export function useCardOffer() {
+  return useQuery({
+    queryKey: ["cardOffer"],
+    queryFn: () => getCardOffer(),
+    enabled: isCloudDeployment(),
     staleTime: STALE_TIME_MS,
   });
 }
