@@ -1,5 +1,5 @@
 export { ApiProvider, useApi } from "./useApi";
-export { usePlan, usePrices } from "./useBilling";
+export { useCardOffer, usePlan, usePrices } from "./useBilling";
 export { useChat } from "./useChat";
 export {
   useConversations,

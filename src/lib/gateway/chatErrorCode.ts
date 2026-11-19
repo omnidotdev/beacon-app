@@ -2,6 +2,7 @@
 export type ChatErrorKind =
   | "out_of_credits"
   | "payment_required"
+  | "reauth_required"
   | "ai_unavailable"
   | "other";
 
@@ -13,13 +14,16 @@ export type BillingNoticeKind = Exclude<ChatErrorKind, "other">;
  * `out_of_credits` is the Synapse gateway's 402 (the pooled AI credit
  * balance is empty); `payment_required` is its 402 for managed AI on an
  * account that has never paid (buy credits, upgrade, or bring a key);
- * `ai_unavailable` is a 503 or a failed key provisioning
+ * `reauth_required` means the session names no personal workspace to bill,
+ * so the user signs in again; `ai_unavailable` is a 503 or a failed key
+ * provisioning
  * @param code - Error `code` from the gateway, if any
  * @returns The UI error kind
  */
 const getChatErrorKind = (code: string | undefined): ChatErrorKind => {
   if (code === "out_of_credits") return "out_of_credits";
   if (code === "payment_required") return "payment_required";
+  if (code === "reauth_required") return "reauth_required";
   if (code === "ai_unavailable") return "ai_unavailable";
 
   return "other";

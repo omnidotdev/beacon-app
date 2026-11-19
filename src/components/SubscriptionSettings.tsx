@@ -1,8 +1,9 @@
 import { useRouteContext } from "@tanstack/react-router";
-import { Coins, CreditCard, Shield } from "lucide-react";
+import { Coins, CreditCard, Gift, Shield } from "lucide-react";
 
-import { usePlan, usePrices } from "@/hooks";
+import { useCardOffer, usePlan, usePrices } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
+import { cardOfferLink } from "@/lib/billing/cardOffer";
 import {
   hubInterval,
   manageSubscriptionUrl,
@@ -35,6 +36,7 @@ function SubscriptionSettingsInner() {
   const { session } = useRouteContext({ from: "__root__" });
   const { data: plan, isLoading } = usePlan();
   const { data: prices } = usePrices();
+  const { data: cardOffer } = useCardOffer();
 
   // Beacon bills the user's personal workspace: its plan and credits apply,
   // and plan actions on the hub target it
@@ -66,6 +68,13 @@ function SubscriptionSettingsInner() {
 
   // Credits are sold on the Omni account hub (catalog packs), never here
   const buyUrl = buyCreditsUrl(ACCOUNT_URL, workspace);
+
+  // A free workspace out of credits can add a card for free monthly credits,
+  // only while the offer is live
+  const addCard =
+    !isPaid && balance?.isOutOfCredits
+      ? cardOfferLink(ACCOUNT_URL, cardOffer, workspace)
+      : null;
 
   return (
     <div className="glass-panel rounded-2xl p-5">
@@ -125,6 +134,16 @@ function SubscriptionSettingsInner() {
                 </a>
               )}
             </div>
+          )}
+
+          {addCard && (
+            <a
+              href={addCard.href}
+              className="flex items-center gap-1.5 text-sm font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+            >
+              <Gift size={14} />
+              {addCard.label}
+            </a>
           )}
 
           {/* Actions (open on the account hub, in the system browser on desktop) */}

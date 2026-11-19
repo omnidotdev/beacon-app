@@ -10,6 +10,10 @@ describe("getChatErrorKind", () => {
     expect(getChatErrorKind("payment_required")).toBe("payment_required");
   });
 
+  it("maps the gateway sign-in-again code", () => {
+    expect(getChatErrorKind("reauth_required")).toBe("reauth_required");
+  });
+
   it("maps the gateway unavailable code", () => {
     expect(getChatErrorKind("ai_unavailable")).toBe("ai_unavailable");
   });

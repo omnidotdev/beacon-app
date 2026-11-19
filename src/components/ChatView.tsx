@@ -8,14 +8,19 @@ import {
   ArrowRight,
   Coins,
   CreditCard,
+  Gift,
   KeyRound,
+  LogIn,
   Mic,
   Settings,
   User,
 } from "lucide-react";
 import { useState } from "react";
+import { useCardOffer } from "@/hooks";
 import type { ToolCallState } from "@/hooks/useChat";
 import type { ChatMessage, PersonaInfo } from "@/lib/api";
+import signIn from "@/lib/auth/signIn";
+import { cardOfferLink } from "@/lib/billing/cardOffer";
 import { upgradePlanUrl } from "@/lib/billing/hubLinks";
 import { personalWorkspace } from "@/lib/billing/personalWorkspace";
 import { ACCOUNT_URL, BASE_URL } from "@/lib/config/env.config";
@@ -248,10 +253,31 @@ function EmptyState({
   );
 }
 
+const NOTICE_LINK =
+  "inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80";
+
 /**
- * Out-of-credits, paid-access, or temporarily-unavailable notice for a failed
- * send. Beacon spends the personal workspace's credits, so Buy credits and
- * Upgrade target it
+ * "Add a card" for the card-verified free AI credits, shown where credits are
+ * short and only while Aether reports the offer as live
+ */
+function AddCardLink({ workspace }: { workspace?: string }) {
+  const { data: offer } = useCardOffer();
+  const link = cardOfferLink(ACCOUNT_URL, offer, workspace);
+
+  if (!link) return null;
+
+  return (
+    <a href={link.href} className={NOTICE_LINK}>
+      <Gift size={14} />
+      {link.label}
+    </a>
+  );
+}
+
+/**
+ * Out-of-credits, paid-access, sign-in-again, or temporarily-unavailable
+ * notice for a failed send. Beacon spends the personal workspace's credits, so
+ * Buy credits, Add a card, and Upgrade target it
  */
 function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
   const { session } = useRouteContext({ from: "__root__" });
@@ -268,6 +294,23 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
     );
   }
 
+  // The session names no personal workspace to bill: sign in again
+  if (kind === "reauth_required") {
+    return (
+      <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
+        Sign in again to keep using AI.
+        <button
+          type="button"
+          onClick={() => signIn({ redirectUrl: window.location.href })}
+          className={NOTICE_LINK}
+        >
+          <LogIn size={14} />
+          Sign in
+        </button>
+      </p>
+    );
+  }
+
   // Managed AI is for paying accounts: buy credits, upgrade, or bring a key
   if (kind === "payment_required") {
     const upgradeUrl = upgradePlanUrl(ACCOUNT_URL, BASE_URL, {
@@ -278,29 +321,21 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
 
     return (
       <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
-        AI uses Omni credits.
+        Beacon AI runs on AI credits.
+        <AddCardLink workspace={workspace} />
         {buyUrl && (
-          <a
-            href={buyUrl}
-            className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-          >
+          <a href={buyUrl} className={NOTICE_LINK}>
             <Coins size={14} />
             Buy credits
           </a>
         )}
         {upgradeUrl && (
-          <a
-            href={upgradeUrl}
-            className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-          >
+          <a href={upgradeUrl} className={NOTICE_LINK}>
             <CreditCard size={14} />
             Upgrade
           </a>
         )}
-        <Link
-          to="/settings"
-          className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-        >
+        <Link to="/settings" className={NOTICE_LINK}>
           <KeyRound size={14} />
           Use your own key
         </Link>
@@ -311,11 +346,9 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
   return (
     <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
       Your personal workspace is out of AI credits.
+      <AddCardLink workspace={workspace} />
       {buyUrl && (
-        <a
-          href={buyUrl}
-          className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-        >
+        <a href={buyUrl} className={NOTICE_LINK}>
           <Coins size={14} />
           Buy credits
         </a>
