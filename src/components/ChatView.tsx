@@ -23,6 +23,7 @@ import signIn from "@/lib/auth/signIn";
 import { cardOfferLink } from "@/lib/billing/cardOffer";
 import { upgradePlanUrl } from "@/lib/billing/hubLinks";
 import { personalWorkspace } from "@/lib/billing/personalWorkspace";
+import { EXAMPLE_PROMPTS } from "@/lib/chat/examplePrompts";
 import { ACCOUNT_URL, BASE_URL } from "@/lib/config/env.config";
 import type { BillingNoticeKind } from "@/lib/gateway/chatErrorCode";
 import { NO_PERSONA_ID } from "@/lib/persona";
@@ -173,6 +174,8 @@ function ChatView({
           </button>
         }
         footerHint="Shift+Enter for a new line"
+        // Example asks above an empty chat; a pick drafts it, never sends it
+        suggestions={canSend ? EXAMPLE_PROMPTS : undefined}
       />
     </div>
   );
