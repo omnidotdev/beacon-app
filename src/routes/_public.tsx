@@ -60,8 +60,8 @@ function PublicLayout() {
       <div className="sticky top-0 z-50">
         <div className="flex w-full items-center justify-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2 text-sm backdrop-blur-sm sm:gap-3">
           <span className="text-text-secondary">
-            <strong className="font-semibold">Beacon is in early access</strong>{" "}
-            — help shape it!
+            <strong className="font-semibold">Beacon is in early access</strong>
+            . Help shape it!
           </span>
           <a
             href={app.links.discord}
@@ -267,6 +267,25 @@ function PublicLayout() {
               </a>
               . All rights reserved.
             </p>
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-6 text-sm md:justify-end">
+            <a
+              href={app.links.privacy}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground transition-colors hover:text-text"
+            >
+              Privacy
+            </a>
+            <a
+              href={app.links.terms}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground transition-colors hover:text-text"
+            >
+              Terms
+            </a>
           </div>
         </div>
       </footer>
