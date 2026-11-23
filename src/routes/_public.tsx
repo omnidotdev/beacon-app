@@ -58,7 +58,15 @@ function PublicLayout() {
 
       {/* Banner + header */}
       <div className="sticky top-0 z-50">
-        <div className="flex w-full items-center justify-center gap-2 border-b border-primary/20 bg-primary/10 px-4 py-2 text-sm backdrop-blur-sm sm:gap-3">
+        {/* Both bars are opaque: page content scrolls beneath them, and a
+            translucent fill let card titles and icons show through */}
+        <div
+          className="flex w-full items-center justify-center gap-2 border-b border-primary/20 px-4 py-2 text-sm sm:gap-3"
+          style={{
+            background:
+              "color-mix(in srgb, var(--color-primary) 10%, var(--background))",
+          }}
+        >
           <span className="text-text-secondary">
             <strong className="font-semibold">Beacon is in early access</strong>
             . Help shape it!
@@ -75,11 +83,8 @@ function PublicLayout() {
         </div>
 
         <header
-          className="w-full border-b border-border backdrop-blur-lg"
-          style={{
-            background:
-              "color-mix(in srgb, var(--background) 80%, transparent)",
-          }}
+          className="w-full border-b border-border"
+          style={{ background: "var(--background)" }}
         >
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <a href="/" className="flex items-center gap-2">
