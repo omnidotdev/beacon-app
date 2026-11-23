@@ -51,7 +51,7 @@ const features = [
   {
     title: "Voice",
     description:
-      "Hands-free conversations with wake words when you self-host. Voice in the web app is coming soon",
+      "Dictate messages in the web app with Pro, or go hands-free with wake words when you self-host",
     icon: <MicIcon size={28} />,
   },
   {
