@@ -69,10 +69,16 @@ const navItems: NavItem[] = [
 
 interface SidebarProps {
   isOpen?: boolean;
+  /** Hide the desktop rail (toggled with `b`) */
+  isCollapsed?: boolean;
   onClose?: () => void;
 }
 
-function Sidebar({ isOpen = true, onClose }: SidebarProps) {
+function Sidebar({
+  isOpen = true,
+  isCollapsed = false,
+  onClose,
+}: SidebarProps) {
   const router = useRouterState();
   const currentPath = router.location.pathname;
   const navigate = useNavigate();
@@ -190,7 +196,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     <aside
       className={`flex w-72 flex-col rounded-none border-r border-border bg-background max-md:absolute max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-full max-md:overflow-y-auto max-md:shadow-2xl max-md:transition-transform max-md:duration-300 max-md:ease-out ${
         isOpen ? "max-md:translate-x-0" : "max-md:translate-x-full"
-      }`}
+      } ${isCollapsed ? "md:hidden" : ""}`}
     >
       {/* Header with logo */}
       <div className="flex h-16 items-center gap-2.5 px-5 max-md:h-14 max-md:px-4">

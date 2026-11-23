@@ -1,5 +1,6 @@
 import type { CommandAction } from "@omnidotdev/thornberry/command-palette";
 import { CommandPalette as CommandPaletteShell } from "@omnidotdev/thornberry/command-palette";
+import { ShortcutsDialog } from "@omnidotdev/thornberry/shortcuts-dialog";
 import {
   GLOBAL_HOTKEYS,
   hotkeyLabel,
@@ -8,6 +9,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import {
   Brain,
+  Keyboard,
   LayoutDashboard,
   MessageSquare,
   MoonStar,
@@ -15,6 +17,7 @@ import {
   Settings,
   Users,
 } from "lucide-react";
+import { useState } from "react";
 import { useTheme } from "@/hooks";
 
 /**
@@ -26,6 +29,7 @@ import { useTheme } from "@/hooks";
 const CommandPalette = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
@@ -88,10 +92,35 @@ const CommandPalette = () => {
       shortcut: hotkeyLabel(GLOBAL_HOTKEYS.toggleTheme),
       onSelect: toggleTheme,
     },
+    {
+      id: "keyboard-shortcuts",
+      label: "Keyboard shortcuts",
+      group: "Preferences",
+      icon: Keyboard,
+      keywords: ["hotkeys", "keys", "help"],
+      shortcut: hotkeyLabel(GLOBAL_HOTKEYS.showShortcuts),
+      onSelect: () => setShortcutsOpen(true),
+    },
   ];
 
   return (
-    <CommandPaletteShell commands={commands} placeholder="Search actions..." />
+    <>
+      <CommandPaletteShell
+        commands={commands}
+        placeholder="Search actions..."
+      />
+      {/* `?` opens it anywhere; the palette entry opens it too */}
+      <ShortcutsDialog
+        globals={[
+          "commandPalette",
+          "showShortcuts",
+          "toggleSidebar",
+          "toggleTheme",
+        ]}
+        open={shortcutsOpen}
+        onOpenChange={setShortcutsOpen}
+      />
+    </>
   );
 };
 
