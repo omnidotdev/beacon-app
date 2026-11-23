@@ -142,7 +142,9 @@ function SettingsPage() {
                     <p className="font-semibold text-text">
                       {session.user.name ?? "User"}
                     </p>
-                    <p className="text-sm text-muted">{session.user.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {session.user.email}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -196,7 +198,7 @@ function SettingsPage() {
                 <p className="font-semibold text-text">
                   {persona?.name ?? "Orin"}
                 </p>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted-foreground">
                   {persona?.tagline ?? "Your AI assistant"}
                 </p>
               </div>
@@ -232,7 +234,7 @@ function SettingsPage() {
                           <h4 className="font-medium text-text">
                             Omni Synapse
                           </h4>
-                          <p className="mt-1 text-sm text-muted">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             Sign in with Omni for current Claude models,
                             credits, and cross-device sync
                           </p>
@@ -241,7 +243,7 @@ function SettingsPage() {
                           href="https://synapse.omni.dev"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-muted/50 hover:text-muted transition-colors"
+                          className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
                         >
                           Learn more
                         </a>
@@ -252,14 +254,14 @@ function SettingsPage() {
                   {/* BYOK — advanced, optional */}
                   <div className="mt-2">
                     <div className="mb-2 flex items-center gap-2">
-                      <h3 className="text-xs font-medium uppercase tracking-wider text-muted/60">
+                      <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
                         Bring Your Own Keys
                       </h3>
-                      <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-[10px] font-medium text-muted/50">
+                      <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/50">
                         {USE_SYNAPSE ? "Advanced" : "AI Providers"}
                       </span>
                     </div>
-                    <p className="mb-3 text-xs text-muted/60">
+                    <p className="mb-3 text-xs text-muted-foreground/60">
                       Optional. Connect your own provider API keys for direct
                       billing, cost control, or access to models not available
                       through Omni Synapse.
@@ -281,7 +283,7 @@ function SettingsPage() {
 
                   {providers.some((p) => p.coming_soon) && (
                     <div className="mt-6">
-                      <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted/60">
+                      <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
                         <Sparkles size={12} />
                         Coming Soon
                       </h3>
@@ -303,9 +305,12 @@ function SettingsPage() {
               )}
             </div>
 
-            <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-accent/15 bg-accent/5 px-3.5 py-2.5">
-              <Lock size={14} className="mt-0.5 flex-shrink-0 text-accent/60" />
-              <p className="text-xs leading-relaxed text-muted">
+            <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-brand-accent/15 bg-brand-accent/5 px-3.5 py-2.5">
+              <Lock
+                size={14}
+                className="mt-0.5 flex-shrink-0 text-brand-accent/60"
+              />
+              <p className="text-xs leading-relaxed text-muted-foreground">
                 Keys are encrypted and stored securely with your account, never
                 in your browser. Cleared from memory after saving.
               </p>
@@ -313,7 +318,7 @@ function SettingsPage() {
           </SettingsSection>
 
           <SettingsSection title="Data">
-            <p className="mb-4 text-sm text-muted">
+            <p className="mb-4 text-sm text-muted-foreground">
               Conversations are stored locally on your device
             </p>
             <div className="flex gap-3">
@@ -362,24 +367,24 @@ function SettingsPage() {
             href="https://github.com/omnidotdev/cli"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-start gap-3 rounded-2xl border border-accent/15 bg-accent/5 px-5 py-4 transition-all hover:border-accent/30 hover:glow-soft"
+            className="group flex items-start gap-3 rounded-2xl border border-brand-accent/15 bg-brand-accent/5 px-5 py-4 transition-all hover:border-brand-accent/30 hover:glow-soft"
           >
             <Terminal
               size={18}
-              className="mt-0.5 flex-shrink-0 text-accent/60 transition-colors group-hover:text-accent"
+              className="mt-0.5 flex-shrink-0 text-brand-accent/60 transition-colors group-hover:text-brand-accent"
             />
             <div>
               <p className="text-sm font-medium text-text">
                 Prefer the terminal?
               </p>
-              <p className="mt-0.5 text-xs text-muted">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 Omni CLI brings the same agent to your command line, with a TUI
                 and HTTP API for scripting and automation
               </p>
             </div>
             <ExternalLink
               size={14}
-              className="mt-0.5 flex-shrink-0 text-muted/40 transition-colors group-hover:text-muted"
+              className="mt-0.5 flex-shrink-0 text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
             />
           </a>
         </div>
@@ -396,7 +401,7 @@ interface SettingsSectionProps {
 function SettingsSection({ title, children }: SettingsSectionProps) {
   return (
     <div className="glass-panel rounded-2xl p-5">
-      <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted/60">
+      <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
         {title}
       </h2>
       {children}
@@ -476,7 +481,7 @@ function OmniCreditsCard({ provider, isActive }: OmniCreditsCardProps) {
         )}
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted-foreground">
           Current Claude models, billed to your AI credits. No API keys needed.
         </p>
         <a
@@ -577,7 +582,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
             </span>
           )}
           {isComingSoon && (
-            <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent">
+            <span className="flex items-center gap-1 rounded-full bg-brand-accent/20 px-2 py-0.5 text-xs text-brand-accent">
               <Zap size={10} />
               Soon
             </span>
@@ -611,7 +616,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
                     href={provider.api_key_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-text"
+                    className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-text"
                   >
                     Get Key
                     <ExternalLink size={12} />
@@ -624,7 +629,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
                     showForm
                       ? "bg-surface-elevated text-text"
                       : isConfigured
-                        ? "text-muted hover:text-text"
+                        ? "text-muted-foreground hover:text-text"
                         : "bg-primary/10 text-primary hover:bg-primary/20"
                   }`}
                 >
@@ -645,7 +650,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
                       <button
                         type="button"
                         onClick={() => setShowRemoveConfirm(false)}
-                        className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:text-text"
+                        className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-text"
                       >
                         Cancel
                       </button>
@@ -654,7 +659,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
                     <button
                       type="button"
                       onClick={() => setShowRemoveConfirm(true)}
-                      className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted transition-colors hover:text-red-400"
+                      className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-red-400"
                       title="Remove API key"
                     >
                       <Trash2 size={12} />
@@ -667,12 +672,18 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
       </div>
 
       {/* Description + key hint */}
-      <p className="mt-1 text-sm text-muted">{provider.description}</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {provider.description}
+      </p>
       {isConfigured && provider.keyHint && (
-        <p className="mt-1 text-xs text-muted/60">•••• {provider.keyHint}</p>
+        <p className="mt-1 text-xs text-muted-foreground/60">
+          •••• {provider.keyHint}
+        </p>
       )}
       {isOmniCredits && isConfigured && (
-        <p className="mt-1 text-xs text-muted/60">Powered by your account</p>
+        <p className="mt-1 text-xs text-muted-foreground/60">
+          Powered by your account
+        </p>
       )}
 
       {/* Key input form */}
@@ -690,7 +701,7 @@ function ProviderCard({ provider, isActive, disabled }: ProviderCardProps) {
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-muted hover:text-text"
+                className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-muted-foreground hover:text-text"
               >
                 {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>

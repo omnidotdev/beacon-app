@@ -174,7 +174,7 @@ function SetupPage() {
             <h1 className="text-2xl font-bold text-text">
               Configure AI Provider
             </h1>
-            <p className="mt-2 text-muted">
+            <p className="mt-2 text-muted-foreground">
               Connect an AI provider to start chatting
             </p>
           </div>
@@ -187,7 +187,7 @@ function SetupPage() {
 
           {/* BYOK Providers */}
           <div className="mb-6 space-y-3">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-muted/60">
+            <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
               Bring Your Own Key
             </h3>
             {byokProviders.map((provider) => (
@@ -204,7 +204,7 @@ function SetupPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h4 className="font-medium text-text">{provider.name}</h4>
-                    <p className="mt-1 text-sm text-muted">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {provider.description}
                     </p>
                   </div>
@@ -226,7 +226,7 @@ function SetupPage() {
                     {provider.features.slice(0, 3).map((feature) => (
                       <span
                         key={feature}
-                        className="rounded bg-surface-elevated px-1.5 py-0.5 text-xs text-muted"
+                        className="rounded bg-surface-elevated px-1.5 py-0.5 text-xs text-muted-foreground"
                       >
                         {feature}
                       </span>
@@ -245,7 +245,7 @@ function SetupPage() {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="Paste your API key"
-                className="glass-input mb-3 w-full rounded-xl px-4 py-3 text-text placeholder:text-muted/60"
+                className="glass-input mb-3 w-full rounded-xl px-4 py-3 text-text placeholder:text-muted-foreground/60"
               />
               <button
                 type="button"
@@ -261,7 +261,7 @@ function SetupPage() {
           {/* Coming Soon */}
           {comingSoonProviders.length > 0 && (
             <div className="mb-6">
-              <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted/60">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
                 <Sparkles size={12} />
                 Coming Soon
               </h3>
@@ -280,7 +280,7 @@ function SetupPage() {
                         Soon
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-muted">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {provider.description}
                     </p>
                   </div>
@@ -295,7 +295,9 @@ function SetupPage() {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-background px-3 text-sm text-muted">or</span>
+              <span className="bg-background px-3 text-sm text-muted-foreground">
+                or
+              </span>
             </div>
           </div>
 
@@ -311,7 +313,7 @@ function SetupPage() {
           <button
             type="button"
             onClick={handleSkipToApp}
-            className="btn-glass w-full rounded-xl px-4 py-3 text-muted"
+            className="btn-glass w-full rounded-xl px-4 py-3 text-muted-foreground"
           >
             Skip for now
           </button>
@@ -326,7 +328,7 @@ function SetupPage() {
       <div className="glass-panel w-full max-w-md rounded-2xl p-8">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-text">Connect to Gateway</h1>
-          <p className="mt-2 text-muted">
+          <p className="mt-2 text-muted-foreground">
             Find a Beacon gateway on your local network
           </p>
         </div>
@@ -340,7 +342,7 @@ function SetupPage() {
         {/* Discovered Gateways */}
         <div className="mb-6 space-y-3">
           {isDiscovering && gateways.length === 0 && (
-            <div className="flex items-center justify-center gap-3 py-6 text-muted">
+            <div className="flex items-center justify-center gap-3 py-6 text-muted-foreground">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" />
               <span>Searching for gateways...</span>
             </div>
@@ -357,17 +359,19 @@ function SetupPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-medium text-text">{gateway.name}</h3>
-                  <p className="text-sm text-muted">{gateway.url}</p>
+                  <p className="text-sm text-muted-foreground">{gateway.url}</p>
                 </div>
                 <span
                   className={`text-xs ${
-                    gateway.source === "mdns" ? "text-green-400" : "text-muted"
+                    gateway.source === "mdns"
+                      ? "text-green-400"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {gateway.source === "mdns" ? "Auto-discovered" : "Saved"}
                 </span>
               </div>
-              <div className="mt-2 flex gap-2 text-xs text-muted">
+              <div className="mt-2 flex gap-2 text-xs text-muted-foreground">
                 <span>v{gateway.version}</span>
                 <span>•</span>
                 <span>{gateway.persona}</span>
@@ -390,7 +394,7 @@ function SetupPage() {
               value={manualUrl}
               onChange={(e) => setManualUrl(e.target.value)}
               placeholder="http://192.168.1.100:18790"
-              className="glass-input mb-3 w-full rounded-xl px-4 py-3 text-text placeholder:text-muted/60"
+              className="glass-input mb-3 w-full rounded-xl px-4 py-3 text-text placeholder:text-muted-foreground/60"
             />
             <div className="flex gap-2">
               <button
@@ -403,7 +407,7 @@ function SetupPage() {
               <button
                 type="button"
                 onClick={() => setShowManual(false)}
-                className="btn-glass rounded-xl px-4 py-2 text-muted"
+                className="btn-glass rounded-xl px-4 py-2 text-muted-foreground"
               >
                 Cancel
               </button>
@@ -413,7 +417,7 @@ function SetupPage() {
           <button
             type="button"
             onClick={() => setShowManual(true)}
-            className="btn-glass mb-6 w-full rounded-xl px-4 py-3 text-muted"
+            className="btn-glass mb-6 w-full rounded-xl px-4 py-3 text-muted-foreground"
           >
             Enter gateway URL manually
           </button>
@@ -425,7 +429,9 @@ function SetupPage() {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-background px-3 text-sm text-muted">or</span>
+            <span className="bg-background px-3 text-sm text-muted-foreground">
+              or
+            </span>
           </div>
         </div>
 
@@ -438,7 +444,7 @@ function SetupPage() {
           Sign in with Omni (Cloud)
         </button>
 
-        <p className="mt-4 text-center text-xs text-muted/60">
+        <p className="mt-4 text-center text-xs text-muted-foreground/60">
           Cloud features require an Omni account
         </p>
       </div>

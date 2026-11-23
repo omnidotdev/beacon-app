@@ -115,7 +115,7 @@ function PairPage() {
       <div className="glass-panel w-full max-w-md rounded-2xl p-8">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-text">Pair Device</h1>
-          <p className="mt-2 text-muted">
+          <p className="mt-2 text-muted-foreground">
             {state.step === "enter-url" && "Enter your gateway URL to begin"}
             {state.step === "enter-code" &&
               "Enter the 6-digit code shown on your gateway"}
@@ -132,7 +132,7 @@ function PairPage() {
               value={gatewayUrl}
               onChange={(e) => setGatewayUrl(e.target.value)}
               placeholder="192.168.1.100:18790"
-              className="glass-input mb-4 w-full rounded-xl px-4 py-3 text-text placeholder:text-muted/60"
+              className="glass-input mb-4 w-full rounded-xl px-4 py-3 text-text placeholder:text-muted-foreground/60"
             />
             <button
               type="submit"
@@ -155,7 +155,7 @@ function PairPage() {
         {state.step === "enter-code" && (
           <form onSubmit={handleCodeSubmit}>
             <div className="mb-4">
-              <p className="mb-3 text-center text-sm text-muted">
+              <p className="mb-3 text-center text-sm text-muted-foreground">
                 Connected to:{" "}
                 <span className="text-text">{state.gatewayUrl}</span>
               </p>
@@ -170,7 +170,7 @@ function PairPage() {
                 }}
                 placeholder="000000"
                 maxLength={6}
-                className="glass-input w-full rounded-xl px-4 py-4 text-center text-2xl font-mono tracking-[0.5em] text-text placeholder:text-muted/60"
+                className="glass-input w-full rounded-xl px-4 py-4 text-center text-2xl font-mono tracking-[0.5em] text-text placeholder:text-muted-foreground/60"
               />
             </div>
             <button
@@ -190,7 +190,7 @@ function PairPage() {
             <button
               type="button"
               onClick={handleRetry}
-              className="btn-glass mt-3 w-full rounded-xl px-4 py-2 text-muted"
+              className="btn-glass mt-3 w-full rounded-xl px-4 py-2 text-muted-foreground"
             >
               Use different gateway
             </button>
@@ -217,7 +217,7 @@ function PairPage() {
                 </svg>
               </div>
             </div>
-            <p className="text-muted">
+            <p className="text-muted-foreground">
               Your device has been paired. Redirecting...
             </p>
           </div>
@@ -241,7 +241,7 @@ function PairPage() {
 
         {/* Help text */}
         {(state.step === "enter-url" || state.step === "enter-code") && (
-          <p className="mt-6 text-center text-xs text-muted/60">
+          <p className="mt-6 text-center text-xs text-muted-foreground/60">
             The pairing code is displayed on your gateway device or in the
             gateway terminal output.
           </p>

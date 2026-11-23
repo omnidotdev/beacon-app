@@ -208,7 +208,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           <button
             type="button"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"
+            className="rounded-lg p-2 text-muted-foreground/60 transition-all hover:bg-surface-elevated hover:text-text"
             title={
               theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
             }
@@ -219,7 +219,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-2 text-muted transition-colors hover:bg-surface-elevated hover:text-text md:hidden"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-surface-elevated hover:text-text md:hidden"
               aria-label="Close menu"
             >
               <X size={20} />
@@ -264,13 +264,13 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               <p className="truncate text-sm font-medium text-text">
                 {persona?.name ?? "Assistant"}
               </p>
-              <p className="truncate text-xs text-muted">
+              <p className="truncate text-xs text-muted-foreground">
                 {persona?.tagline ?? "AI Assistant"}
               </p>
             </div>
             <ChevronDown
               size={16}
-              className={`text-muted transition-transform ${personaDropdownOpen ? "rotate-180" : ""}`}
+              className={`text-muted-foreground transition-transform ${personaDropdownOpen ? "rotate-180" : ""}`}
             />
           </button>
         )}
@@ -291,13 +291,15 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               }}
             >
               {personasLoading ? (
-                <div className="flex items-center justify-center gap-2 p-3 text-muted">
+                <div className="flex items-center justify-center gap-2 p-3 text-muted-foreground">
                   <Loader2 size={16} className="animate-spin" />
                   <span className="text-sm">Loading personas...</span>
                 </div>
               ) : personasError || (!personas?.length && !persona) ? (
                 <div className="flex flex-col items-center gap-2 p-3 text-center">
-                  <p className="text-sm text-muted">Unable to load personas</p>
+                  <p className="text-sm text-muted-foreground">
+                    Unable to load personas
+                  </p>
                   <button
                     type="button"
                     onClick={() => refetchPersonas()}
@@ -325,7 +327,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                       <span className="block text-sm text-text">
                         {NO_PERSONA.name}
                       </span>
-                      <span className="block text-xs text-muted">
+                      <span className="block text-xs text-muted-foreground">
                         {NO_PERSONA.tagline}
                       </span>
                     </div>
@@ -357,7 +359,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                           {p.name}
                         </span>
                         {p.tagline && (
-                          <span className="block text-xs text-muted">
+                          <span className="block text-xs text-muted-foreground">
                             {p.tagline}
                           </span>
                         )}
@@ -366,7 +368,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   ))}
                   <div className="mt-1 px-2 pt-1">
                     <div className="mb-2 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-                    <p className="text-center text-[11px] text-muted/60">
+                    <p className="text-center text-[11px] text-muted-foreground/60">
                       More coming soon, including custom personas.{" "}
                       <a
                         href="https://x.com/omnidotdev"
@@ -387,12 +389,12 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       </div>
 
       {/* Crystalline divider */}
-      <div className="mx-3 my-1 h-px bg-gradient-to-r from-transparent via-accent/15 to-transparent" />
+      <div className="mx-3 my-1 h-px bg-gradient-to-r from-transparent via-brand-accent/15 to-transparent" />
 
       {/* Conversations section */}
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden pt-1">
         <div className="flex shrink-0 items-center justify-between px-4 py-2">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted/50">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50">
             Conversations
           </span>
           <button
@@ -403,7 +405,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               navigate({ to: "/chat", search: { c: conv.id } });
               handleNavClick();
             }}
-            className="btn-icon -mr-1 p-1 text-muted/50 hover:text-primary"
+            className="btn-icon -mr-1 p-1 text-muted-foreground/50 hover:text-primary"
             title="New conversation"
           >
             <Plus size={14} />
@@ -429,7 +431,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-medium text-primary/70">Group chats</p>
-          <p className="text-[10px] text-muted/60">Coming soon</p>
+          <p className="text-[10px] text-muted-foreground/60">Coming soon</p>
         </div>
       </div>
 
@@ -445,7 +447,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             return (
               <div
                 key={item.to}
-                className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted"
+                className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted-foreground"
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -516,13 +518,13 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 <p className="truncate text-sm font-medium text-text">
                   {session.user.name ?? "User"}
                 </p>
-                <p className="truncate text-xs text-muted">
+                <p className="truncate text-xs text-muted-foreground">
                   {session.user.email}
                 </p>
               </div>
               <ChevronDown
                 size={14}
-                className={`text-muted transition-transform ${userDropdownOpen ? "rotate-180" : ""}`}
+                className={`text-muted-foreground transition-transform ${userDropdownOpen ? "rotate-180" : ""}`}
               />
             </button>
 
@@ -598,7 +600,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           href="https://discord.gg/omnidotdev"
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"
+          className="rounded-lg p-2 text-muted-foreground/60 transition-all hover:bg-surface-elevated hover:text-text"
           title="Discord"
         >
           <RiDiscordLine size={18} />
@@ -607,7 +609,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           href="https://x.com/omnidotdev"
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"
+          className="rounded-lg p-2 text-muted-foreground/60 transition-all hover:bg-surface-elevated hover:text-text"
           title="X"
         >
           <RiTwitterXLine size={18} />
@@ -616,7 +618,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           href="https://github.com/omnidotdev/beacon-gateway"
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"
+          className="rounded-lg p-2 text-muted-foreground/60 transition-all hover:bg-surface-elevated hover:text-text"
           title="GitHub"
         >
           <RiGithubLine size={18} />
@@ -625,7 +627,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           href={app.links.docs}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"
+          className="rounded-lg p-2 text-muted-foreground/60 transition-all hover:bg-surface-elevated hover:text-text"
           title="Docs"
         >
           <BookOpen size={18} />
@@ -634,7 +636,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           href="https://backfeed.omni.dev/workspaces/omni/projects/beacon"
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg p-2 text-muted/60 transition-all hover:bg-surface-elevated hover:text-text"
+          className="rounded-lg p-2 text-muted-foreground/60 transition-all hover:bg-surface-elevated hover:text-text"
           title="Feedback"
         >
           <RiFeedbackLine size={18} />

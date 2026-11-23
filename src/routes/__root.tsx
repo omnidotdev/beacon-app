@@ -139,7 +139,7 @@ function MaintenancePage() {
         <h1 className="mb-4 font-bold text-4xl text-text">
           Signal Maintenance
         </h1>
-        <p className="max-w-md text-lg text-muted">
+        <p className="max-w-md text-lg text-muted-foreground">
           Beacon is recalibrating. We'll be back online shortly.
         </p>
       </div>

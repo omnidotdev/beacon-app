@@ -48,7 +48,7 @@ function AuthGate() {
         <Brain size={28} className="text-primary" />
       </div>
       <h2 className="font-semibold text-text">Memory Sync</h2>
-      <p className="mt-2 max-w-sm text-sm text-muted">
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
         Sign in with your Omni account to sync and manage memories across
         devices
       </p>
@@ -116,7 +116,7 @@ function MemoriesContent() {
         <div className="relative max-w-md">
           <Search
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted/50"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50"
           />
           <input
             type="text"
@@ -167,7 +167,7 @@ function CategoryTab({
       className={`border-b-2 py-3 text-sm font-medium transition-all ${
         active
           ? "border-primary text-primary"
-          : "border-transparent text-muted hover:text-text"
+          : "border-transparent text-muted-foreground hover:text-text"
       }`}
     >
       {children}
@@ -236,7 +236,7 @@ function MemoryCard({ memory }: { memory: Memory }) {
             className={`rounded-lg p-1.5 text-sm transition-colors ${
               memory.pinned
                 ? "text-primary hover:bg-primary/10"
-                : "text-muted hover:bg-surface-elevated hover:text-text"
+                : "text-muted-foreground hover:bg-surface-elevated hover:text-text"
             }`}
             title={memory.pinned ? "Unpin" : "Pin"}
           >
@@ -263,7 +263,7 @@ function MemoryCard({ memory }: { memory: Memory }) {
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-lg px-2 py-1 text-xs text-muted hover:text-text"
+                className="rounded-lg px-2 py-1 text-xs text-muted-foreground hover:text-text"
               >
                 Cancel
               </button>
@@ -272,7 +272,7 @@ function MemoryCard({ memory }: { memory: Memory }) {
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-surface-elevated hover:text-red-400"
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-surface-elevated hover:text-red-400"
               title="Delete memory"
             >
               <Trash2 size={14} />
@@ -290,7 +290,7 @@ function MemoryCard({ memory }: { memory: Memory }) {
           {tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-lg bg-surface-elevated px-2 py-0.5 text-xs text-muted"
+              className="rounded-lg bg-surface-elevated px-2 py-0.5 text-xs text-muted-foreground"
             >
               {tag}
             </span>
@@ -299,7 +299,7 @@ function MemoryCard({ memory }: { memory: Memory }) {
       )}
 
       {/* Footer: timestamp + access count */}
-      <div className="mt-3 flex items-center gap-3 text-xs text-muted/60">
+      <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground/60">
         <span className="flex items-center gap-1">
           <Clock size={11} />
           {updatedDate}
@@ -317,9 +317,9 @@ function MemoryCard({ memory }: { memory: Memory }) {
 
 const CATEGORY_STYLES: Record<string, string> = {
   preference: "bg-primary/15 text-primary",
-  fact: "bg-accent/15 text-accent",
+  fact: "bg-brand-accent/15 text-brand-accent",
   correction: "bg-primary/10 text-primary/60",
-  general: "bg-surface-elevated text-muted",
+  general: "bg-surface-elevated text-muted-foreground",
 };
 
 function CategoryBadge({ category }: { category: MemoryCategory }) {
@@ -335,7 +335,7 @@ function CategoryBadge({ category }: { category: MemoryCategory }) {
 function LoadingState() {
   return (
     <div className="flex items-center justify-center py-12">
-      <div className="flex items-center gap-3 text-muted">
+      <div className="flex items-center gap-3 text-muted-foreground">
         <span className="inline-flex gap-1">
           <span className="streaming-dot" />
           <span className="streaming-dot" />
@@ -356,11 +356,11 @@ function ErrorState({
 }) {
   return (
     <div className="glass-panel mx-auto max-w-sm rounded-2xl p-6 text-center">
-      <p className="break-words text-sm text-muted">{message}</p>
+      <p className="break-words text-sm text-muted-foreground">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-3 rounded-lg bg-surface-elevated px-4 py-2 text-sm text-muted transition-colors hover:text-text"
+        className="mt-3 rounded-lg bg-surface-elevated px-4 py-2 text-sm text-muted-foreground transition-colors hover:text-text"
       >
         Try again
       </button>
@@ -393,7 +393,9 @@ function EmptyState({
         <Brain size={28} className="text-primary" />
       </div>
       <h3 className="font-semibold text-text">{title}</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        {description}
+      </p>
     </div>
   );
 }

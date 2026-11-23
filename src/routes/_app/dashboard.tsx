@@ -38,7 +38,7 @@ function DashboardHome() {
         <h1 className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-3xl font-bold text-transparent">
           Welcome to Beacon
         </h1>
-        <p className="mt-2 text-muted/70">Your AI command center</p>
+        <p className="mt-2 text-muted-foreground/70">Your AI command center</p>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -52,7 +52,7 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <section className="mt-10">
-        <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted/60">
+        <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">
           Quick Actions
         </h2>
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
@@ -62,9 +62,9 @@ function DashboardHome() {
           >
             <MessageSquare
               size={20}
-              className="text-muted/70 transition-colors group-hover:text-primary"
+              className="text-muted-foreground/70 transition-colors group-hover:text-primary"
             />
-            <span className="text-sm text-muted">New Chat</span>
+            <span className="text-sm text-muted-foreground">New Chat</span>
           </Link>
           <Link
             to="/settings"
@@ -72,16 +72,16 @@ function DashboardHome() {
           >
             <Settings
               size={20}
-              className="text-muted/70 transition-colors group-hover:text-primary"
+              className="text-muted-foreground/70 transition-colors group-hover:text-primary"
             />
-            <span className="text-sm text-muted">Settings</span>
+            <span className="text-sm text-muted-foreground">Settings</span>
           </Link>
         </div>
       </section>
 
       {/* Explore features */}
       <section className="mt-10">
-        <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted/60">
+        <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">
           Explore
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
@@ -109,14 +109,14 @@ function DashboardHome() {
       {/* Model info */}
       {status?.model && (
         <section className="mt-10">
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted/60">
+          <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground/60">
             Current Model
           </h2>
           <div className="glass-panel inline-flex items-center gap-3 rounded-xl px-4 py-3">
             <div className="h-2 w-2 rounded-full bg-primary glow-primary" />
             <div>
               <p className="text-sm font-medium text-text">{status.model.id}</p>
-              <p className="text-xs text-muted">
+              <p className="text-xs text-muted-foreground">
                 Provider: {status.model.provider}
               </p>
             </div>
@@ -140,16 +140,16 @@ function FeatureCard({ to, icon, title, description }: FeatureCardProps) {
       to={to}
       className="glass-panel group flex items-center gap-4 overflow-hidden rounded-2xl p-4 transition-all hover:glow-soft"
     >
-      <span className="text-muted/70 transition-colors group-hover:text-primary">
+      <span className="text-muted-foreground/70 transition-colors group-hover:text-primary">
         {icon}
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-medium text-text">{title}</p>
-        <p className="truncate text-xs text-muted">{description}</p>
+        <p className="truncate text-xs text-muted-foreground">{description}</p>
       </div>
       <ChevronRight
         size={16}
-        className="shrink-0 text-muted/40 transition-colors group-hover:text-primary"
+        className="shrink-0 text-muted-foreground/40 transition-colors group-hover:text-primary"
       />
     </Link>
   );
@@ -173,13 +173,13 @@ function StatCard({ title, value, icon, href, accent }: StatCardProps) {
     >
       <div className="flex items-start justify-between">
         <span
-          className={`${accent ? "text-primary" : "text-muted/70"} ${interactive ? "transition-colors group-hover:text-primary" : ""}`}
+          className={`${accent ? "text-primary" : "text-muted-foreground/70"} ${interactive ? "transition-colors group-hover:text-primary" : ""}`}
         >
           {icon}
         </span>
         <span className={`${valueSize} font-bold text-text`}>{value}</span>
       </div>
-      <p className="mt-auto pt-3 text-sm text-muted">{title}</p>
+      <p className="mt-auto pt-3 text-sm text-muted-foreground">{title}</p>
     </div>
   );
 

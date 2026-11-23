@@ -52,7 +52,7 @@ function ConversationList({ onNavigate }: ConversationListProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted">
+      <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
         <span className="inline-flex gap-1">
           <span className="streaming-dot" />
           <span className="streaming-dot" />
@@ -67,10 +67,10 @@ function ConversationList({ onNavigate }: ConversationListProps) {
     return (
       <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
         <div className="mb-2 rounded-full bg-surface-elevated p-3">
-          <MessageSquare size={20} className="text-muted/50" />
+          <MessageSquare size={20} className="text-muted-foreground/50" />
         </div>
-        <p className="text-sm text-muted/70">No conversations yet</p>
-        <p className="mt-1 text-xs text-muted/50">
+        <p className="text-sm text-muted-foreground/70">No conversations yet</p>
+        <p className="mt-1 text-xs text-muted-foreground/50">
           Start chatting to create one
         </p>
       </div>
@@ -105,7 +105,7 @@ function ConversationList({ onNavigate }: ConversationListProps) {
     <div className="space-y-3">
       {groups.map((group) => (
         <div key={group.label}>
-          <p className="mb-1 px-2 text-[10px] font-medium uppercase tracking-wider text-muted/50">
+          <p className="mb-1 px-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50">
             {group.label}
           </p>
           <div className="space-y-0.5">
@@ -130,7 +130,7 @@ function ConversationList({ onNavigate }: ConversationListProps) {
                         if (e.key === "Escape") cancelEditing();
                       }}
                       onBlur={commitRename}
-                      className="flex-1 truncate rounded bg-surface-elevated px-3 py-2 text-sm text-text outline-none ring-1 ring-accent"
+                      className="flex-1 truncate rounded bg-surface-elevated px-3 py-2 text-sm text-text outline-none ring-1 ring-brand-accent"
                     />
                   ) : (
                     <Link
@@ -153,7 +153,7 @@ function ConversationList({ onNavigate }: ConversationListProps) {
                         onClick={() =>
                           startEditing(conversation.id, conversation.title)
                         }
-                        className="rounded p-1.5 text-muted opacity-0 transition-opacity hover:bg-accent/10 hover:text-accent group-hover:opacity-100"
+                        className="rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-brand-accent/10 hover:text-brand-accent group-hover:opacity-100"
                         title="Rename conversation"
                       >
                         <Pencil size={14} />
@@ -170,7 +170,7 @@ function ConversationList({ onNavigate }: ConversationListProps) {
                             },
                           });
                         }}
-                        className="mr-1 rounded p-1.5 text-muted opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                        className="mr-1 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
                         title="Delete conversation"
                       >
                         <Trash2 size={14} />

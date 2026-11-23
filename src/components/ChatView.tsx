@@ -166,7 +166,7 @@ function ChatView({
           <button
             type="button"
             disabled
-            className="btn-icon cursor-not-allowed text-muted opacity-40"
+            className="btn-icon cursor-not-allowed text-muted-foreground opacity-40"
             data-tooltip="Coming soon"
             aria-label="Voice input (coming soon)"
           >
@@ -215,7 +215,7 @@ function EmptyState({
               className="h-12 w-12 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-elevated text-muted">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-elevated text-muted-foreground">
               <User size={20} />
             </div>
           )}
@@ -231,7 +231,7 @@ function EmptyState({
           <h2 className="mb-2 text-xl font-medium text-text">
             No model loaded
           </h2>
-          <p className="mb-5 max-w-sm text-muted">
+          <p className="mb-5 max-w-sm text-muted-foreground">
             Configure a provider in settings to start chatting with {name}
           </p>
           <Link
@@ -247,7 +247,7 @@ function EmptyState({
           <h2 className="mb-2 text-xl font-medium text-text">
             Start a conversation with {name}
           </h2>
-          <p className="max-w-sm text-muted">
+          <p className="max-w-sm text-muted-foreground">
             Ask a question, get help with a task, or just chat
           </p>
         </>
@@ -416,7 +416,7 @@ function Avatar({ name, avatar, size = "md", personaId }: AvatarProps) {
       <img
         src={avatar}
         alt={name}
-        className={`${sizeClasses[size]} rounded-full object-cover ring-2 ring-accent/20`}
+        className={`${sizeClasses[size]} rounded-full object-cover ring-2 ring-brand-accent/20`}
       />
     );
   }
@@ -440,7 +440,7 @@ function Avatar({ name, avatar, size = "md", personaId }: AvatarProps) {
 
   return (
     <div
-      className={`${sizeClasses[size]} flex items-center justify-center rounded-full bg-gradient-to-br from-accent/30 to-accent/10 font-semibold text-accent`}
+      className={`${sizeClasses[size]} flex items-center justify-center rounded-full bg-gradient-to-br from-brand-accent/30 to-brand-accent/10 font-semibold text-brand-accent`}
     >
       {initials}
     </div>
@@ -465,7 +465,7 @@ function UserAvatar({
   }
 
   return (
-    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-elevated text-muted">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-elevated text-muted-foreground">
       <User size={16} />
     </div>
   );

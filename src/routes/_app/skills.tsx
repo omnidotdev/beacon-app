@@ -35,7 +35,7 @@ function AuthGate() {
         <Zap size={28} className="text-primary" />
       </div>
       <h2 className="font-semibold text-text">Skills</h2>
-      <p className="mt-2 max-w-sm text-sm text-muted">
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
         Sign in with your Omni account to browse and install skills
       </p>
     </div>
@@ -74,7 +74,7 @@ function SkillsContent() {
           <div className="relative max-w-md">
             <Search
               size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted/50"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50"
             />
             <input
               type="text"
@@ -112,7 +112,7 @@ function TabButton({ active, onClick, children }: TabButtonProps) {
       className={`border-b-2 py-3 text-sm font-medium transition-all ${
         active
           ? "border-primary text-primary"
-          : "border-transparent text-muted hover:text-text"
+          : "border-transparent text-muted-foreground hover:text-text"
       }`}
     >
       {children}
@@ -251,7 +251,7 @@ function SkillCard({
           <div>
             <h3 className="font-semibold text-text">{skill.name}</h3>
             {skill.author && (
-              <p className="text-xs text-muted">by {skill.author}</p>
+              <p className="text-xs text-muted-foreground">by {skill.author}</p>
             )}
           </div>
         </div>
@@ -261,7 +261,7 @@ function SkillCard({
             onClick={onToggle}
             disabled={isLoading}
             className={`relative h-6 w-11 rounded-full transition-colors ${
-              skill.enabled ? "bg-primary" : "bg-muted/30"
+              skill.enabled ? "bg-primary" : "bg-muted-foreground/30"
             }`}
           >
             <span
@@ -273,7 +273,7 @@ function SkillCard({
         )}
       </div>
 
-      <p className="mt-3 line-clamp-2 text-sm text-muted">
+      <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
         {skill.description}
       </p>
 
@@ -282,7 +282,7 @@ function SkillCard({
           {skill.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="rounded-lg bg-surface-elevated px-2 py-0.5 text-xs text-muted"
+              className="rounded-lg bg-surface-elevated px-2 py-0.5 text-xs text-muted-foreground"
             >
               {tag}
             </span>
@@ -296,7 +296,7 @@ function SkillCard({
             type="button"
             onClick={onUninstall}
             disabled={isLoading}
-            className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted hover:border-red-500/50 hover:text-red-400"
+            className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted-foreground hover:border-red-500/50 hover:text-red-400"
           >
             Uninstall
           </button>
@@ -318,7 +318,7 @@ function SkillCard({
 function LoadingState() {
   return (
     <div className="flex items-center justify-center py-12">
-      <div className="flex items-center gap-3 text-muted">
+      <div className="flex items-center gap-3 text-muted-foreground">
         <span className="inline-flex gap-1">
           <span className="streaming-dot" />
           <span className="streaming-dot" />
@@ -333,7 +333,7 @@ function LoadingState() {
 function ErrorState({ message }: { message: string }) {
   return (
     <div className="glass-panel mx-auto max-w-sm rounded-2xl p-6 text-center">
-      <p className="break-words text-sm text-muted">{message}</p>
+      <p className="break-words text-sm text-muted-foreground">{message}</p>
     </div>
   );
 }
@@ -351,7 +351,9 @@ function EmptyState({
         <Zap size={28} className="text-primary" />
       </div>
       <h3 className="font-semibold text-text">{title}</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        {description}
+      </p>
     </div>
   );
 }
