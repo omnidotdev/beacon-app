@@ -36,13 +36,30 @@ import createMetaTags from "@/lib/util/createMetaTags";
 
 const USE_SYNAPSE = !!SYNAPSE_API_URL;
 
+/** Plan a visitor picked on the public pricing section, carried through sign-in */
+interface SettingsSearch {
+  plan?: string;
+  interval?: "month" | "year";
+}
+
 export const Route = createFileRoute("/_app/settings")({
   head: () => createMetaTags({ title: "Settings" }),
+  validateSearch: (search: Record<string, unknown>): SettingsSearch => ({
+    plan:
+      typeof search.plan === "string" && /^[a-z]+$/.test(search.plan)
+        ? search.plan
+        : undefined,
+    interval:
+      search.interval === "month" || search.interval === "year"
+        ? search.interval
+        : undefined,
+  }),
   component: SettingsPage,
 });
 
 function SettingsPage() {
   const { session } = useRouteContext({ from: "__root__" });
+  const search = Route.useSearch();
   const { data: persona } = usePersona();
   const { data: providersData, isLoading: providersLoading } = useProviders();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -173,7 +190,10 @@ function SettingsPage() {
             </SettingsSection>
           )}
 
-          <SubscriptionSettings />
+          <SubscriptionSettings
+            requestedPlan={search.plan}
+            requestedInterval={search.interval}
+          />
 
           <SettingsSection title="Persona">
             <div className="flex items-center gap-4">
