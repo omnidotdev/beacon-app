@@ -14,6 +14,8 @@ const app = {
     github: "https://github.com/omnidotdev",
     feedback: "https://backfeed.omni.dev/workspaces/omni/projects/beacon",
     x: "https://x.com/omnidotdev",
+    privacy: "https://omni.dev/legal/privacy",
+    terms: "https://omni.dev/legal/terms",
   },
 };
 

@@ -2,11 +2,12 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
   ArrowRightIcon,
   BrainIcon,
-  CheckCircle2Icon,
+  CheckIcon,
+  KeyRoundIcon,
+  LogInIcon,
   MessageSquareIcon,
   MicIcon,
   RocketIcon,
-  SparklesIcon,
   VenetianMaskIcon,
   ZapIcon,
 } from "lucide-react";
@@ -17,7 +18,9 @@ import {
   RiTelegramLine as TelegramIcon,
 } from "react-icons/ri";
 
+import { usePrices } from "@/hooks";
 import signIn from "@/lib/auth/signIn";
+import { pricingPlans } from "@/lib/billing/pricingPlans";
 import app from "@/lib/config/app.config";
 import createMetaTags from "@/lib/util/createMetaTags";
 import { signOutLocal } from "@/server/functions/auth";
@@ -41,9 +44,9 @@ export const Route = createFileRoute("/_public/")({
 
 const features = [
   {
-    title: "Voice-First",
+    title: "Voice",
     description:
-      "Natural voice interactions powered by real-time audio streaming",
+      "Hands-free conversations with wake words when you self-host. Voice in the web app is coming soon",
     icon: <MicIcon size={28} />,
   },
   {
@@ -66,6 +69,12 @@ const features = [
     description: "Shape personality, tone, and expertise to fit your workflow",
     icon: <VenetianMaskIcon size={28} />,
   },
+  {
+    title: "Any AI Provider",
+    description:
+      "Run on Omni AI credits, or bring your own key for the models you already use",
+    icon: <KeyRoundIcon size={28} />,
+  },
 ];
 
 const steps = [
@@ -73,7 +82,7 @@ const steps = [
     number: "01",
     title: "Sign In",
     description: "Authenticate with your Omni account to get started instantly",
-    icon: <SparklesIcon size={24} />,
+    icon: <LogInIcon size={24} />,
   },
   {
     number: "02",
@@ -85,7 +94,7 @@ const steps = [
   {
     number: "03",
     title: "Start Talking",
-    description: "Chat via voice, text, or any connected channel",
+    description: "Chat in the web app, or anywhere you run Beacon",
     icon: <RocketIcon size={24} />,
   },
 ];
@@ -160,9 +169,6 @@ function HomePage() {
       <section className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <span className="glass-panel mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
-              Features
-            </span>
             <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
               Built for every conversation
             </h2>
@@ -196,9 +202,6 @@ function HomePage() {
       <section className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <span className="glass-panel mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
-              How It Works
-            </span>
             <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
               Online in minutes
             </h2>
@@ -217,7 +220,7 @@ function HomePage() {
                   <div className="glass-panel flex h-20 w-20 items-center justify-center rounded-2xl">
                     <div className="text-primary">{step.icon}</div>
                   </div>
-                  <div className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary font-bold text-xs text-[#0a0a0f]">
+                  <div className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary font-bold text-xs text-primary-foreground">
                     {step.number}
                   </div>
                 </div>
@@ -239,10 +242,6 @@ function HomePage() {
           <div className="glass-panel overflow-hidden rounded-3xl p-8 sm:p-12 lg:p-16">
             <div className="flex flex-col items-center gap-8 lg:flex-row lg:justify-between">
               <div className="max-w-xl text-center lg:text-left">
-                <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                  <CheckCircle2Icon size={14} />
-                  Open Source
-                </span>
                 <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
                   Transparent by design
                 </h2>
@@ -268,6 +267,8 @@ function HomePage() {
         </div>
       </section>
 
+      <Pricing />
+
       {/* Final CTA */}
       <section className="px-4 py-32 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
@@ -276,8 +277,8 @@ function HomePage() {
             <span className="text-shimmer">signal?</span>
           </h2>
           <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground">
-            One assistant, every channel, always listening. Free and open
-            source, forever.
+            One assistant, every channel. Open source, free to self-host, and
+            free to start in the cloud.
           </p>
 
           <button
@@ -293,10 +294,81 @@ function HomePage() {
           </button>
 
           <p className="mt-6 text-muted-foreground text-sm">
-            No credit card required. Free and open source.
+            No credit card required to start.
           </p>
         </div>
       </section>
     </div>
+  );
+}
+
+/**
+ * Plans offered in the cloud, live from billing (see `pricingPlans`)
+ */
+function Pricing() {
+  const { data: prices } = usePrices();
+  const plans = pricingPlans(prices ?? []);
+
+  if (!plans.length) return null;
+
+  return (
+    <section className="px-4 py-24 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <div className="mx-auto mb-16 max-w-2xl text-center">
+          <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
+            Simple pricing
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Start free. Upgrade for included AI credits and unlimited
+            conversations
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className="glass-panel flex flex-col rounded-2xl p-6"
+            >
+              <h3 className="font-semibold text-lg text-text">{plan.name}</h3>
+              <p className="mt-1 text-muted-foreground text-sm">
+                {plan.description}
+              </p>
+              <p className="mt-6 mb-6">
+                <span className="font-bold text-4xl text-text">
+                  ${plan.amount}
+                </span>
+                <span className="text-muted-foreground text-sm"> /month</span>
+              </p>
+              <ul className="mb-8 flex-1 space-y-2">
+                {plan.features.map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-start gap-2 text-sm text-text-secondary"
+                  >
+                    <CheckIcon
+                      size={16}
+                      className="mt-0.5 flex-shrink-0 text-primary"
+                    />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className={
+                  plan.amount === 0
+                    ? "btn-glass h-11"
+                    : "btn-primary h-11 font-semibold"
+                }
+                onClick={() => signIn({ redirectUrl: "/chat" })}
+              >
+                {plan.amount === 0 ? "Start free" : `Get ${plan.name}`}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
