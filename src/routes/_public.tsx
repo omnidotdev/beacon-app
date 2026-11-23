@@ -98,7 +98,7 @@ function PublicLayout() {
                 href={app.links.docs}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-md px-3 py-2 font-medium text-muted text-sm transition-colors hover:text-text"
+                className="rounded-md px-3 py-2 font-medium text-muted-foreground text-sm transition-colors hover:text-text"
               >
                 Docs
               </a>
@@ -106,7 +106,7 @@ function PublicLayout() {
                 href={app.links.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-md px-3 py-2 font-medium text-muted text-sm transition-colors hover:text-text"
+                className="rounded-md px-3 py-2 font-medium text-muted-foreground text-sm transition-colors hover:text-text"
               >
                 GitHub
               </a>
@@ -158,7 +158,7 @@ function PublicLayout() {
                   href={app.links.docs}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-md px-3 py-2 font-medium text-muted text-sm hover:text-text"
+                  className="block rounded-md px-3 py-2 font-medium text-muted-foreground text-sm hover:text-text"
                 >
                   Docs
                 </a>
@@ -166,7 +166,7 @@ function PublicLayout() {
                   href={app.links.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-md px-3 py-2 font-medium text-muted text-sm hover:text-text"
+                  className="block rounded-md px-3 py-2 font-medium text-muted-foreground text-sm hover:text-text"
                 >
                   GitHub
                 </a>
@@ -204,14 +204,15 @@ function PublicLayout() {
       <footer
         className="relative z-10 border-t border-border backdrop-blur-sm"
         style={{
-          background: "color-mix(in srgb, var(--muted) 10%, transparent)",
+          background:
+            "color-mix(in srgb, var(--muted-foreground) 10%, transparent)",
         }}
       >
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-2">
-              <BeaconLogo className="h-5 w-5 text-muted opacity-60" />
-              <span className="text-muted text-sm">
+              <BeaconLogo className="h-5 w-5 text-muted-foreground opacity-60" />
+              <span className="text-muted-foreground text-sm">
                 Built by{" "}
                 <a
                   href="https://omni.dev"
@@ -230,7 +231,7 @@ function PublicLayout() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
-                className="text-muted transition-colors hover:text-primary"
+                className="text-muted-foreground transition-colors hover:text-primary"
               >
                 <GithubIcon size={20} />
               </a>
@@ -239,7 +240,7 @@ function PublicLayout() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Discord"
-                className="text-muted transition-colors hover:text-primary"
+                className="text-muted-foreground transition-colors hover:text-primary"
               >
                 <DiscordIcon size={20} />
               </a>
@@ -248,13 +249,13 @@ function PublicLayout() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="X"
-                className="text-muted transition-colors hover:text-primary"
+                className="text-muted-foreground transition-colors hover:text-primary"
               >
                 <XIcon2 size={20} />
               </a>
             </div>
 
-            <p className="text-muted text-sm">
+            <p className="text-muted-foreground text-sm">
               &copy; {new Date().getFullYear()}{" "}
               <a
                 href="https://omni.dev"

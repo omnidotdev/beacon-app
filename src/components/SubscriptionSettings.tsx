@@ -78,7 +78,7 @@ function SubscriptionSettingsInner() {
 
   return (
     <div className="glass-panel rounded-2xl p-5">
-      <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted/60">
+      <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
         Subscription
       </h2>
 
@@ -92,7 +92,7 @@ function SubscriptionSettingsInner() {
             <span className="text-lg font-semibold text-text">{name}</span>
           </div>
 
-          <p className="text-sm text-muted">
+          <p className="text-sm text-muted-foreground">
             {isPaid
               ? "Your personal workspace's plan"
               : "Upgrade your personal workspace for included credits each month and voice"}
@@ -114,7 +114,7 @@ function SubscriptionSettingsInner() {
                     ? "You are out of credits"
                     : `${balance.formatted} credits`}
                 </p>
-                <p className="text-xs text-muted">
+                <p className="text-xs text-muted-foreground">
                   {balance.isOutOfCredits
                     ? "Chat is paused until you buy credits or upgrade. Credits belong to your personal workspace"
                     : "Your personal workspace's credits"}

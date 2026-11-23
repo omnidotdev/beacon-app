@@ -172,7 +172,7 @@ function ChatPage() {
           <LogIn size={28} className="text-primary" />
         </div>
         <h2 className="text-xl font-medium text-text">Sign in to chat</h2>
-        <p className="max-w-sm text-muted">
+        <p className="max-w-sm text-muted-foreground">
           Create an account or sign in to start chatting with your AI assistant
         </p>
         <button

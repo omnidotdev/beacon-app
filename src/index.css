@@ -2,14 +2,37 @@
 @import "@omnidotdev/thornberry/base.css";
 @source "../node_modules/@omnidotdev/thornberry/build";
 
+/* Thornberry components style themselves with the shared shadcn token
+   contract (background, foreground, card, popover, primary, secondary, muted,
+   accent, destructive, border, input, ring). Every name must resolve, or the
+   utility silently drops: an unmapped `border-input` falls back to
+   `currentColor` and paints a bright border. Beacon's own palette maps onto
+   it below; the teal brand color is `brand-accent` because `accent` in the
+   contract is the subtle hover surface. Interactive states (hover, focus,
+   selection) use the neutral surface or the orange primary, never teal */
 @theme inline {
   --font-sans: "Outfit", system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--text);
+  --color-card: var(--card);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--text);
   --color-primary: #f97316;
+  --color-primary-foreground: #0a0a0f;
   --color-primary-glow: rgba(249, 115, 22, 0.4);
   --color-primary-soft: rgba(249, 115, 22, 0.15);
-  --color-accent: #2dd4bf;
-  --color-accent-glow: rgba(45, 212, 191, 0.35);
-  --color-accent-soft: rgba(45, 212, 191, 0.12);
+  --color-secondary: var(--surface-elevated);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surface-elevated);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--surface-hover);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--color-primary);
+  --color-brand-accent: #2dd4bf;
 }
 
 :root {
@@ -18,8 +41,13 @@
   --background-gradient: linear-gradient(135deg, #f0f2f8 0%, #e8ecf4 100%);
   --surface: rgba(255, 255, 255, 0.8);
   --surface-elevated: rgba(255, 255, 255, 0.9);
-  --muted: #71717a;
+  --surface-hover: rgba(0, 0, 0, 0.04);
+  --card: #ffffff;
+  --popover: #ffffff;
+  --muted-foreground: #71717a;
+  --destructive: #dc2626;
   --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.12);
   --border-subtle: rgba(0, 0, 0, 0.04);
   --text: #18181b;
   --text-secondary: #52525b;
@@ -48,8 +76,13 @@
   --background-gradient: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0f0f18 100%);
   --surface: rgba(255, 255, 255, 0.04);
   --surface-elevated: rgba(255, 255, 255, 0.06);
-  --muted: #71717a;
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --card: #14141b;
+  --popover: #16161e;
+  --muted-foreground: #71717a;
+  --destructive: #f87171;
   --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
   --border-subtle: rgba(255, 255, 255, 0.04);
   --text: #f4f4f5;
   --text-secondary: #a1a1aa;
@@ -73,6 +106,16 @@
 }
 
 @layer base {
+  /* Tailwind v4 defaults borders to currentColor; keep a bare `border` on the
+     theme's hairline instead */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border);
+  }
+
   html,
   body,
   #root {
@@ -115,23 +158,17 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--muted);
+    background: var(--muted-foreground);
   }
 }
 
 @layer utilities {
   /* Background utilities */
-  .bg-background {
-    background-color: var(--background);
-  }
   .bg-surface {
     background-color: var(--surface);
   }
   .bg-surface-elevated {
     background-color: var(--surface-elevated);
-  }
-  .bg-muted {
-    background-color: var(--muted);
   }
 
   /* Text utilities */
@@ -141,14 +178,7 @@
   .text-text-secondary {
     color: var(--text-secondary);
   }
-  .text-muted {
-    color: var(--muted);
-  }
 
-  /* Border utilities */
-  .border-border {
-    border-color: var(--border);
-  }
   .border-subtle {
     border-color: var(--border-subtle);
   }
@@ -181,8 +211,8 @@
   }
 
   .glass-input:focus {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 20px var(--color-accent-glow);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px var(--color-primary-soft);
     outline: none;
   }
 
@@ -250,7 +280,7 @@
 
   .streaming-dot {
     @apply inline-block w-1.5 h-1.5 rounded-full;
-    background: var(--color-accent);
+    background: var(--color-brand-accent);
     animation: pulse-glow 1.4s ease-in-out infinite;
   }
 
@@ -364,7 +394,7 @@
     border-radius: 8px;
     background: var(--surface-elevated);
     border: 1px solid var(--border);
-    color: var(--muted);
+    color: var(--muted-foreground);
     font-size: 12px;
     white-space: nowrap;
     pointer-events: none;
@@ -396,7 +426,7 @@
 
   .send-button:disabled {
     background: var(--surface-elevated);
-    color: var(--muted);
+    color: var(--muted-foreground);
     opacity: 0.4;
     cursor: not-allowed;
   }
@@ -448,11 +478,11 @@
   }
 
   .markdown a {
-    @apply text-accent underline underline-offset-2;
+    @apply text-brand-accent underline underline-offset-2;
   }
 
   .markdown a:hover {
-    @apply text-accent/80;
+    @apply text-brand-accent/80;
   }
 
   .markdown ul,
@@ -477,8 +507,8 @@
   }
 
   .markdown blockquote {
-    @apply my-2 border-l-2 border-accent/40 pl-3 italic;
-    color: var(--muted);
+    @apply my-2 border-l-2 border-brand-accent/40 pl-3 italic;
+    color: var(--muted-foreground);
   }
 
   .markdown hr {
@@ -490,7 +520,7 @@
   .markdown code:not(pre code) {
     @apply rounded px-1.5 py-0.5 text-xs;
     background: var(--surface-elevated);
-    color: var(--color-accent);
+    color: var(--color-brand-accent);
   }
 
   /* Code blocks */
@@ -498,7 +528,7 @@
     @apply my-3 overflow-x-auto rounded-xl p-4 text-xs leading-relaxed;
     background: var(--surface-elevated);
     border: 1px solid var(--border-subtle);
-    border-left: 2px solid var(--color-accent);
+    border-left: 2px solid var(--color-brand-accent);
   }
 
   .markdown pre code {
@@ -547,7 +577,7 @@
   }
 
   .hljs-comment {
-    color: var(--muted);
+    color: var(--muted-foreground);
   }
 
   .hljs-name,
@@ -730,7 +760,7 @@
     gap: 0.75rem;
     padding: 1.5rem;
     text-align: center;
-    background: hsl(var(--background, 240 10% 6%));
-    color: hsl(var(--foreground, 0 0% 98%));
+    background: var(--background);
+    color: var(--text);
   }
 }

@@ -131,7 +131,9 @@ function ModelPill({
       type="button"
       onClick={onToggle}
       className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-        isOpen ? "bg-surface-elevated text-text" : "text-muted hover:text-text"
+        isOpen
+          ? "bg-surface-elevated text-text"
+          : "text-muted-foreground hover:text-text"
       }`}
     >
       {name}
@@ -191,7 +193,7 @@ function ModelDropdown({
         <div key={providerId}>
           {i > 0 && <div className="mx-2 my-1 border-t border-subtle" />}
           <div className="flex items-center gap-1.5 px-2.5 py-1.5">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-muted/50">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50">
               {getProviderDisplayName(providerId)}
             </span>
             {providerId === "omni_credits" && (
@@ -223,7 +225,9 @@ function ModelDropdown({
                 <span>
                   {model.name}
                   {model.id === defaultModelId && (
-                    <span className="ml-1.5 text-xs text-muted">Default</span>
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      Default
+                    </span>
                   )}
                 </span>
                 {isSelected && <Check size={14} className="text-primary" />}

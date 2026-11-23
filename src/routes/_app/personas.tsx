@@ -58,7 +58,7 @@ function AuthGate() {
         <VenetianMask size={28} className="text-primary" />
       </div>
       <h2 className="font-semibold text-text">Persona Marketplace</h2>
-      <p className="mt-2 max-w-sm text-sm text-muted">
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
         Sign in with your Omni account to browse and install personas
       </p>
     </div>
@@ -97,7 +97,7 @@ function PersonasContent() {
           <div className="relative max-w-md">
             <Search
               size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted/50"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50"
             />
             <input
               type="text"
@@ -136,7 +136,7 @@ function TabButton({ active, onClick, children }: TabButtonProps) {
       className={`border-b-2 py-3 text-sm font-medium transition-all ${
         active
           ? "border-primary text-primary"
-          : "border-transparent text-muted hover:text-text"
+          : "border-transparent text-muted-foreground hover:text-text"
       }`}
     >
       {children}
@@ -293,7 +293,7 @@ function PersonaCard({
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-text">{persona.name}</h3>
           {persona.tagline && (
-            <p className="mt-1 line-clamp-2 text-sm text-muted">
+            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
               {persona.tagline}
             </p>
           )}
@@ -303,7 +303,7 @@ function PersonaCard({
       <div className="mt-4 flex gap-2">
         {installed ? (
           isBuiltIn ? (
-            <span className="flex-1 rounded-xl py-2 text-center text-xs text-muted/60">
+            <span className="flex-1 rounded-xl py-2 text-center text-xs text-muted-foreground/60">
               Built-in
             </span>
           ) : (
@@ -311,7 +311,7 @@ function PersonaCard({
               type="button"
               onClick={onUninstall}
               disabled={isLoading}
-              className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted hover:border-red-500/50 hover:text-red-400"
+              className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted-foreground hover:border-red-500/50 hover:text-red-400"
             >
               Uninstall
             </button>
@@ -339,7 +339,7 @@ function CustomPersonaTeaser() {
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-text">Create custom personas</p>
-        <p className="mt-0.5 text-xs text-muted">
+        <p className="mt-0.5 text-xs text-muted-foreground">
           Build and configure your own personas with custom instructions, tools,
           and styles — coming soon
         </p>
@@ -351,7 +351,7 @@ function CustomPersonaTeaser() {
 function LoadingState() {
   return (
     <div className="flex items-center justify-center py-12">
-      <div className="flex items-center gap-3 text-muted">
+      <div className="flex items-center gap-3 text-muted-foreground">
         <span className="inline-flex gap-1">
           <span className="streaming-dot" />
           <span className="streaming-dot" />
@@ -366,7 +366,7 @@ function LoadingState() {
 function ErrorState({ message }: { message: string }) {
   return (
     <div className="glass-panel mx-auto max-w-sm rounded-2xl p-6 text-center">
-      <p className="break-words text-sm text-muted">{message}</p>
+      <p className="break-words text-sm text-muted-foreground">{message}</p>
     </div>
   );
 }
@@ -384,7 +384,9 @@ function EmptyState({
         <VenetianMask size={28} className="text-primary" />
       </div>
       <h3 className="font-semibold text-text">{title}</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        {description}
+      </p>
     </div>
   );
 }

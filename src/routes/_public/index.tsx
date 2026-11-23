@@ -107,7 +107,7 @@ function HomePage() {
             <span className="mt-2 block text-shimmer">always within reach</span>
           </h1>
 
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-muted">
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground">
             Voice, text, Discord, Telegram, Slack, and more. Deploy a single
             binary and your assistant is everywhere. Free and open source.
           </p>
@@ -142,13 +142,13 @@ function HomePage() {
             {channels.map((ch) => (
               <span
                 key={ch.name}
-                className="glass-panel inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs text-muted"
+                className="glass-panel inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs text-muted-foreground"
               >
                 {ch.icon}
                 {ch.name}
               </span>
             ))}
-            <span className="glass-panel inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs text-muted">
+            <span className="glass-panel inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs text-muted-foreground">
               <MicIcon size={16} />
               Voice
             </span>
@@ -160,13 +160,13 @@ function HomePage() {
       <section className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <span className="glass-panel mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-muted">
+            <span className="glass-panel mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
               Features
             </span>
             <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
               Built for every conversation
             </h2>
-            <p className="text-lg text-muted">
+            <p className="text-lg text-muted-foreground">
               A single runtime that adapts to how you work
             </p>
           </div>
@@ -183,7 +183,7 @@ function HomePage() {
                 <h3 className="mb-2 font-semibold text-lg text-text">
                   {feat.title}
                 </h3>
-                <p className="text-muted text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {feat.description}
                 </p>
               </div>
@@ -196,13 +196,15 @@ function HomePage() {
       <section className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <span className="glass-panel mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-muted">
+            <span className="glass-panel mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
               How It Works
             </span>
             <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
               Online in minutes
             </h2>
-            <p className="text-lg text-muted">No friction. Just signal.</p>
+            <p className="text-lg text-muted-foreground">
+              No friction. Just signal.
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -222,7 +224,9 @@ function HomePage() {
                 <h3 className="mb-2 font-semibold text-xl text-text">
                   {step.title}
                 </h3>
-                <p className="max-w-xs text-muted">{step.description}</p>
+                <p className="max-w-xs text-muted-foreground">
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
@@ -242,7 +246,7 @@ function HomePage() {
                 <h2 className="mb-4 font-bold text-3xl text-text sm:text-4xl">
                   Transparent by design
                 </h2>
-                <p className="text-lg text-muted">
+                <p className="text-lg text-muted-foreground">
                   {app.name} is completely open source. Inspect the code,
                   contribute features, or self-host on your own infrastructure.
                   Your data, your signal.
@@ -271,7 +275,7 @@ function HomePage() {
             Ready to broadcast your{" "}
             <span className="text-shimmer">signal?</span>
           </h2>
-          <p className="mx-auto mb-10 max-w-xl text-lg text-muted">
+          <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground">
             One assistant, every channel, always listening. Free and open
             source, forever.
           </p>
@@ -288,7 +292,7 @@ function HomePage() {
             />
           </button>
 
-          <p className="mt-6 text-muted text-sm">
+          <p className="mt-6 text-muted-foreground text-sm">
             No credit card required. Free and open source.
           </p>
         </div>
