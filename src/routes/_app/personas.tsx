@@ -66,6 +66,10 @@ function AuthGate() {
 }
 
 function PersonasContent() {
+  // Beacon cloud runs one shared set of personas for every user, so only the
+  // operator installs or removes them there; self-hosted gateways manage their
+  // own
+  const manageable = !isCloudDeployment();
   const [activeTab, setActiveTab] = useState<Tab>("installed");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -75,24 +79,31 @@ function PersonasContent() {
         <VenetianMask size={20} className="text-primary/70" />
       </div>
 
-      <div className="px-6">
-        <div className="flex gap-6">
-          <TabButton
-            active={activeTab === "installed"}
-            onClick={() => setActiveTab("installed")}
-          >
-            Installed
-          </TabButton>
-          <TabButton
-            active={activeTab === "browse"}
-            onClick={() => setActiveTab("browse")}
-          >
-            Marketplace
-          </TabButton>
+      {manageable ? (
+        <div className="px-6">
+          <div className="flex gap-6">
+            <TabButton
+              active={activeTab === "installed"}
+              onClick={() => setActiveTab("installed")}
+            >
+              Installed
+            </TabButton>
+            <TabButton
+              active={activeTab === "browse"}
+              onClick={() => setActiveTab("browse")}
+            >
+              Marketplace
+            </TabButton>
+          </div>
         </div>
-      </div>
+      ) : (
+        <p className="px-6 text-muted-foreground text-sm">
+          Beacon cloud shares one set of personas, managed by Omni. Self-host
+          Beacon to install your own
+        </p>
+      )}
 
-      {activeTab === "browse" && (
+      {manageable && activeTab === "browse" && (
         <div className="px-6 py-4">
           <div className="relative max-w-md">
             <Search
@@ -111,8 +122,8 @@ function PersonasContent() {
       )}
 
       <div className="flex-1 overflow-y-auto p-6">
-        {activeTab === "installed" ? (
-          <InstalledPersonasTab />
+        {!manageable || activeTab === "installed" ? (
+          <InstalledPersonasTab manageable={manageable} />
         ) : (
           <BrowsePersonasTab searchQuery={searchQuery} />
         )}
@@ -144,7 +155,7 @@ function TabButton({ active, onClick, children }: TabButtonProps) {
   );
 }
 
-function InstalledPersonasTab() {
+function InstalledPersonasTab({ manageable }: { manageable: boolean }) {
   const { data, isLoading, error } = useMarketplacePersonas();
   const uninstallPersona = useUninstallMarketplacePersona();
 
@@ -172,7 +183,9 @@ function InstalledPersonasTab() {
             installed
             isBuiltIn={isFlagship}
             onUninstall={
-              isFlagship ? undefined : () => uninstallPersona.mutate(persona.id)
+              isFlagship || !manageable
+                ? undefined
+                : () => uninstallPersona.mutate(persona.id)
             }
             isLoading={
               uninstallPersona.isPending &&
@@ -306,7 +319,7 @@ function PersonaCard({
             <span className="flex-1 rounded-xl py-2 text-center text-xs text-muted-foreground/60">
               Built-in
             </span>
-          ) : (
+          ) : onUninstall ? (
             <button
               type="button"
               onClick={onUninstall}
@@ -315,7 +328,7 @@ function PersonaCard({
             >
               Uninstall
             </button>
-          )
+          ) : null
         ) : (
           <button
             type="button"

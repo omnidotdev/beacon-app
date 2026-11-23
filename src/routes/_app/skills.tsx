@@ -43,6 +43,10 @@ function AuthGate() {
 }
 
 function SkillsContent() {
+  // Beacon cloud runs one shared set of skills for every user, so only the
+  // operator installs or removes them there; self-hosted gateways manage their
+  // own
+  const manageable = !isCloudDeployment();
   const [activeTab, setActiveTab] = useState<Tab>("installed");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -52,24 +56,31 @@ function SkillsContent() {
         <Zap size={20} className="text-primary/70" />
       </div>
 
-      <div className="px-6">
-        <div className="flex gap-6">
-          <TabButton
-            active={activeTab === "installed"}
-            onClick={() => setActiveTab("installed")}
-          >
-            Installed
-          </TabButton>
-          <TabButton
-            active={activeTab === "browse"}
-            onClick={() => setActiveTab("browse")}
-          >
-            Marketplace
-          </TabButton>
+      {manageable ? (
+        <div className="px-6">
+          <div className="flex gap-6">
+            <TabButton
+              active={activeTab === "installed"}
+              onClick={() => setActiveTab("installed")}
+            >
+              Installed
+            </TabButton>
+            <TabButton
+              active={activeTab === "browse"}
+              onClick={() => setActiveTab("browse")}
+            >
+              Marketplace
+            </TabButton>
+          </div>
         </div>
-      </div>
+      ) : (
+        <p className="px-6 text-muted-foreground text-sm">
+          Beacon cloud shares one set of skills, managed by Omni. Self-host
+          Beacon to install your own
+        </p>
+      )}
 
-      {activeTab === "browse" && (
+      {manageable && activeTab === "browse" && (
         <div className="px-6 py-4">
           <div className="relative max-w-md">
             <Search
@@ -88,8 +99,8 @@ function SkillsContent() {
       )}
 
       <div className="flex-1 overflow-y-auto p-6">
-        {activeTab === "installed" ? (
-          <InstalledSkillsTab />
+        {!manageable || activeTab === "installed" ? (
+          <InstalledSkillsTab manageable={manageable} />
         ) : (
           <BrowseSkillsTab searchQuery={searchQuery} />
         )}
@@ -120,7 +131,7 @@ function TabButton({ active, onClick, children }: TabButtonProps) {
   );
 }
 
-function InstalledSkillsTab() {
+function InstalledSkillsTab({ manageable }: { manageable: boolean }) {
   const { data, isLoading, error } = useInstalledSkills();
   const toggleSkill = useToggleSkill();
   const uninstallSkill = useUninstallSkill();
@@ -149,10 +160,18 @@ function InstalledSkillsTab() {
           key={skill.id}
           skill={skill}
           installed
-          onToggle={() =>
-            toggleSkill.mutate({ skillId: skill.id, enabled: !skill.enabled })
+          onToggle={
+            manageable
+              ? () =>
+                  toggleSkill.mutate({
+                    skillId: skill.id,
+                    enabled: !skill.enabled,
+                  })
+              : undefined
           }
-          onUninstall={() => uninstallSkill.mutate(skill.id)}
+          onUninstall={
+            manageable ? () => uninstallSkill.mutate(skill.id) : undefined
+          }
           isLoading={
             toggleSkill.isPending && toggleSkill.variables?.skillId === skill.id
           }
@@ -255,7 +274,7 @@ function SkillCard({
             )}
           </div>
         </div>
-        {installed && skill.enabled !== undefined && (
+        {installed && skill.enabled !== undefined && onToggle && (
           <button
             type="button"
             onClick={onToggle}
@@ -290,27 +309,29 @@ function SkillCard({
         </div>
       )}
 
-      <div className="mt-4 flex gap-2">
-        {installed ? (
-          <button
-            type="button"
-            onClick={onUninstall}
-            disabled={isLoading}
-            className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted-foreground hover:border-red-500/50 hover:text-red-400"
-          >
-            Uninstall
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onInstall}
-            disabled={isLoading}
-            className="btn-primary flex-1 rounded-xl py-2 text-sm disabled:opacity-50"
-          >
-            {isLoading ? "Installing..." : "Install"}
-          </button>
-        )}
-      </div>
+      {(installed ? onUninstall : onInstall) && (
+        <div className="mt-4 flex gap-2">
+          {installed ? (
+            <button
+              type="button"
+              onClick={onUninstall}
+              disabled={isLoading}
+              className="btn-glass flex-1 rounded-xl py-2 text-sm text-muted-foreground hover:border-red-500/50 hover:text-red-400"
+            >
+              Uninstall
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onInstall}
+              disabled={isLoading}
+              className="btn-primary flex-1 rounded-xl py-2 text-sm disabled:opacity-50"
+            >
+              {isLoading ? "Installing..." : "Install"}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
