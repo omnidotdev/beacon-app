@@ -130,7 +130,7 @@ function ConversationList({ onNavigate }: ConversationListProps) {
                         if (e.key === "Escape") cancelEditing();
                       }}
                       onBlur={commitRename}
-                      className="flex-1 truncate rounded bg-surface-elevated px-3 py-2 text-sm text-text outline-none ring-1 ring-brand-accent"
+                      className="flex-1 truncate rounded bg-surface-elevated px-3 py-2 text-sm text-text outline-none ring-1 ring-primary"
                     />
                   ) : (
                     <Link
@@ -153,7 +153,7 @@ function ConversationList({ onNavigate }: ConversationListProps) {
                         onClick={() =>
                           startEditing(conversation.id, conversation.title)
                         }
-                        className="rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-brand-accent/10 hover:text-brand-accent group-hover:opacity-100"
+                        className="rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-primary/10 hover:text-primary group-hover:opacity-100"
                         title="Rename conversation"
                       >
                         <Pencil size={14} />

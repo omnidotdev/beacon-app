@@ -367,11 +367,11 @@ function SettingsPage() {
             href="https://github.com/omnidotdev/cli"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-start gap-3 rounded-2xl border border-brand-accent/15 bg-brand-accent/5 px-5 py-4 transition-all hover:border-brand-accent/30 hover:glow-soft"
+            className="group flex items-start gap-3 rounded-2xl border border-primary/15 bg-primary/5 px-5 py-4 transition-all hover:border-primary/30 hover:glow-soft"
           >
             <Terminal
               size={18}
-              className="mt-0.5 flex-shrink-0 text-brand-accent/60 transition-colors group-hover:text-brand-accent"
+              className="mt-0.5 flex-shrink-0 text-primary/60 transition-colors group-hover:text-primary"
             />
             <div>
               <p className="text-sm font-medium text-text">

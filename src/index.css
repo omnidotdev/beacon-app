@@ -8,7 +8,8 @@
    utility silently drops: an unmapped `border-input` falls back to
    `currentColor` and paints a bright border. Beacon's own palette maps onto
    it below; the teal brand color is `brand-accent` because `accent` in the
-   contract is the subtle hover surface */
+   contract is the subtle hover surface. Interactive states (hover, focus,
+   selection) use the neutral surface or the orange primary, never teal */
 @theme inline {
   --font-sans: "Outfit", system-ui, sans-serif;
   --color-background: var(--background);
@@ -32,8 +33,6 @@
   --color-input: var(--input);
   --color-ring: var(--color-primary);
   --color-brand-accent: #2dd4bf;
-  --color-brand-accent-glow: rgba(45, 212, 191, 0.35);
-  --color-brand-accent-soft: rgba(45, 212, 191, 0.12);
 }
 
 :root {
@@ -212,8 +211,8 @@
   }
 
   .glass-input:focus {
-    border-color: var(--color-brand-accent);
-    box-shadow: 0 0 20px var(--color-brand-accent-glow);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px var(--color-primary-soft);
     outline: none;
   }
 
