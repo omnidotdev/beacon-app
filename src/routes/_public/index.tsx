@@ -11,6 +11,7 @@ import {
   VenetianMaskIcon,
   ZapIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { LuGithub as GithubIcon } from "react-icons/lu";
 import {
   RiDiscordLine as DiscordIcon,
@@ -20,7 +21,11 @@ import {
 
 import { usePrices } from "@/hooks";
 import signIn from "@/lib/auth/signIn";
-import { pricingPlans } from "@/lib/billing/pricingPlans";
+import {
+  type PricingInterval,
+  pricingPlans,
+  yearlySavingsPercent,
+} from "@/lib/billing/pricingPlans";
 import app from "@/lib/config/app.config";
 import createMetaTags from "@/lib/util/createMetaTags";
 import { signOutLocal } from "@/server/functions/auth";
@@ -307,9 +312,21 @@ function HomePage() {
  */
 function Pricing() {
   const { data: prices } = usePrices();
-  const plans = pricingPlans(prices ?? []);
+  const [interval, setBillingInterval] = useState<PricingInterval>("month");
+  const plans = pricingPlans(prices ?? [], interval);
+  const savings = yearlySavingsPercent(prices ?? []);
 
   if (!plans.length) return null;
+
+  // Paid plans sign in, then land on Settings, which sends the user to the
+  // account hub's checkout for their personal workspace (the one Beacon bills)
+  const choose = (tier: string) =>
+    signIn({
+      redirectUrl:
+        tier === "free"
+          ? "/chat"
+          : `/settings?plan=${tier}&interval=${interval}`,
+    });
 
   return (
     <section className="px-4 py-24 sm:px-6 lg:px-8">
@@ -323,6 +340,29 @@ function Pricing() {
             conversations
           </p>
         </div>
+
+        {savings && (
+          <div className="mb-10 flex justify-center">
+            <fieldset className="glass-panel inline-flex rounded-xl p-1">
+              <legend className="sr-only">Billing interval</legend>
+              {(["month", "year"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={interval === option}
+                  onClick={() => setBillingInterval(option)}
+                  className={`rounded-lg px-4 py-1.5 font-medium text-sm transition-colors ${
+                    interval === option
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-text"
+                  }`}
+                >
+                  {option === "month" ? "Monthly" : `Yearly, save ${savings}%`}
+                </button>
+              ))}
+            </fieldset>
+          </div>
+        )}
 
         <div className="grid gap-6 md:grid-cols-3">
           {plans.map((plan) => (
@@ -338,7 +378,10 @@ function Pricing() {
                 <span className="font-bold text-4xl text-text">
                   ${plan.amount}
                 </span>
-                <span className="text-muted-foreground text-sm"> /month</span>
+                <span className="text-muted-foreground text-sm">
+                  {" "}
+                  /{interval}
+                </span>
               </p>
               <ul className="mb-8 flex-1 space-y-2">
                 {plan.features.map((feature) => (
@@ -361,7 +404,7 @@ function Pricing() {
                     ? "btn-glass h-11"
                     : "btn-primary h-11 font-semibold"
                 }
-                onClick={() => signIn({ redirectUrl: "/chat" })}
+                onClick={() => choose(plan.tier)}
               >
                 {plan.amount === 0 ? "Start free" : `Get ${plan.name}`}
               </button>

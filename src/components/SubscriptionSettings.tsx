@@ -1,5 +1,6 @@
 import { useRouteContext } from "@tanstack/react-router";
 import { Coins, CreditCard, Gift, Shield } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 import { useCardOffer, usePlan, usePrices } from "@/hooks";
 import { isCloudDeployment } from "@/lib/api";
@@ -31,8 +32,17 @@ function SubscriptionSkeleton() {
   );
 }
 
+interface SubscriptionSettingsProps {
+  /** Paid tier a visitor picked on the public pricing section */
+  requestedPlan?: string;
+  requestedInterval?: "month" | "year";
+}
+
 // Inner component that always calls hooks (avoids Rules of Hooks violation)
-function SubscriptionSettingsInner() {
+function SubscriptionSettingsInner({
+  requestedPlan,
+  requestedInterval,
+}: SubscriptionSettingsProps) {
   const { session } = useRouteContext({ from: "__root__" });
   const { data: plan, isLoading } = usePlan();
   const { data: prices } = usePrices();
@@ -65,6 +75,28 @@ function SubscriptionSettingsInner() {
         })
       : "";
   const manageUrl = manageSubscriptionUrl(ACCOUNT_URL, BASE_URL, workspace);
+
+  // A plan picked on the pricing section continues straight to checkout once
+  // the user is signed in, for a free account and a tier billing actually sells
+  const requestedPrice = requestedPlan
+    ? prices?.find((price) => price.metadata?.tier === requestedPlan)
+    : undefined;
+  const checkoutUrl =
+    requestedPrice && !isLoading && !isPaid
+      ? upgradePlanUrl(ACCOUNT_URL, BASE_URL, {
+          plan: requestedPlan as string,
+          interval: requestedInterval ?? "month",
+          workspace,
+        })
+      : "";
+  const continuedToCheckout = useRef(false);
+
+  useEffect(() => {
+    if (!checkoutUrl || continuedToCheckout.current) return;
+
+    continuedToCheckout.current = true;
+    window.location.assign(checkoutUrl);
+  }, [checkoutUrl]);
 
   // Credits are sold on the Omni account hub (catalog packs), never here
   const buyUrl = buyCreditsUrl(ACCOUNT_URL, workspace);
@@ -181,9 +213,9 @@ function SubscriptionSettingsInner() {
 // Guard component that skips rendering on non-cloud deployments. The plan
 // comes from the gateway, so it shows even when the client has no billing URL
 // (only the Upgrade target, which needs Aether's prices, is then hidden)
-function SubscriptionSettings() {
+function SubscriptionSettings(props: SubscriptionSettingsProps) {
   if (!isCloudDeployment()) return null;
-  return <SubscriptionSettingsInner />;
+  return <SubscriptionSettingsInner {...props} />;
 }
 
 export default SubscriptionSettings;
