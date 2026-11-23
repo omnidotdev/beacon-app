@@ -796,12 +796,46 @@ function createGatewayClient(
     setTokenRefresher(refresher: (() => Promise<string | null>) | null): void {
       tokenRefresher = refresher;
     },
+
+    async transcribe(audio: Blob): Promise<string> {
+      const send = (token: string | null) =>
+        fetch(`${getBaseUrl()}/api/voice/transcribe`, {
+          method: "POST",
+          headers: {
+            "Content-Type": audio.type || "audio/webm",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: audio,
+        });
+
+      let response = await send(accessToken);
+
+      if (response.status === 401 && tokenRefresher) {
+        response = await send(await refreshAccessToken());
+      }
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new TranscriptionError(body?.error?.code ?? null);
+      }
+
+      const { text } = (await response.json()) as { text: string };
+      return text;
+    },
   };
 
   return client;
 }
 
 // Extension interface for gateway-specific features
+/** A failed transcription, with the gateway's error code when it sent one */
+export class TranscriptionError extends Error {
+  constructor(readonly code: string | null) {
+    super(code ?? "transcription_failed");
+    this.name = "TranscriptionError";
+  }
+}
+
 export interface GatewayClientExtensions {
   getIdentity(): Promise<DeviceIdentity>;
   getConnectionState(): ConnectionState;
@@ -817,6 +851,11 @@ export interface GatewayClientExtensions {
   setAccessToken(token: string | null): void;
   /** Register a callback that returns a fresh token on demand */
   setTokenRefresher(refresher: (() => Promise<string | null>) | null): void;
+  /**
+   * Transcribe recorded speech to text with the signed-in user's plan
+   * @throws {TranscriptionError} when the gateway refuses or fails
+   */
+  transcribe(audio: Blob): Promise<string>;
 }
 
 // Singleton instance

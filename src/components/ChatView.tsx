@@ -11,7 +11,6 @@ import {
   Gift,
   KeyRound,
   LogIn,
-  Mic,
   Settings,
   User,
 } from "lucide-react";
@@ -28,6 +27,7 @@ import { ACCOUNT_URL, BASE_URL } from "@/lib/config/env.config";
 import type { BillingNoticeKind } from "@/lib/gateway/chatErrorCode";
 import { NO_PERSONA_ID } from "@/lib/persona";
 import buyCreditsUrl from "@/lib/util/buyCreditsUrl";
+import DictationButton, { type DictationIssue } from "./DictationButton";
 import Markdown from "./Markdown";
 import ModelSelector from "./ModelSelector";
 import { BeaconLogo } from "./Sidebar";
@@ -108,6 +108,9 @@ function ChatView({
   billingNotice,
 }: ChatViewProps) {
   const [input, setInput] = useState("");
+  const [dictationIssue, setDictationIssue] = useState<DictationIssue | null>(
+    null,
+  );
 
   const canSend = isConnected && modelLoaded !== false;
 
@@ -145,6 +148,8 @@ function ChatView({
         notice={
           billingNotice ? (
             <BillingNotice kind={billingNotice} />
+          ) : dictationIssue ? (
+            <DictationNotice issue={dictationIssue} />
           ) : error ? (
             <ErrorNotice error={error} />
           ) : undefined
@@ -163,15 +168,15 @@ function ChatView({
         }
         composerAccessory={<ModelSelector />}
         composerActions={
-          <button
-            type="button"
-            disabled
-            className="btn-icon cursor-not-allowed text-muted-foreground opacity-40"
-            data-tooltip="Coming soon"
-            aria-label="Voice input (coming soon)"
-          >
-            <Mic size={20} />
-          </button>
+          <DictationButton
+            disabled={!canSend}
+            onText={(text) =>
+              setInput((draft) =>
+                draft.trim() ? `${draft.trim()} ${text}` : text,
+              )
+            }
+            onIssue={setDictationIssue}
+          />
         }
         footerHint="Shift+Enter for a new line"
         // Example asks above an empty chat, matched to the persona; a pick drafts
@@ -365,6 +370,49 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
       </Link>
     </p>
   );
+}
+
+/** Why dictation produced no text: billing reuses the chat notices */
+function DictationNotice({ issue }: { issue: DictationIssue }) {
+  const { session } = useRouteContext({ from: "__root__" });
+
+  if (issue === "upgrade") {
+    const upgradeUrl = upgradePlanUrl(ACCOUNT_URL, BASE_URL, {
+      plan: "pro",
+      interval: "month",
+      workspace: personalWorkspace(session?.organizations)?.slug,
+    });
+
+    return (
+      <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
+        Voice dictation is included with Beacon Pro.
+        {upgradeUrl && (
+          <a href={upgradeUrl} className={NOTICE_LINK}>
+            <CreditCard size={14} />
+            Upgrade
+          </a>
+        )}
+      </p>
+    );
+  }
+
+  if (issue === "microphone_denied") {
+    return (
+      <p className="text-amber-400 text-sm">
+        Allow microphone access in your browser to dictate.
+      </p>
+    );
+  }
+
+  if (issue === "failed") {
+    return (
+      <p className="text-amber-400 text-sm">
+        Couldn't catch that. Please try again.
+      </p>
+    );
+  }
+
+  return <BillingNotice kind={issue} />;
 }
 
 function ErrorNotice({ error }: { error: string }) {
