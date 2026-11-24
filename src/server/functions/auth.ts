@@ -1,7 +1,7 @@
 import type { OrganizationClaim } from "@omnidotdev/providers/auth";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest, setCookie } from "@tanstack/react-start/server";
-import auth from "@/lib/auth/auth";
+import auth, { isOmniOAuthConfigured } from "@/lib/auth/auth";
 import { authCache } from "@/lib/auth/authCache";
 import { getAuth } from "@/lib/auth/getAuth";
 import {
@@ -23,6 +23,8 @@ interface SessionResult {
     organizations: OrganizationClaim[];
   } | null;
   organizations: OrganizationClaim[];
+  /** Whether sign-in is configured, so signed-in areas must enforce it */
+  authEnabled: boolean;
 }
 
 /**
@@ -35,10 +37,15 @@ export const fetchSession = createServerFn({ method: "POST" }).handler(
     const result = await getAuth(request);
 
     if (!result) {
-      return { session: null, organizations: [] };
+      return {
+        session: null,
+        organizations: [],
+        authEnabled: isOmniOAuthConfigured,
+      };
     }
 
     return {
+      authEnabled: isOmniOAuthConfigured,
       session: {
         user: {
           id: result.user.id,

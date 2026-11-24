@@ -17,7 +17,7 @@ const { AUTH_SECRET } = process.env;
 // Register the Omni OIDC provider only when it is actually configured.
 // Without client credentials (e.g. local dev), skip it so a failed
 // discovery fetch does not crash auth init and take down the whole app
-const isOmniOAuthConfigured = Boolean(
+export const isOmniOAuthConfigured = Boolean(
   AUTH_CLIENT_ID && AUTH_CLIENT_SECRET && AUTH_BASE_URL,
 );
 
