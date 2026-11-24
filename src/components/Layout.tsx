@@ -1,4 +1,5 @@
 import { LogoLockup } from "@omnidotdev/thornberry/logo-lockup";
+import { GLOBAL_HOTKEYS, useHotkeys } from "@omnidotdev/thornberry/use-hotkeys";
 import { Link, Outlet } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -6,6 +7,16 @@ import Sidebar, { BeaconLogo } from "./Sidebar";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // `b` collapses the desktop rail, or opens and closes the mobile drawer
+  useHotkeys(GLOBAL_HOTKEYS.toggleSidebar, () => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      setSidebarCollapsed((collapsed) => !collapsed);
+    } else {
+      setSidebarOpen((open) => !open);
+    }
+  });
 
   return (
     <div className="relative flex h-dvh w-full overflow-hidden">
@@ -20,7 +31,11 @@ function Layout() {
       )}
 
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        isCollapsed={sidebarCollapsed}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile header */}
