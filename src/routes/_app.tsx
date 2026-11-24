@@ -1,3 +1,4 @@
+import { useIdentitySync } from "@omnidotdev/providers/react";
 import {
   createFileRoute,
   redirect,
@@ -5,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 
 import { Layout } from "@/components";
+import { followSignOut, followSwitch } from "@/lib/auth/followIdentity";
 import type { Workspace } from "@/lib/context/workspace.context";
 import { WorkspaceProvider } from "@/lib/context/workspace.context";
 import { EventsProvider } from "@/providers/EventsProvider";
@@ -41,9 +43,22 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AuthLayout() {
-  const { organizations } = useRouteContext({ strict: false }) as {
+  const { organizations, session, authBaseUrl } = useRouteContext({
+    strict: false,
+  }) as {
     organizations?: Workspace[];
+    session?: { user?: { identityProviderId?: string | null } } | null;
+    authBaseUrl?: string;
   };
+
+  // Stay signed in as the same account as Omni: follow a switch or sign-out
+  // made in another app
+  useIdentitySync({
+    authBaseUrl,
+    subject: session?.user?.identityProviderId,
+    onSignedOut: followSignOut,
+    onSwitched: followSwitch,
+  });
 
   return (
     <EventsProvider provider={eventsProvider}>
