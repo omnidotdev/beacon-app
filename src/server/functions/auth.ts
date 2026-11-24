@@ -1,6 +1,7 @@
 import type { OrganizationClaim } from "@omnidotdev/providers/auth";
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest, setCookie } from "@tanstack/react-start/server";
+import { getCookie, getRequest, setCookie } from "@tanstack/react-start/server";
+import type { PersonaInfo } from "@/lib/api";
 import auth, { isOmniOAuthConfigured } from "@/lib/auth/auth";
 import { authCache } from "@/lib/auth/authCache";
 import { getAuth } from "@/lib/auth/getAuth";
@@ -9,6 +10,7 @@ import {
   AUTH_CLIENT_ID,
   BASE_URL,
 } from "@/lib/config/env.config";
+import { PERSONA_COOKIE, parsePersonaCookie } from "@/lib/personaCookie";
 
 interface SessionResult {
   session: {
@@ -30,6 +32,8 @@ interface SessionResult {
    * (the client bundle carries no build-time auth config)
    */
   authBaseUrl?: string;
+  /** The persona last active in this browser, so the server renders it first */
+  persona: PersonaInfo | null;
 }
 
 /**
@@ -40,17 +44,20 @@ export const fetchSession = createServerFn({ method: "POST" }).handler(
   async (): Promise<SessionResult> => {
     const request = getRequest();
     const result = await getAuth(request);
+    const persona = parsePersonaCookie(getCookie(PERSONA_COOKIE));
 
     if (!result) {
       return {
         session: null,
         organizations: [],
         authEnabled: isOmniOAuthConfigured,
+        persona,
       };
     }
 
     return {
       authEnabled: isOmniOAuthConfigured,
+      persona,
       authBaseUrl: AUTH_BASE_URL as string | undefined,
       session: {
         user: {

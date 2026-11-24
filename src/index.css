@@ -9,6 +9,18 @@
 @import "@fontsource/outfit/800.css";
 @import "@fontsource/outfit/900.css";
 @import "@omnidotdev/thornberry/base.css";
+
+/* Stand-in for Outfit while it loads: Arial scaled to Outfit's width and
+   vertical metrics, so text does not reflow when Outfit swaps in. The
+   generic system-ui fallback is wider and shifted the whole layout on load */
+@font-face {
+  font-family: "Outfit Fallback";
+  src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("Arimo");
+  size-adjust: 100.16%;
+  ascent-override: 99.84%;
+  descent-override: 25.96%;
+  line-gap-override: 0%;
+}
 @source "../node_modules/@omnidotdev/thornberry/build";
 
 /* Thornberry components style themselves with the shared shadcn token
@@ -20,7 +32,7 @@
    contract is the subtle hover surface. Interactive states (hover, focus,
    selection) use the neutral surface or the orange primary, never teal */
 @theme inline {
-  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-sans: "Outfit", "Outfit Fallback", system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--text);
   --color-card: var(--card);
@@ -140,7 +152,7 @@
     background: var(--background-gradient);
     background-attachment: fixed;
     color: var(--text);
-    font-family: "Outfit", system-ui, sans-serif;
+    font-family: "Outfit", "Outfit Fallback", system-ui, sans-serif;
   }
 
   button,

@@ -180,8 +180,13 @@ function ChatView({
         }
         footerHint="Shift+Enter for a new line"
         // Example asks above an empty chat, matched to the persona; a pick drafts
-        // it, never sends it
-        suggestions={canSend ? examplePromptsFor(persona?.id) : undefined}
+        // it, never sends it, so they show while still connecting (shown only
+        // once connected, they pushed the page up when they appeared)
+        suggestions={
+          persona && modelLoaded !== false
+            ? examplePromptsFor(persona.id)
+            : undefined
+        }
       />
     </div>
   );
@@ -230,7 +235,7 @@ function EmptyState({
       {personaLoading ? (
         <>
           <div className="mb-2 h-7 w-56 animate-pulse rounded-lg bg-surface-elevated" />
-          <div className="h-5 w-64 animate-pulse rounded-lg bg-surface-elevated" />
+          <div className="h-6 w-64 animate-pulse rounded-lg bg-surface-elevated" />
         </>
       ) : modelLoaded === false ? (
         <>
