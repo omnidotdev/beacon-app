@@ -237,7 +237,8 @@ function Sidebar({
       {/* Persona Switcher */}
       <div className="px-3 pb-3 max-md:pb-2">
         {personaLoading ? (
-          <div className="flex items-center gap-3 rounded-xl p-3">
+          // Same box as the persona card, so the card replaces it in place
+          <div className="persona-card flex items-center gap-3 rounded-xl p-3">
             <div className="h-10 w-10 animate-pulse rounded-full bg-surface-elevated" />
             <div className="min-w-0 flex-1">
               <div className="mb-1.5 h-3.5 w-20 animate-pulse rounded bg-surface-elevated" />

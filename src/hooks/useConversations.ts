@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect, useSyncExternalStore } from "react";
 
 import type { Conversation, PersonaInfo } from "@/lib/api";
 import * as localDb from "@/lib/db/conversations";
 import { NO_PERSONA, NO_PERSONA_ID } from "@/lib/persona";
+import { writePersonaCookie } from "@/lib/personaCookie";
 import { useApi } from "./useApi";
 import { markPersonaSynced } from "./useChat";
 
@@ -37,6 +40,45 @@ function storePersonaId(id: string) {
   if (typeof window !== "undefined") {
     localStorage.setItem(PERSONA_STORAGE_KEY, id);
   }
+}
+
+/** The last persona the gateway confirmed, so a reload shows it right away */
+const PERSONA_INFO_STORAGE_KEY = "beacon-active-persona-info";
+
+function getStoredPersonaInfo(id: string): PersonaInfo | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const info = JSON.parse(
+      localStorage.getItem(PERSONA_INFO_STORAGE_KEY) ?? "null",
+    ) as PersonaInfo | null;
+    return info?.id === id ? info : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function storePersonaInfo(info: PersonaInfo) {
+  writePersonaCookie(info);
+  try {
+    localStorage.setItem(PERSONA_INFO_STORAGE_KEY, JSON.stringify(info));
+  } catch {
+    // Storage unavailable: the next load waits for the gateway instead
+  }
+}
+
+const noopSubscribe = () => () => {};
+
+/**
+ * False during server rendering and hydration, true after. The stored persona
+ * lives in localStorage, which the server cannot read, so anything derived
+ * from it waits for hydration instead of rendering a default first
+ */
+function useIsHydrated() {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
 }
 
 // Get current persona ID from query cache or localStorage
@@ -100,7 +142,12 @@ export function useUpdateConversationTitle() {
 
 export function usePersona() {
   const api = useApi();
+  const isHydrated = useIsHydrated();
   const storedId = getStoredPersonaId();
+  // What the server rendered: the persona this browser last used (cookie)
+  const { persona: renderedPersona } = useRouteContext({
+    strict: false,
+  }) as { persona?: PersonaInfo | null };
 
   const query = useQuery({
     queryKey: ["persona"],
@@ -130,20 +177,38 @@ export function usePersona() {
     retry: 1,
   });
 
-  // Fall back to stored persona when gateway is unreachable
-  const fallback =
+  // Show the stored persona right away: the one the gateway last confirmed,
+  // else a built-in one with that id. A persona known only to the gateway
+  // (e.g. from the marketplace) waits for it rather than flashing a default
+  // first; the default stands in only when the gateway is unreachable
+  const known =
     storedId === NO_PERSONA_ID
       ? NO_PERSONA
-      : (DEFAULT_PERSONAS.find((p) => p.id === storedId) ??
-        DEFAULT_PERSONAS[0]);
+      : (getStoredPersonaInfo(storedId) ??
+        DEFAULT_PERSONAS.find((p) => p.id === storedId));
+  const fallback = known ?? (query.isError ? DEFAULT_PERSONAS[0] : undefined);
 
-  // Always return fallback data immediately — we have a reliable local fallback
-  // (stored persona ID → DEFAULT_PERSONAS), so there's no need to block on the
-  // gateway response. The real data replaces the fallback once the query resolves.
+  // Remember the active persona (the gateway's, else the stored one) so the
+  // next load, server render included, shows it immediately
+  // Keyed by content: the stored copy is a new object on every render
+  const remembered = query.data ?? known;
+  const rememberedKey = remembered ? JSON.stringify(remembered) : null;
+  useEffect(() => {
+    if (isHydrated && rememberedKey) {
+      storePersonaInfo(JSON.parse(rememberedKey) as PersonaInfo);
+    }
+  }, [isHydrated, rememberedKey]);
+
+  // Until hydrated, match the server exactly; after, the stored persona (which
+  // the cookie mirrors, so the two agree) until the gateway confirms it
+  const data = isHydrated
+    ? (query.data ?? fallback)
+    : (renderedPersona ?? undefined);
+
   return {
     ...query,
-    data: query.data ?? fallback,
-    isLoading: false,
+    data,
+    isLoading: !data,
   };
 }
 
@@ -164,6 +229,7 @@ export function usePersonas() {
 
     if (personaId === NO_PERSONA_ID) {
       markPersonaSynced(NO_PERSONA_ID);
+      storePersonaInfo(NO_PERSONA);
       queryClient.setQueryData(["persona"], NO_PERSONA);
       queryClient.invalidateQueries({ queryKey: ["personas"] });
       return;
@@ -172,6 +238,7 @@ export function usePersonas() {
     try {
       const newPersona = await api.switchPersona(personaId);
       markPersonaSynced(personaId);
+      storePersonaInfo(newPersona);
       queryClient.setQueryData(["persona"], newPersona);
       queryClient.invalidateQueries({ queryKey: ["personas"] });
     } catch {

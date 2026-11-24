@@ -1,3 +1,6 @@
+import outfit400 from "@fontsource/outfit/files/outfit-latin-400-normal.woff2?url";
+import outfit500 from "@fontsource/outfit/files/outfit-latin-500-normal.woff2?url";
+import outfit600 from "@fontsource/outfit/files/outfit-latin-600-normal.woff2?url";
 import { useSessionRefresh } from "@omnidotdev/providers/react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
@@ -17,6 +20,7 @@ import LandscapeGate from "@/components/LandscapeGate";
 import { DefaultCatchBoundary, NotFound } from "@/components/layout";
 import { ApiProvider } from "@/hooks";
 import appCss from "@/index.css?url";
+import type { PersonaInfo } from "@/lib/api";
 import app from "@/lib/config/app.config";
 import { isDevEnv } from "@/lib/config/env.config";
 import { isNative } from "@/lib/platform";
@@ -48,6 +52,7 @@ interface RouterContext {
   session?: Awaited<ReturnType<typeof fetchSession>>["session"] | null;
   authEnabled?: boolean;
   authBaseUrl?: string;
+  persona?: PersonaInfo | null;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -59,10 +64,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     }
 
     try {
-      const { session, organizations, authEnabled, authBaseUrl } =
+      const { session, organizations, authEnabled, authBaseUrl, persona } =
         await fetchSession();
 
-      return { session, organizations, authEnabled, authBaseUrl };
+      return { session, organizations, authEnabled, authBaseUrl, persona };
     } catch {
       // Server function failed, likely in Tauri mode
       return { session: null, organizations: [], authEnabled: false };
@@ -83,6 +88,15 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       ],
       links: [
         { rel: "stylesheet", href: appCss },
+        // The weights above the fold, fetched with the stylesheet rather than
+        // after it, so first paint is already in Outfit
+        ...[outfit400, outfit500, outfit600].map((href) => ({
+          rel: "preload",
+          href,
+          as: "font",
+          type: "font/woff2",
+          crossOrigin: "anonymous" as const,
+        })),
         {
           rel: "icon",
           type: "image/png",
