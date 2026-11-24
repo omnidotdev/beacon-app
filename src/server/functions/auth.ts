@@ -25,6 +25,11 @@ interface SessionResult {
   organizations: OrganizationClaim[];
   /** Whether sign-in is configured, so signed-in areas must enforce it */
   authEnabled: boolean;
+  /**
+   * Identity provider base URL, so the browser can check its Omni session
+   * (the client bundle carries no build-time auth config)
+   */
+  authBaseUrl?: string;
 }
 
 /**
@@ -46,6 +51,7 @@ export const fetchSession = createServerFn({ method: "POST" }).handler(
 
     return {
       authEnabled: isOmniOAuthConfigured,
+      authBaseUrl: AUTH_BASE_URL as string | undefined,
       session: {
         user: {
           id: result.user.id,

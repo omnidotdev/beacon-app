@@ -47,6 +47,7 @@ interface RouterContext {
   queryClient: QueryClient;
   session?: Awaited<ReturnType<typeof fetchSession>>["session"] | null;
   authEnabled?: boolean;
+  authBaseUrl?: string;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -58,9 +59,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     }
 
     try {
-      const { session, organizations, authEnabled } = await fetchSession();
+      const { session, organizations, authEnabled, authBaseUrl } =
+        await fetchSession();
 
-      return { session, organizations, authEnabled };
+      return { session, organizations, authEnabled, authBaseUrl };
     } catch {
       // Server function failed, likely in Tauri mode
       return { session: null, organizations: [], authEnabled: false };
