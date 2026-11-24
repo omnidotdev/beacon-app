@@ -46,6 +46,7 @@ const organizationSchema = {
 interface RouterContext {
   queryClient: QueryClient;
   session?: Awaited<ReturnType<typeof fetchSession>>["session"] | null;
+  authEnabled?: boolean;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -53,16 +54,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     // In Tauri mode, server functions are not available
     // Auth is handled differently (or not at all for local mode)
     if (isNative()) {
-      return { session: null, organizations: [] };
+      return { session: null, organizations: [], authEnabled: false };
     }
 
     try {
-      const { session, organizations } = await fetchSession();
+      const { session, organizations, authEnabled } = await fetchSession();
 
-      return { session, organizations };
+      return { session, organizations, authEnabled };
     } catch {
       // Server function failed, likely in Tauri mode
-      return { session: null, organizations: [] };
+      return { session: null, organizations: [], authEnabled: false };
     }
   },
   head: () => {
