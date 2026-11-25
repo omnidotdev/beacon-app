@@ -1,5 +1,19 @@
 # @omnidotdev/beacon-app
 
+## 0.3.0
+
+### Minor Changes
+
+- [#43](https://github.com/omnidotdev/beacon-app/pull/43) [`86436c1`](https://github.com/omnidotdev/beacon-app/commit/86436c1e6a56588fdc24245a695af683718833b6) Thanks [@coopbri](https://github.com/coopbri)! - Links from Beacon to your Omni account (Manage account, Upgrade, Manage subscription, Buy credits, Add a card) now open it as the same account you use in Beacon, even when another account is signed in on the browser
+
+### Patch Changes
+
+- [#39](https://github.com/omnidotdev/beacon-app/pull/39) [`11dcbe0`](https://github.com/omnidotdev/beacon-app/commit/11dcbe05e8cefa49ef691173d6263858f94f1480) Thanks [@coopbri](https://github.com/coopbri)! - Beacon now follows your Omni session: switching accounts or signing out in another Omni app switches or signs out here too, the next time you come back to the tab
+
+- [#41](https://github.com/omnidotdev/beacon-app/pull/41) [`4a204d0`](https://github.com/omnidotdev/beacon-app/commit/4a204d06f04b24087368c03d0054b6f51bd1b40a) Thanks [@coopbri](https://github.com/coopbri)! - Beacon no longer jumps around while it loads: text keeps its size while the font loads, your persona shows from the first paint instead of briefly showing Orin, and the example prompts appear with the page instead of pushing it up once connected
+
+- [#42](https://github.com/omnidotdev/beacon-app/pull/42) [`ff762bc`](https://github.com/omnidotdev/beacon-app/commit/ff762bcee8e96f4ee0fe48638019f2c7cd1de1b0) Thanks [@coopbri](https://github.com/coopbri)! - Sign-in session tokens stay out of reach of scripts running on the page.
+
 ## 0.2.0
 
 ### Minor Changes
