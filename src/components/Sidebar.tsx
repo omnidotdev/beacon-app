@@ -553,7 +553,9 @@ function Sidebar({
                 >
                   {ACCOUNT_URL && (
                     <a
-                      href={accountUrl(ACCOUNT_URL)}
+                      href={accountUrl(ACCOUNT_URL, {
+                        loginHint: session.user.identityProviderId,
+                      })}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex w-full items-center gap-3 rounded-lg p-2 text-sm text-text transition-colors hover:bg-surface-elevated"

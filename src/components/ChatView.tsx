@@ -274,9 +274,15 @@ const NOTICE_LINK =
  * "Add a card" for the card-verified free AI credits, shown where credits are
  * short and only while Aether reports the offer as live
  */
-function AddCardLink({ workspace }: { workspace?: string }) {
+function AddCardLink({
+  workspace,
+  loginHint,
+}: {
+  workspace?: string;
+  loginHint?: string | null;
+}) {
   const { data: offer } = useCardOffer();
-  const link = cardOfferLink(ACCOUNT_URL, offer, workspace);
+  const link = cardOfferLink(ACCOUNT_URL, offer, workspace, loginHint);
 
   if (!link) return null;
 
@@ -296,9 +302,11 @@ function AddCardLink({ workspace }: { workspace?: string }) {
 function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
   const { session } = useRouteContext({ from: "__root__" });
   const workspace = personalWorkspace(session?.organizations)?.slug;
+  // The hub opens as the account Beacon is signed in as
+  const loginHint = session?.user?.identityProviderId;
 
   // Credits are sold on the Omni account hub; empty when no hub is configured
-  const buyUrl = buyCreditsUrl(ACCOUNT_URL, workspace);
+  const buyUrl = buyCreditsUrl(ACCOUNT_URL, { workspace, loginHint });
 
   if (kind === "ai_unavailable") {
     return (
@@ -331,12 +339,13 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
       plan: "pro",
       interval: "month",
       workspace,
+      loginHint,
     });
 
     return (
       <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
         Beacon AI runs on AI credits.
-        <AddCardLink workspace={workspace} />
+        <AddCardLink workspace={workspace} loginHint={loginHint} />
         {buyUrl && (
           <a href={buyUrl} className={NOTICE_LINK}>
             <Coins size={14} />
@@ -360,7 +369,7 @@ function BillingNotice({ kind }: { kind: BillingNoticeKind }) {
   return (
     <p className="flex flex-wrap items-center gap-2 text-amber-400 text-sm">
       Your personal workspace is out of AI credits.
-      <AddCardLink workspace={workspace} />
+      <AddCardLink workspace={workspace} loginHint={loginHint} />
       {buyUrl && (
         <a href={buyUrl} className={NOTICE_LINK}>
           <Coins size={14} />
@@ -386,6 +395,7 @@ function DictationNotice({ issue }: { issue: DictationIssue }) {
       plan: "pro",
       interval: "month",
       workspace: personalWorkspace(session?.organizations)?.slug,
+      loginHint: session?.user?.identityProviderId,
     });
 
     return (

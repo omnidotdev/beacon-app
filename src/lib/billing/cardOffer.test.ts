@@ -35,7 +35,7 @@ describe("parseCardOffer", () => {
 describe("cardOfferLink", () => {
   it("links the account hub's AI tab for the personal workspace", () => {
     expect(cardOfferLink(HUB, LIVE, "ada")).toEqual({
-      href: "https://account.omni.dev/billing?product=beacon&tab=ai&workspace=ada",
+      href: "https://account.omni.dev/billing?product=beacon&workspace=ada&tab=ai",
       label: "Add a card to unlock 50 free AI credits a month",
     });
   });
@@ -44,6 +44,11 @@ describe("cardOfferLink", () => {
     expect(cardOfferLink(HUB, LIVE)?.href).toBe(
       "https://account.omni.dev/billing?product=beacon&tab=ai",
     );
+  });
+
+  it("opens the hub as the signed-in account", () => {
+    const href = cardOfferLink(HUB, LIVE, "ada", "user-123")?.href ?? "";
+    expect(new URL(href).searchParams.get("login_hint")).toBe("user-123");
   });
 
   it("keeps the link lowercase", () => {

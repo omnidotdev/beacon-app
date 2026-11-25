@@ -45,15 +45,17 @@ export const addCardLabel = (monthlyCredits: number): string =>
  * @param accountBaseUrl - Account hub base URL
  * @param offer - The offer Aether reports
  * @param workspace - Personal workspace slug, when known
+ * @param loginHint - The signed-in account's subject, so the hub opens as it
  */
 export const cardOfferLink = (
   accountBaseUrl: string | undefined,
   offer: CardOffer | undefined,
   workspace?: string,
+  loginHint?: string | null,
 ): { href: string; label: string } | null => {
   if (!offer?.enabled) return null;
 
-  const href = buyCreditsUrl(accountBaseUrl, workspace);
+  const href = buyCreditsUrl(accountBaseUrl, { workspace, loginHint });
   if (!href) return null;
 
   return { href, label: addCardLabel(offer.monthlyCredits) };
