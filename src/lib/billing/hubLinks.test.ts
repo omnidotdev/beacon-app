@@ -78,6 +78,18 @@ describe("upgradePlanUrl", () => {
     });
   });
 
+  test("opens the hub as the signed-in account", () => {
+    expect(
+      params(
+        upgradePlanUrl(HUB, BEACON, {
+          plan: "pro",
+          interval: "month",
+          loginHint: "user-123",
+        }),
+      ),
+    ).toHaveProperty("login_hint", "user-123");
+  });
+
   test("lets the hub ask for the workspace when none is known", () => {
     expect(
       params(upgradePlanUrl(HUB, BEACON, { plan: "team", interval: "year" })),
@@ -109,6 +121,18 @@ describe("manageSubscriptionUrl", () => {
 
     expect(url.startsWith(`${HUB}/billing?`)).toBe(true);
     expect(params(url)).toEqual({ tab: "subscriptions" });
+  });
+
+  test("opens the hub as the signed-in account", () => {
+    expect(
+      params(manageSubscriptionUrl(HUB, BEACON, "claude", "user-123")),
+    ).toHaveProperty("login_hint", "user-123");
+    expect(
+      params(manageSubscriptionUrl(HUB, BEACON, undefined, "user-123")),
+    ).toEqual({
+      tab: "subscriptions",
+      login_hint: "user-123",
+    });
   });
 
   test("is empty when no account hub is configured", () => {

@@ -51,6 +51,8 @@ function SubscriptionSettingsInner({
   // Beacon bills the user's personal workspace: its plan and credits apply,
   // and plan actions on the hub target it
   const workspace = personalWorkspace(session?.organizations)?.slug;
+  // Hub links open the hub as the account Beacon is signed in as
+  const loginHint = session?.user?.identityProviderId;
 
   const isPaid = isPaidTier(plan?.tier);
   const name = planName(plan?.tier);
@@ -72,9 +74,15 @@ function SubscriptionSettingsInner({
           plan: upgradePrice.metadata.tier,
           interval: upgradeInterval,
           workspace,
+          loginHint,
         })
       : "";
-  const manageUrl = manageSubscriptionUrl(ACCOUNT_URL, BASE_URL, workspace);
+  const manageUrl = manageSubscriptionUrl(
+    ACCOUNT_URL,
+    BASE_URL,
+    workspace,
+    loginHint,
+  );
 
   // A plan picked on the pricing section continues straight to checkout once
   // the user is signed in, for a free account and a tier billing actually sells
@@ -87,6 +95,7 @@ function SubscriptionSettingsInner({
           plan: requestedPlan as string,
           interval: requestedInterval ?? "month",
           workspace,
+          loginHint,
         })
       : "";
   const continuedToCheckout = useRef(false);
@@ -99,13 +108,13 @@ function SubscriptionSettingsInner({
   }, [checkoutUrl]);
 
   // Credits are sold on the Omni account hub (catalog packs), never here
-  const buyUrl = buyCreditsUrl(ACCOUNT_URL, workspace);
+  const buyUrl = buyCreditsUrl(ACCOUNT_URL, { workspace, loginHint });
 
   // A free workspace out of credits can add a card for free monthly credits,
   // only while the offer is live
   const addCard =
     !isPaid && balance?.isOutOfCredits
-      ? cardOfferLink(ACCOUNT_URL, cardOffer, workspace)
+      ? cardOfferLink(ACCOUNT_URL, cardOffer, workspace, loginHint)
       : null;
 
   return (

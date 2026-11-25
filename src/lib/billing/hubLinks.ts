@@ -10,8 +10,9 @@ import {
  * product sells plans and credits. Beacon shows its own plan status, but its
  * Upgrade and Manage subscription actions link to the hub, which confirms the
  * plan (names and prices from Aether), runs checkout or the billing portal, and
- * returns here. Each helper is empty when no account hub is configured, so the
- * action is hidden rather than dead
+ * returns here. Each link carries the signed-in account's subject as
+ * `loginHint`, so the hub opens as the same account. Each helper is empty when
+ * no account hub is configured, so the action is hidden rather than dead
  */
 
 const PRODUCT = "beacon";
@@ -52,7 +53,14 @@ export const upgradePlanUrl = (
     plan,
     interval,
     workspace,
-  }: { plan: string; interval: HubPlanInterval; workspace?: string },
+    loginHint,
+  }: {
+    plan: string;
+    interval: HubPlanInterval;
+    workspace?: string;
+    /** The signed-in account's subject */
+    loginHint?: string | null;
+  },
 ): string =>
   hubPlanUrl(accountBaseUrl, {
     product: PRODUCT,
@@ -60,6 +68,7 @@ export const upgradePlanUrl = (
     interval,
     workspace,
     returnUrl: settingsUrl(baseUrl),
+    loginHint,
   });
 
 /**
@@ -69,21 +78,30 @@ export const upgradePlanUrl = (
  * @param accountBaseUrl - Account hub base URL
  * @param baseUrl - Beacon's base URL, for the return
  * @param workspace - Personal workspace slug
+ * @param loginHint - The signed-in account's subject
  */
 export const manageSubscriptionUrl = (
   accountBaseUrl: string | undefined,
   baseUrl: string | undefined,
   workspace?: string,
+  loginHint?: string | null,
 ): string => {
   if (workspace) {
     return hubManageUrl(accountBaseUrl, {
       product: PRODUCT,
       workspace,
       returnUrl: settingsUrl(baseUrl),
+      loginHint,
     });
   }
 
   const base = accountUrl(accountBaseUrl);
+  if (!base) return "";
 
-  return base ? `${base}/billing?tab=subscriptions` : "";
+  // The hub link helpers have no subscriptions tab, so this one link is built
+  // here, carrying the same `login_hint` they would
+  const search = new URLSearchParams({ tab: "subscriptions" });
+  if (loginHint) search.set("login_hint", loginHint);
+
+  return `${base}/billing?${search.toString()}`;
 };
